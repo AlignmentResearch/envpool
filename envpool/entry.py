@@ -52,3 +52,5 @@ try:
   import envpool.vizdoom.registration  # noqa: F401
 except ImportError:
   pass
+
+import envpool.sokoban.registration  # noqa: F401
