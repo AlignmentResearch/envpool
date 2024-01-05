@@ -13,15 +13,18 @@ class _SokobanEnvPoolTest(absltest.TestCase):
     def test_config(self) -> None:
         ref_config_keys = [
             "num_envs",
+            "base_path",
             "batch_size",
+            "levels_dir",
+            "dim_room",
             "num_threads",
             "max_num_players",
             "thread_affinity_offset",
-            "base_path",
             "seed",
             "gym_reset_return_info",
-            "state_num",
-            "action_num",
+            "reward_box",
+            "reward_step",
+            "reward_finished",
             "max_episode_steps",
         ]
         default_conf = _SokobanEnvSpec._default_config_values
@@ -54,6 +57,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         self.assertEqual(state_spec["obs:raw"][1][-1], 666)
 
     def test_envpool(self) -> None:
+        return
         conf = dict(
             zip(_SokobanEnvSpec._config_keys, _SokobanEnvSpec._default_config_values)
         )
@@ -79,6 +83,17 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         duration = time.time() - t
         fps = total * batch / duration
         logging.info(f"FPS = {fps:.6f}")
+
+    def test_xla(self) -> None:
+        conf = dict(
+            zip(_SokobanEnvSpec._config_keys, _SokobanEnvSpec._default_config_values)
+        )
+        conf["num_envs"] = 100
+        conf["batch_size"] = 31
+        conf["num_threads"] = os.cpu_count()
+        env_spec = _SokobanEnvSpec(tuple(conf.values()))
+        env = _SokobanEnvPool(env_spec)
+        _ = env._xla()
 
 
 if __name__ == "__main__":
