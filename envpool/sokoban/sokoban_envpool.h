@@ -57,6 +57,11 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 
     bool IsDone () override { return done_; }
     void Reset() override {
+        static std::vector<uint8_t> zero_state(3*dim_room*dim_room);
+
+        State state = Allocate();
+        state["obs"_].Assign(zero_state.data(), zero_state.size());
+        state["reward"_] = reward_step;
 
     }
     void Step(const Action &action) override {
