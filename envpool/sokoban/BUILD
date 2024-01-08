@@ -1,11 +1,21 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
+package(default_visibility = ["//visibility:public"])
+
 py_library(
     name = "sokoban",
     srcs = ["__init__.py"],
     data = [":sokoban_envpool.so"],
     deps = ["//envpool/python:api"],
+)
+
+py_library(
+    name = "registration",
+    srcs = ["registration.py"],
+    deps = [
+        "//envpool:registration",
+    ],
 )
 
 cc_library(
@@ -29,7 +39,8 @@ cc_library(
 # )
 
 py_test(
-    name = "sokoban_py_envpool_test",
+    name = "test",
+    main = "sokoban_py_envpool_test.py",
     srcs = ["sokoban_py_envpool_test.py"],
     deps = [
         ":sokoban",
