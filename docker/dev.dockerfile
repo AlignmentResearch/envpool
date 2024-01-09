@@ -26,13 +26,5 @@ RUN go install github.com/bazelbuild/bazelisk@latest && ln -sf $HOME/go/bin/baze
 RUN go install github.com/bazelbuild/buildtools/buildifier@latest
 RUN $HOME/go/bin/bazel version
 
-RUN useradd -ms /bin/zsh github-action
-
-RUN apt-get update \
-    && apt-get install -y clang-format clang-tidy swig qtdeclarative5-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 COPY . .
-
-RUN make bazel-build

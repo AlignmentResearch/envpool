@@ -20,7 +20,7 @@ py_library(
 
 cc_library(
     name = "sokoban_envpool_h",
-    hdrs = ["sokoban_envpool.h"],
+    hdrs = ["sokoban_envpool.h", "level_loader.h"],
     deps = [
         "//envpool/core:async_envpool",
         "//envpool/core:env",
@@ -53,6 +53,7 @@ pybind_extension(
     name = "sokoban_envpool",
     srcs = [
         "sokoban_envpool.cc",
+        "level_loader.cc",
     ],
     linkopts = [
         "-ldl",

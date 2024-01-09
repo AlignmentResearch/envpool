@@ -1,8 +1,13 @@
 #ifndef ENVPOOL_SOKOBAN_H_
 #define ENVPOOL_SOKOBAN_H_
 
+#include <filesystem>
+
 #include "envpool/core/async_envpool.h"
 #include "envpool/core/env.h"
+#include "envpool/core/array.h"
+
+#include "level_loader.h"
 
 namespace sokoban {
 
@@ -52,32 +57,26 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
             reward_finished{static_cast<float>(spec.config["reward_finished"_])},
             reward_box{static_cast<float>(spec.config["reward_box"_])},
             reward_step{static_cast<float>(spec.config["reward_step"_])},
-            levels_dir{static_cast<std::string>(spec.config["levels_dir"_])}
+            levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
+            level_loader(levels_dir),
+            internal_state_(WALL, static_cast<std::size_t>(dim_room*dim_room))
         {}
 
     bool IsDone () override { return done_; }
-    void Reset() override {
-        static std::vector<uint8_t> zero_state(3*dim_room*dim_room);
+    void Reset() override;
+    void Step(const Action &action) override;
 
-        State state = Allocate();
-        state["obs"_].Assign(zero_state.data(), zero_state.size());
-        state["reward"_] = reward_step;
-
-    }
-    void Step(const Action &action) override {
-        static std::vector<uint8_t> zero_state(3*dim_room*dim_room);
-
-        State state = Allocate();
-        state["obs"_].Assign(zero_state.data(), zero_state.size());
-        state["reward"_] = reward_step;
-
-    }
+    void WriteState();
 
   private:
     bool done_{true};
     int max_episode_steps, dim_room;
     float reward_finished, reward_box, reward_step;
-    std::string levels_dir;
+    std::filesystem::path levels_dir;
+
+    LevelLoader level_loader;
+    SokobanLevel internal_state_;
+    float _reward;
 };
 
 using SokobanEnvPool = AsyncEnvPool<SokobanEnv>;
