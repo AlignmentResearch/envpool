@@ -3,37 +3,29 @@
 
 #include <filesystem>
 
+#include "envpool/core/array.h"
 #include "envpool/core/async_envpool.h"
 #include "envpool/core/env.h"
-#include "envpool/core/array.h"
-
 #include "level_loader.h"
 
 namespace sokoban {
 
-// class BaseSokobanEnvConfig(EnvConfig):
-//     tinyworld_obs: bool = False
-//     tinyworld_render: bool = False
-//     max_episode_steps: int = 120  # default value from gym_sokoban
-//     terminate_on_first_box: bool = False
-
-//     reward_finished: float = 10.0  # Reward for completing a level
-//     reward_box: float = 1.0  # Reward for putting a box on target
-//     reward_step: float = -0.1  # Reward for completing a step
-//
-// class BoxobanConfig(BaseSokobanEnvConfig):
-
-    // cache_path: Path = Path(__file__).parent.parent / ".sokoban_cache"
-    // split: Literal["train", "valid", "test", None] = "train"
-    // difficulty: Literal["unfiltered", "medium", "hard"] = "unfiltered"
+constexpr int ACT_NOOP = 0;
+constexpr int ACT_PUSH_UP = 1;
+constexpr int ACT_PUSH_DOWN = 2;
+constexpr int ACT_PUSH_LEFT = 3;
+constexpr int ACT_PUSH_RIGHT = 4;
+constexpr int ACT_MOVE_UP = 5;
+constexpr int ACT_MOVE_DOWN = 6;
+constexpr int ACT_MOVE_LEFT = 7;
+constexpr int ACT_MOVE_RIGHT = 8;
+constexpr int MAX_ACTION = ACT_MOVE_RIGHT;
 
 class SokobanEnvFns {
  public:
   static decltype(auto) DefaultConfig() {
-    return MakeDict("reward_finished"_.Bind(10.0f),
-                    "reward_box"_.Bind(1.0f),
-                    "reward_step"_.Bind(-0.1f),
-                    "dim_room"_.Bind(10),
+    return MakeDict("reward_finished"_.Bind(10.0f), "reward_box"_.Bind(1.0f),
+                    "reward_step"_.Bind(-0.1f), "dim_room"_.Bind(10),
                     "levels_dir"_.Bind(std::string("None")));
   }
   template <typename Config>
@@ -43,7 +35,7 @@ class SokobanEnvFns {
   }
   template <typename Config>
   static decltype(auto) ActionSpec(const Config& conf) {
-    return MakeDict("action"_.Bind(Spec<int>({-1}, {0, 8})));
+    return MakeDict("action"_.Bind(Spec<int>({-1}, {0, MAX_ACTION})));
   }
 };
 
@@ -51,35 +43,50 @@ class SokobanEnvFns {
 using SokobanEnvSpec = EnvSpec<SokobanEnvFns>;
 
 class SokobanEnv : public Env<SokobanEnvSpec> {
-  public:
-        SokobanEnv(const Spec& spec, int env_id) : Env<SokobanEnvSpec>(spec, env_id), max_episode_steps{spec.config["max_episode_steps"_]},
-            dim_room{static_cast<int>(spec.config["dim_room"_])},
-            reward_finished{static_cast<float>(spec.config["reward_finished"_])},
-            reward_box{static_cast<float>(spec.config["reward_box"_])},
-            reward_step{static_cast<float>(spec.config["reward_step"_])},
-            levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
-            level_loader(levels_dir),
-            internal_state_(WALL, static_cast<std::size_t>(dim_room*dim_room))
-        {}
+ public:
+  SokobanEnv(const Spec& spec, int env_id)
+      : Env<SokobanEnvSpec>(spec, env_id),
+        max_episode_steps{spec.config["max_episode_steps"_]},
+        dim_room{static_cast<int>(spec.config["dim_room"_])},
+        reward_finished{static_cast<float>(spec.config["reward_finished"_])},
+        reward_box{static_cast<float>(spec.config["reward_box"_])},
+        reward_step{static_cast<float>(spec.config["reward_step"_])},
+        levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
+        level_loader(levels_dir),
+        world(WALL, static_cast<std::size_t>(dim_room * dim_room)) {}
 
-    bool IsDone () override { return done_; }
-    void Reset() override;
-    void Step(const Action &action) override;
+  bool IsDone() override { return unmatched_boxes == 0; }
+  void Reset() override;
+  void Step(const Action& action) override;
 
-    void WriteState();
+  void WriteState(float reward);
 
-  private:
-    bool done_{true};
-    int max_episode_steps, dim_room;
-    float reward_finished, reward_box, reward_step;
-    std::filesystem::path levels_dir;
+ private:
+  int max_episode_steps, dim_room;
+  float reward_finished, reward_box, reward_step;
+  std::filesystem::path levels_dir;
 
-    LevelLoader level_loader;
-    SokobanLevel internal_state_;
-    float _reward;
+  LevelLoader level_loader;
+  SokobanLevel world;
+
+  int player_x{0}, player_y{0};
+  int unmatched_boxes{0};
+
+  uint8_t WorldAt(int x, int y) {
+    if ((x < 0) || (x > dim_room) || (y < 0) || (y > dim_room)) {
+      return WALL;
+    }
+    return world.at(x + y * dim_room);
+  }
+  void WorldAssignAt(int x, int y, uint8_t value) {
+    if ((x < 0) || (x > dim_room) || (y < 0) || (y > dim_room)) {
+      return;
+    }
+    world.at(x + y * dim_room) = value;
+  }
 };
 
 using SokobanEnvPool = AsyncEnvPool<SokobanEnv>;
-}
+}  // namespace sokoban
 
-#endif // ENVPOOL_SOKOBAN_H_
+#endif  // ENVPOOL_SOKOBAN_H_

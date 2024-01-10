@@ -1,5 +1,6 @@
 #include "envpool/sokoban/sokoban_envpool.h"
 
+#include <array>
 #include <sstream>
 #include <stdexcept>
 
@@ -8,36 +9,136 @@
 namespace sokoban {
 
 void SokobanEnv::Reset() {
-  //
-  internal_state_ = *level_loader.RandomLevel(gen_);
-  State state = Allocate();
-  _reward = 0.0f;
+  world = *level_loader.RandomLevel(gen_);
+  if (world.size() != dim_room * dim_room) {
+    std::stringstream msg;
+    msg << "Loaded level is not dim_room x dim_room. world.size()="
+        << world.size() << ", dim_room=" << dim_room << std::endl;
+    throw std::runtime_error(msg.str());
+  }
+  unmatched_boxes = 0;
+  for (int x = 0; x < dim_room; x++) {
+    for (int y = 0; y < dim_room; y++) {
+      switch (WorldAt(x, y)) {
+        case PLAYER:
+          player_x = x;
+          player_y = y;
+          break;
+        case BOX:
+          unmatched_boxes++;
+          break;
+      }
 
-  WriteState();
+      WriteState(0.0f);
+    }
+  }
 }
+
+constexpr std ::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
+    {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
 void SokobanEnv::Step(const Action& action) {
-  _reward = reward_step;
-  // todo actual state transition
+  if (action == ACT_NOOP) {
+    WriteState(reward_step);
+    return;
+  }
+  // From here on, assume the agent will try to move
 
-  WriteState();
+  const int change_coordinates_idx = (action - 1) % CHANGE_COORDINATES.size();
+  const int delta_x = CHANGE_COORDINATES.at(change_coordinates_idx).at(0);
+  const int delta_y = CHANGE_COORDINATES.at(change_coordinates_idx).at(1);
+
+  const int prev_unmatched_boxes = unmatched_boxes;
+
+  // Arena: the things that will change if the agent moves
+  std::array<uint8_t, 3> arena;
+  for (size_t i = 0; i < arena.size(); i++) {
+    arena.at(i) = WorldAt(player_x + delta_x * i, player_y + delta_y * i);
+  }
+
+  // The box will move IFF action is a pushing action AND there's a box AND it
+  // has space to move
+  const bool box_moves =
+      ((action <= ACT_PUSH_RIGHT) &&
+       ((arena.at(1) == BOX) || (arena.at(1) == BOX_ON_TARGET)) &&
+       ((arena.at(1) == EMPTY) || (arena.at(2) == TARGET)));
+
+  // The agent will move if the next arena location is possible to move into, or
+  // if it's a box and the box moves
+  const bool is_a_box_and_the_box_moves = box_moves;
+  const bool agent_moves = (arena.at(1) == EMPTY) || (arena.at(1) == TARGET) ||
+                           is_a_box_and_the_box_moves;
+
+  if (agent_moves) {
+    // `is_target` is boolean but we'll need it as an int later
+    std::array<int, arena.size()> is_target;
+    for (size_t i = 0; i < arena.size(); i++) {
+      uint8_t tile = arena.at(i);
+      is_target.at(i) =
+          (tile == BOX_ON_TARGET || tile == TARGET || tile == PLAYER_ON_TARGET);
+    }
+    // only whatever was on the floor is now at position 0
+    arena.at(0) = is_target.at(0) ? TARGET : EMPTY;
+    // the player now occupies position 1
+    arena.at(1) = is_target.at(1) ? PLAYER_ON_TARGET : PLAYER;
+
+    if (box_moves) {
+      // the box moves for sure. A target at 2 reduces the nubmer of unmatched
+      // boxes (because the box goes there), a target at 1 increases it (the box
+      // leaves from there). Both can be equal to 1 and in that case the number
+      // stays the same.
+      unmatched_boxes += is_target.at(1) - is_target.at(2);
+
+      // A box now occupies position 2
+      arena.at(2) = is_target.at(2) ? BOX_ON_TARGET : BOX;
+    }
+
+    player_x += delta_x;
+    player_y += delta_y;
+    for (size_t i = 0; i < arena.size(); i++) {
+      WorldAssignAt(player_x + delta_x * i, player_y + delta_y * i,
+                    arena.at(i));
+    }
+  }
+
+  const float reward =
+      reward_step +
+      reward_box * static_cast<float>(prev_unmatched_boxes - unmatched_boxes) +
+      (IsDone() ? reward_finished : 0.0f);
+  WriteState(reward);
 }
 
-void SokobanEnv::WriteState() {
+constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =
+    {
+        {0, 0, 0},        // WALL
+        {243, 248, 238},  // EMPTY
+        {254, 126, 125},  // TARGET
+        {254, 95, 56},    // BOX_ON_TARGET
+        {142, 121, 56},   // BOX
+        {160, 212, 56},   // PLAYER
+        {219, 212, 56}    // PLAYER_ON_TARGET
+};
+
+void SokobanEnv::WriteState(float reward) {
   State state = Allocate();
-  state["reward"_] = _reward;
+  state["reward"_] = reward;
   Array& obs = state["obs"_];
-  if (obs.size != 3 * internal_state_.size()) {
+  if (obs.size != 3 * world.size()) {
     std::stringstream msg;
     msg << "Obs size and level size are different: obs_size=" << obs.size
-        << "/3, level_size=" << internal_state_.size()
-        << ", dim_room=" << dim_room << std::endl;
+        << "/3, level_size=" << world.size() << ", dim_room=" << dim_room
+        << std::endl;
     throw std::runtime_error(msg.str());
   }
 
-  // TODO: actually color the image
-  for (int i = 0; i < 3; i++) {
-    obs(i).Assign(internal_state_.data(), internal_state_.size());
+  std::array<uint8_t, 3 * world.size()> out;
+  for (int rgb = 0; rgb < 3; rgb++) {
+    for (size_t i = 0; i < world.size(); i++) {
+      out.at(rgb * (dim_room * dim_room) + i) =
+          TINY_COLORS.at(world.at(i)).at(rgb);
+    }
   }
+  obs.Assign(out.data(), out.size());
 }
 
 }  // namespace sokoban

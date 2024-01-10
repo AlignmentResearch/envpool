@@ -10,10 +10,12 @@ namespace sokoban {
 using SokobanLevel = std::vector<uint8_t>;
 
 constexpr uint8_t WALL = 0;
+constexpr uint8_t EMPTY = 1;
+constexpr uint8_t TARGET = 2;
+constexpr uint8_t BOX_ON_TARGET = 3;
 constexpr uint8_t BOX = 4;
 constexpr uint8_t PLAYER = 5;
-constexpr uint8_t TARGET = 2;
-constexpr uint8_t SPACE = 1;
+constexpr uint8_t PLAYER_ON_TARGET = 6;
 
 class LevelLoader {
  protected:

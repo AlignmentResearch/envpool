@@ -40,7 +40,7 @@ void AddLine(SokobanLevel& level, const std::string& line) {
         level.push_back(TARGET);
         break;
       case ' ':
-        level.push_back(SPACE);
+        level.push_back(EMPTY);
         break;
       default:
         std::stringstream msg;
