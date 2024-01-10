@@ -1,29 +1,22 @@
-# Need docker >= 20.10.9, see https://stackoverflow.com/questions/71941032/why-i-cannot-run-apt-update-inside-a-fresh-ubuntu22-04
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 
-FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
-
-ARG DEBIAN_FRONTEND=noninteractive
 ARG HOME=/root
-ARG PATH=$PATH:$HOME/go/bin
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH=$PATH:$HOME/go/bin
 
 RUN apt-get update \
-    && apt-get install -y python3-pip python3-dev golang-1.18 git wget curl zsh tmux vim ssh \
+    && apt-get install -y python3-pip python3-dev golang-1.18 git wget curl tmux vim ssh \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN ln -sf /usr/lib/go-1.18/bin/go /usr/bin/go
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-WORKDIR $HOME
-RUN git clone https://github.com/gpakosz/.tmux.git
-RUN ln -s -f .tmux/.tmux.conf
-RUN cp .tmux/.tmux.conf.local .
-RUN echo "set-option -g default-shell /bin/zsh" >> .tmux.conf.local
-RUN echo "set-option -g history-limit 10000" >> .tmux.conf.local
-RUN echo "export PATH=$PATH:$HOME/go/bin" >> .zshrc
 
-ENV USE_BAZEL_VERSION=6.4.0
-
+# Install Bazel
 RUN go install github.com/bazelbuild/bazelisk@latest && ln -sf $HOME/go/bin/bazelisk $HOME/go/bin/bazel
 RUN go install github.com/bazelbuild/buildtools/buildifier@latest
+
+ARG USE_BAZEL_VERSION=6.4.0
 RUN $HOME/go/bin/bazel version
 
 WORKDIR /app
