@@ -25,9 +25,14 @@ class LevelLoader {
   void LoadNewFile(std::mt19937& gen);
 
  public:
+  int verbose;
+
   const std::vector<SokobanLevel>::iterator RandomLevel(std::mt19937& gen);
-  LevelLoader(const std::filesystem::path& base_path);
+  LevelLoader(const std::filesystem::path& base_path, int verbose=0);
 };
+
+
+void PrintLevel(std::ostream& os, SokobanLevel vec);
 }  // namespace sokoban
 
 #endif  // LEVEL_LOADER_H_

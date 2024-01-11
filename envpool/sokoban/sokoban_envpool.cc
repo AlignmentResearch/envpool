@@ -28,16 +28,29 @@ void SokobanEnv::Reset() {
           unmatched_boxes++;
           break;
       }
-
-      WriteState(0.0f);
     }
   }
+  WriteState(0.0f);
 }
 
-constexpr std ::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
-    {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+uint8_t SokobanEnv::WorldAt(int x, int y) {
+  if ((x < 0) || (x >= dim_room) || (y < 0) || (y >= dim_room)) {
+    return WALL;
+  }
+  return world.at(x + y * dim_room);
+}
+void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
+  if ((x < 0) || (x >= dim_room) || (y < 0) || (y >= dim_room)) {
+    return;
+  }
+  world.at(x + y * dim_room) = value;
+}
 
-void SokobanEnv::Step(const Action& action) {
+constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
+    {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}};
+
+void SokobanEnv::Step(const Action& action_) {
+  const int action = action_["action"_];
   if (action == ACT_NOOP) {
     WriteState(reward_step);
     return;
@@ -109,7 +122,7 @@ void SokobanEnv::Step(const Action& action) {
 }
 
 constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =
-    {
+    {{
         {0, 0, 0},        // WALL
         {243, 248, 238},  // EMPTY
         {254, 126, 125},  // TARGET
@@ -117,10 +130,10 @@ constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =
         {142, 121, 56},   // BOX
         {160, 212, 56},   // PLAYER
         {219, 212, 56}    // PLAYER_ON_TARGET
-};
+    }};
 
 void SokobanEnv::WriteState(float reward) {
-  State state = Allocate();
+  auto state = Allocate();
   state["reward"_] = reward;
   Array& obs = state["obs"_];
   if (obs.size != 3 * world.size()) {
@@ -131,7 +144,7 @@ void SokobanEnv::WriteState(float reward) {
     throw std::runtime_error(msg.str());
   }
 
-  std::array<uint8_t, 3 * world.size()> out;
+  std::vector<uint8_t> out(3 * world.size());
   for (int rgb = 0; rgb < 3; rgb++) {
     for (size_t i = 0; i < world.size(); i++) {
       out.at(rgb * (dim_room * dim_room) + i) =

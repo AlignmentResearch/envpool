@@ -24,9 +24,14 @@ constexpr int MAX_ACTION = ACT_MOVE_RIGHT;
 class SokobanEnvFns {
  public:
   static decltype(auto) DefaultConfig() {
-    return MakeDict("reward_finished"_.Bind(10.0f), "reward_box"_.Bind(1.0f),
-                    "reward_step"_.Bind(-0.1f), "dim_room"_.Bind(10),
-                    "levels_dir"_.Bind(std::string("None")));
+    return MakeDict(
+      "reward_finished"_.Bind(10.0f),
+      "reward_box"_.Bind(1.0f),
+      "reward_step"_.Bind(-0.1f),
+      "dim_room"_.Bind(10),
+      "levels_dir"_.Bind(std::string("")),
+      "verbose"_.Bind(0)
+    );
   }
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
@@ -53,7 +58,8 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         reward_step{static_cast<float>(spec.config["reward_step"_])},
         levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
         level_loader(levels_dir),
-        world(WALL, static_cast<std::size_t>(dim_room * dim_room)) {}
+        world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
+        verbose(static_cast<int>(spec.config["verbose"_])) {}
 
   bool IsDone() override { return unmatched_boxes == 0; }
   void Reset() override;
@@ -68,22 +74,13 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 
   LevelLoader level_loader;
   SokobanLevel world;
+  int verbose;
 
   int player_x{0}, player_y{0};
   int unmatched_boxes{0};
 
-  uint8_t WorldAt(int x, int y) {
-    if ((x < 0) || (x > dim_room) || (y < 0) || (y > dim_room)) {
-      return WALL;
-    }
-    return world.at(x + y * dim_room);
-  }
-  void WorldAssignAt(int x, int y, uint8_t value) {
-    if ((x < 0) || (x > dim_room) || (y < 0) || (y > dim_room)) {
-      return;
-    }
-    world.at(x + y * dim_room) = value;
-  }
+  uint8_t WorldAt(int x, int y);
+  void WorldAssignAt(int x, int y, uint8_t value);
 };
 
 using SokobanEnvPool = AsyncEnvPool<SokobanEnv>;

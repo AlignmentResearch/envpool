@@ -3,6 +3,8 @@
 import os
 import time
 
+import envpool  # noqa: F401
+import envpool.sokoban.registration
 import numpy as np
 from absl import logging
 from absl.testing import absltest
@@ -29,6 +31,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             "reward_box",
             "reward_finished",
             "reward_step",
+            "verbose",
         ]
         default_conf = _SokobanEnvSpec._default_config_values
         self.assertTrue(isinstance(default_conf, tuple))
@@ -38,43 +41,42 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         self.assertEqual(sorted(config_keys), sorted(ref_config_keys))
 
     def test_envpool(self) -> None:
-        conf = dict(
-            zip(_SokobanEnvSpec._config_keys, _SokobanEnvSpec._default_config_values)
+        batch = num_envs = 200
+        env = envpool.make(
+            "Sokoban-v0",
+            env_type="gymnasium",
+            num_envs=num_envs,
+            batch_size=num_envs,
+            seed=2346890,
+            max_episode_steps=60,
+            reward_step=-0.1,
+            dim_room=10,
+            levels_dir="/aa/boxoban-levels-master/unfiltered/train",
         )
-        conf["num_envs"] = num_envs = 200
-        conf["batch_size"] = batch = 100
-        conf["num_threads"] = 10
-        env_spec = _SokobanEnvSpec(tuple(conf.values()))
-        env = _SokobanEnvPool(env_spec)
-        state_keys = env._state_keys
-        total = 1
-        env._reset(np.arange(num_envs, dtype=np.int32))
-        raise ValueError("resetted")
+        total_steps = 1000
+
+        _ = env.reset()
         t = time.time()
-        for _ in range(total):
-            state = dict(zip(state_keys, env._recv()))
-            action = {
-                "env_id": state["info:env_id"],
-                "players.env_id": state["info:players.env_id"],
-                "list_action": np.zeros((batch, 6), dtype=np.float64),
-                "players.id": state["info:players.id"],
-                "players.action": state["info:players.id"],
-            }
-            # env._send(tuple(action.values()))
+        for _ in range(total_steps):
+            _ = env.step(np.random.randint(low=0, high=9, size=(num_envs,)))
         duration = time.time() - t
-        fps = total * batch / duration
+        fps = total_steps * batch / duration
         logging.info(f"FPS = {fps:.6f}")
 
     def test_xla(self) -> None:
-        conf = dict(
-            zip(_SokobanEnvSpec._config_keys, _SokobanEnvSpec._default_config_values)
+        num_envs = 10
+        env = envpool.make(
+            "Sokoban-v0",
+            env_type="dm",
+            num_envs=num_envs,
+            batch_size=num_envs,
+            seed=2346890,
+            max_episode_steps=60,
+            reward_step=-0.1,
+            dim_room=10,
+            levels_dir="/aa/boxoban-levels-master/unfiltered/train",
         )
-        conf["num_envs"] = 100
-        conf["batch_size"] = 31
-        conf["num_threads"] = os.cpu_count()
-        env_spec = _SokobanEnvSpec(tuple(conf.values()))
-        env = _SokobanEnvPool(env_spec)
-        _ = env._xla()
+        handle, recv, send, step = env.xla()
 
 
 if __name__ == "__main__":

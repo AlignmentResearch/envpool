@@ -44,6 +44,8 @@ py_test(
     srcs = ["sokoban_py_envpool_test.py"],
     deps = [
         ":sokoban",
+        ":registration",
+        "//envpool:envpool",
         requirement("numpy"),
         requirement("absl-py"),
     ],
