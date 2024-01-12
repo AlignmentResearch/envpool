@@ -1,6 +1,5 @@
 """Unit test for dummy envpool and speed benchmark."""
 
-import os
 import time
 
 import envpool  # noqa: F401
@@ -8,7 +7,7 @@ import envpool.sokoban.registration
 import numpy as np
 from absl import logging
 from absl.testing import absltest
-from envpool.sokoban.sokoban_envpool import _SokobanEnvPool, _SokobanEnvSpec
+from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
 
 
 class _SokobanEnvPoolTest(absltest.TestCase):
