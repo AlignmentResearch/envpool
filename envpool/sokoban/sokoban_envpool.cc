@@ -106,12 +106,13 @@ void SokobanEnv::Step(const Action& action_) {
       arena.at(2) = is_target.at(2) ? BOX_ON_TARGET : BOX;
     }
 
-    player_x += delta_x;
-    player_y += delta_y;
     for (size_t i = 0; i < arena.size(); i++) {
       WorldAssignAt(player_x + delta_x * i, player_y + delta_y * i,
                     arena.at(i));
     }
+    // After assigning the arena, move player.
+    player_x += delta_x;
+    player_y += delta_y;
   }
 
   const float reward =
