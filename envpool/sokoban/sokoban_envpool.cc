@@ -62,6 +62,18 @@ constexpr std::array<const char *, MAX_ACTION+1> action_names = {
   "ACT_MOVE_RIGHT",
 };
 
+
+constexpr std::array<const char *, 7> arena_names = {
+  "WALL",
+  "EMPTY",
+  "TARGET",
+  "BOX_ON_TARGET",
+  "BOX",
+  "PLAYER",
+  "PLAYER_ON_TARGET",
+};
+
+
 void SokobanEnv::Step(const Action& action_) {
   const int action = action_["action"_];
   if (action == ACT_NOOP) {
@@ -95,9 +107,9 @@ void SokobanEnv::Step(const Action& action_) {
   const bool agent_moves = (arena.at(1) == EMPTY) || (arena.at(1) == TARGET) ||
                            is_a_box_and_the_box_moves;
 
-  std::cout << "arena.at(0) " << action_names.at(arena.at(0)) << std::endl;
-  std::cout << "arena.at(1) " << action_names.at(arena.at(1)) << std::endl;
-  std::cout << "arena.at(2) " << action_names.at(arena.at(2)) << std::endl;
+  std::cout << "arena.at(0) " << arena_names.at(arena.at(0)) << std::endl;
+  std::cout << "arena.at(1) " << arena_names.at(arena.at(1)) << std::endl;
+  std::cout << "arena.at(2) " << arena_names.at(arena.at(2)) << std::endl;
 
   std::cout << "box_moves " << box_moves << std::endl;
   std::cout << "  (action <= ACT_PUSH_RIGHT) = " << (action <= ACT_PUSH_RIGHT) << std::endl;
