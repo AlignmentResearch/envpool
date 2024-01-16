@@ -52,7 +52,7 @@ constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
 void SokobanEnv::Step(const Action& action_) {
   const int action = action_["action"_];
   if (action == ACT_NOOP) {
-    WriteState(reward_step);
+    WriteState(static_cast<float>(reward_step));
     return;
   }
   // From here on, assume the agent will try to move
@@ -115,11 +115,11 @@ void SokobanEnv::Step(const Action& action_) {
     player_y += delta_y;
   }
 
-  const float reward =
+  const double reward =
       reward_step +
-      reward_box * static_cast<float>(prev_unmatched_boxes - unmatched_boxes) +
+      reward_box * static_cast<double>(prev_unmatched_boxes - unmatched_boxes) +
       (IsDone() ? reward_finished : 0.0f);
-  WriteState(reward);
+  WriteState(static_cast<float>(reward));
 }
 
 constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =

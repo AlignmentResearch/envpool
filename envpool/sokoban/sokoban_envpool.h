@@ -25,9 +25,9 @@ class SokobanEnvFns {
  public:
   static decltype(auto) DefaultConfig() {
     return MakeDict(
-      "reward_finished"_.Bind(10.0f),
-      "reward_box"_.Bind(1.0f),
-      "reward_step"_.Bind(-0.1f),
+      "reward_finished"_.Bind(10.0),
+      "reward_box"_.Bind(1.0),
+      "reward_step"_.Bind(-0.1),
       "dim_room"_.Bind(10),
       "levels_dir"_.Bind(std::string("")),
       "verbose"_.Bind(0)
@@ -53,9 +53,9 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
       : Env<SokobanEnvSpec>(spec, env_id),
         max_episode_steps{spec.config["max_episode_steps"_]},
         dim_room{static_cast<int>(spec.config["dim_room"_])},
-        reward_finished{static_cast<float>(spec.config["reward_finished"_])},
-        reward_box{static_cast<float>(spec.config["reward_box"_])},
-        reward_step{static_cast<float>(spec.config["reward_step"_])},
+        reward_finished{static_cast<double>(spec.config["reward_finished"_])},
+        reward_box{static_cast<double>(spec.config["reward_box"_])},
+        reward_step{static_cast<double>(spec.config["reward_step"_])},
         levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
         level_loader(levels_dir),
         world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
@@ -69,7 +69,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 
  private:
   int max_episode_steps, dim_room;
-  float reward_finished, reward_box, reward_step;
+  double reward_finished, reward_box, reward_step;
   std::filesystem::path levels_dir;
 
   LevelLoader level_loader;
