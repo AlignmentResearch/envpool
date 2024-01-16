@@ -99,7 +99,7 @@ void SokobanEnv::Step(const Action& action_) {
   const bool box_moves =
       ((action <= ACT_PUSH_RIGHT) &&
        ((arena.at(1) == BOX) || (arena.at(1) == BOX_ON_TARGET)) &&
-       ((arena.at(1) == EMPTY) || (arena.at(2) == TARGET)));
+       ((arena.at(2) == EMPTY) || (arena.at(2) == TARGET)));
 
   // The agent will move if the next arena location is possible to move into, or
   // if it's a box and the box moves
