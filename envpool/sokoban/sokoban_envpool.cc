@@ -50,6 +50,18 @@ void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
 constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
     {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
+constexpr std::array<const char *, MAX_ACTION+1> action_names = {
+  "ACT_NOOP",
+  "ACT_PUSH_UP",
+  "ACT_PUSH_DOWN",
+  "ACT_PUSH_LEFT",
+  "ACT_PUSH_RIGHT",
+  "ACT_MOVE_UP",
+  "ACT_MOVE_DOWN",
+  "ACT_MOVE_LEFT",
+  "ACT_MOVE_RIGHT",
+};
+
 void SokobanEnv::Step(const Action& action_) {
   const int action = action_["action"_];
   if (action == ACT_NOOP) {
@@ -83,9 +95,9 @@ void SokobanEnv::Step(const Action& action_) {
   const bool agent_moves = (arena.at(1) == EMPTY) || (arena.at(1) == TARGET) ||
                            is_a_box_and_the_box_moves;
 
-  std::cout << "arena.at(0) " << arena.at(0) << std::endl;
-  std::cout << "arena.at(1) " << arena.at(1) << std::endl;
-  std::cout << "arena.at(2) " << arena.at(2) << std::endl;
+  std::cout << "arena.at(0) " << action_names.at(arena.at(0)) << std::endl;
+  std::cout << "arena.at(1) " << action_names.at(arena.at(1)) << std::endl;
+  std::cout << "arena.at(2) " << action_names.at(arena.at(2)) << std::endl;
 
   std::cout << "box_moves " << box_moves << std::endl;
   std::cout << "  (action <= ACT_PUSH_RIGHT) = " << (action <= ACT_PUSH_RIGHT) << std::endl;
