@@ -3,6 +3,7 @@
 #include <array>
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 #include "envpool/core/py_envpool.h"
 
@@ -47,7 +48,7 @@ void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
 }
 
 constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
-    {{0, -1}, {0, 1}, {1, 0}, {-1, 0}}};
+    {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
 void SokobanEnv::Step(const Action& action_) {
   const int action = action_["action"_];
@@ -81,6 +82,24 @@ void SokobanEnv::Step(const Action& action_) {
   const bool is_a_box_and_the_box_moves = box_moves;
   const bool agent_moves = (arena.at(1) == EMPTY) || (arena.at(1) == TARGET) ||
                            is_a_box_and_the_box_moves;
+
+  std::cout << "arena.at(0) " << arena.at(0) << std::endl;
+  std::cout << "arena.at(1) " << arena.at(1) << std::endl;
+  std::cout << "arena.at(2) " << arena.at(2) << std::endl;
+
+  std::cout << "box_moves " << box_moves << std::endl;
+  std::cout << "  (action <= ACT_PUSH_RIGHT) = " << (action <= ACT_PUSH_RIGHT) << std::endl;
+  std::cout << "  (arena.at(1) == BOX) = " << (arena.at(1) == BOX) << std::endl;
+  std::cout << "  (arena.at(1) == BOX_ON_TARGET) = " << (arena.at(1) == BOX_ON_TARGET) << std::endl;
+  std::cout << "  (arena.at(1) == EMPTY) = " << (arena.at(1) == EMPTY) << std::endl;
+  std::cout << "  (arena.at(2) == TARGET) = " << (arena.at(2) == TARGET) << std::endl;
+
+  std::cout << "is_a_box_and_the_box_moves " << is_a_box_and_the_box_moves << std::endl;
+
+  std::cout << "agent_moves " << agent_moves << std::endl;
+  std::cout << "  (arena.at(1) == EMPTY) = " << (arena.at(1) == EMPTY) << std::endl;
+  std::cout << "  (arena.at(1) == TARGET) = " << (arena.at(1) == TARGET) << std::endl;
+  std::cout << "  is_a_box_and_the_box_moves = " << is_a_box_and_the_box_moves << std::endl;
 
   if (agent_moves) {
     // `is_target` is boolean but we'll need it as an int later
