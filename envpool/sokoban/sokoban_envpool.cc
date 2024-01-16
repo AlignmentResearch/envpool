@@ -47,7 +47,7 @@ void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
 }
 
 constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
-    {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}};
+    {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
 void SokobanEnv::Step(const Action& action_) {
   const int action = action_["action"_];
