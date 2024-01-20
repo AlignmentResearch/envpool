@@ -50,7 +50,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             max_episode_steps=60,
             reward_step=-0.1,
             dim_room=10,
-            levels_dir="/aa/boxoban-levels-master/unfiltered/train",
+            levels_dir="/app/envpool/sokoban/sample_levels",
         )
         total_steps = 1000
 
@@ -61,6 +61,25 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         duration = time.time() - t
         fps = total_steps * batch / duration
         logging.info(f"FPS = {fps:.6f}")
+
+    def test_envpool_max_episode_steps(self) -> None:
+        for max_episode_steps in [2, 5, 10]:
+            env = envpool.make(
+                "Sokoban-v0",
+                env_type="gymnasium",
+                num_envs=1,
+                batch_size=1,
+                max_episode_steps=max_episode_steps,
+                levels_dir="/app/envpool/sokoban/sample_levels",
+            )
+            env.reset()
+            for _ in range(max_episode_steps - 1):
+                _, _, terminated, truncated, _ = env.step(np.zeros([1], dtype=np.int32))
+                assert not np.any(terminated | truncated)
+
+            _, _, terminated, truncated, _ = env.step(np.zeros([1], dtype=np.int32))
+            assert not np.any(terminated)
+            assert np.all(truncated)
 
     def test_xla(self) -> None:
         num_envs = 10
@@ -73,7 +92,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             max_episode_steps=60,
             reward_step=-0.1,
             dim_room=10,
-            levels_dir="/aa/boxoban-levels-master/unfiltered/train",
+            levels_dir="/app/envpool/sokoban/sample_levels",
         )
         handle, recv, send, step = env.xla()
 

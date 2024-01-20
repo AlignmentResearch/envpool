@@ -30,6 +30,7 @@ void SokobanEnv::Reset() {
       }
     }
   }
+  current_step_ = 0;
   WriteState(0.0f);
 }
 
@@ -74,6 +75,8 @@ constexpr std::array<const char *, 7> arena_names = {
 
 
 void SokobanEnv::Step(const Action& action_) {
+  current_step_++;
+
   const int action = action_["action"_];
   if (action == ACT_NOOP) {
     WriteState(static_cast<float>(reward_step));

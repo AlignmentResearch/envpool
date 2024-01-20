@@ -48,7 +48,6 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
  public:
   SokobanEnv(const Spec& spec, int env_id)
       : Env<SokobanEnvSpec>(spec, env_id),
-        max_episode_steps{spec.config["max_episode_steps"_]},
         dim_room{static_cast<int>(spec.config["dim_room"_])},
         reward_finished{static_cast<double>(spec.config["reward_finished"_])},
         reward_box{static_cast<double>(spec.config["reward_box"_])},
@@ -72,14 +71,16 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
     }
   }
 
-  bool IsDone() override { return unmatched_boxes == 0; }
+  bool IsDone() override {
+    const int max_episode_steps = spec_.config["max_episode_steps"_];
+    return (unmatched_boxes == 0) || (current_step_ >= max_episode_steps); }
   void Reset() override;
   void Step(const Action& action) override;
 
   void WriteState(float reward);
 
  private:
-  int max_episode_steps, dim_room;
+  int dim_room;
   double reward_finished, reward_box, reward_step;
   std::filesystem::path levels_dir;
 
@@ -87,6 +88,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
   SokobanLevel world;
   int verbose;
 
+  int current_step_{0};
   int player_x{0}, player_y{0};
   int unmatched_boxes{0};
 
