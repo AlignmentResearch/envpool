@@ -2,6 +2,8 @@
 #define ENVPOOL_SOKOBAN_H_
 
 #include <filesystem>
+#include <sstream>
+#include <stdexcept>
 
 #include "envpool/core/array.h"
 #include "envpool/core/async_envpool.h"
@@ -24,14 +26,9 @@ constexpr int MAX_ACTION = ACT_MOVE_RIGHT;
 class SokobanEnvFns {
  public:
   static decltype(auto) DefaultConfig() {
-    return MakeDict(
-      "reward_finished"_.Bind(10.0),
-      "reward_box"_.Bind(1.0),
-      "reward_step"_.Bind(-0.1),
-      "dim_room"_.Bind(10),
-      "levels_dir"_.Bind(std::string("")),
-      "verbose"_.Bind(0)
-    );
+    return MakeDict("reward_finished"_.Bind(10.0), "reward_box"_.Bind(1.0),
+                    "reward_step"_.Bind(-0.1), "dim_room"_.Bind(10),
+                    "levels_dir"_.Bind(std::string("")), "verbose"_.Bind(0));
   }
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
@@ -59,9 +56,23 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
         level_loader(levels_dir),
         world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
-        verbose(static_cast<int>(spec.config["verbose"_])) {}
+        verbose(static_cast<int>(spec.config["verbose"_])) {
+    if (max_num_players_ != spec_.config["max_num_players"_]) {
+      std::stringstream msg;
+      msg << "max_num_players_ != spec_['max_num_players'] " << max_num_players_
+          << " != " << spec_.config["max_num_players"_] << std::endl;
+      throw std::runtime_error(msg.str());
+    }
 
-  bool IsDone() override { return unmatched_boxes == 0; }
+    if (max_num_players_ != spec.config["max_num_players"_]) {
+      std::stringstream msg;
+      msg << "max_num_players_ != spec['max_num_players'] " << max_num_players_
+          << " != " << spec.config["max_num_players"_] << std::endl;
+      throw std::runtime_error(msg.str());
+    }
+  }
+
+  bool IsDone() override { return (unmatched_boxes == 0) || (); }
   void Reset() override;
   void Step(const Action& action) override;
 
