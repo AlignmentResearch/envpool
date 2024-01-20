@@ -72,7 +72,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
     }
   }
 
-  bool IsDone() override { return (unmatched_boxes == 0) || (); }
+  bool IsDone() override { return unmatched_boxes == 0; }
   void Reset() override;
   void Step(const Action& action) override;
 
