@@ -114,8 +114,12 @@ void SokobanEnv::Step(const Action& action_) {
     std::array<int, arena.size()> is_target;
     for (size_t i = 0; i < arena.size(); i++) {
       uint8_t tile = arena.at(i);
+      // We explicitly set them to 0 or 1 because false/true are not guaranteed
+      // to be 0/1.
       is_target.at(i) =
-          (tile == BOX_ON_TARGET || tile == TARGET || tile == PLAYER_ON_TARGET);
+          ((tile == BOX_ON_TARGET || tile == TARGET || tile == PLAYER_ON_TARGET)
+               ? 1
+               : 0);
     }
     // only whatever was on the floor is now at position 0
     arena.at(0) = is_target.at(0) ? TARGET : EMPTY;
@@ -163,6 +167,7 @@ constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =
 void SokobanEnv::WriteState(float reward) {
   auto state = Allocate();
   state["reward"_] = reward;
+  state["info:unmatched_boxes"_] = unmatched_boxes;
   Array& obs = state["obs"_];
   if (obs.size != 3 * world.size()) {
     std::stringstream msg;
