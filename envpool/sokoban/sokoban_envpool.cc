@@ -3,7 +3,6 @@
 #include <array>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
 
 #include "envpool/core/py_envpool.h"
 
@@ -150,10 +149,7 @@ void SokobanEnv::Step(const Action& action_) {
   const double reward =
       reward_step +
       reward_box * static_cast<double>(prev_unmatched_boxes - unmatched_boxes) +
-      ((unmatched_boxes == 0) ? reward_finished : 0.0);
-  std::cout << "prev_unmatched_boxes=" << prev_unmatched_boxes
-            << ", unmatched_boxes=" << unmatched_boxes
-            << ", so reward=" << reward << "\n";
+      ((unmatched_boxes == 0) ? reward_finished : 0.0f);
   WriteState(static_cast<float>(reward));
 }
 
