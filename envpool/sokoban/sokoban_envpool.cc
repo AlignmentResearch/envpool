@@ -145,7 +145,7 @@ void SokobanEnv::Step(const Action& action_) {
   const double reward =
       reward_step +
       reward_box * static_cast<double>(prev_unmatched_boxes - unmatched_boxes) +
-      (IsDone() ? reward_finished : 0.0f);
+      ((unmatched_boxes == 0) ? reward_finished : 0.0f);
   WriteState(static_cast<float>(reward));
 }
 
