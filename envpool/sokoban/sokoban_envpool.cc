@@ -167,7 +167,6 @@ constexpr std::array<std::array<uint8_t, 3>, PLAYER_ON_TARGET + 1> TINY_COLORS =
 void SokobanEnv::WriteState(float reward) {
   auto state = Allocate();
   state["reward"_] = reward;
-  state["info:unmatched_boxes"_] = unmatched_boxes;
   Array& obs = state["obs"_];
   if (obs.size != 3 * world.size()) {
     std::stringstream msg;

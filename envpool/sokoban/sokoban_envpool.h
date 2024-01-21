@@ -33,8 +33,7 @@ class SokobanEnvFns {
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
     int dim_room = conf["dim_room"_];
-    return MakeDict("obs"_.Bind(Spec<uint8_t>({3, dim_room, dim_room})),
-                    "info:unmatched_boxes"_.Bind(Spec<int>({})));
+    return MakeDict("obs"_.Bind(Spec<uint8_t>({3, dim_room, dim_room})));
   }
   template <typename Config>
   static decltype(auto) ActionSpec(const Config& conf) {
