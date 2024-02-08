@@ -22,6 +22,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             "num_threads",
             "seed",
             "thread_affinity_offset",
+            "min_episode_steps",
             # Default and also used by sokoban
             "max_episode_steps",
             # defined by sokoban

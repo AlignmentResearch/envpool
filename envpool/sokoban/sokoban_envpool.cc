@@ -9,6 +9,11 @@
 namespace sokoban {
 
 void SokobanEnv::Reset() {
+  const int max_episode_steps = spec_.config["max_episode_steps"_];
+  const int min_episode_steps = spec_.config["min_episode_steps"_];
+  std::uniform_int_distribution<int> episode_length_rand(min_episode_steps, max_episode_steps);
+  current_max_episode_steps_ = episode_length_rand(gen_);
+
   world = *level_loader.RandomLevel(gen_);
   if (world.size() != dim_room * dim_room) {
     std::stringstream msg;
