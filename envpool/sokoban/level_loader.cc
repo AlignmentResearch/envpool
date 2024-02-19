@@ -10,14 +10,24 @@
 
 namespace sokoban {
 
-size_t ERROR_SZ = 1024;
+std::vector<std::filesystem::path> list_levels(
+    const std::filesystem::path& base_path) {
 
-LevelLoader::LevelLoader(const std::filesystem::path& base_path, int verbose)
-    : levels(0), cur_level(levels.begin()), level_file_paths(0), verbose(verbose) {
+  std::vector<std::filesystem::path> level_file_paths;
   for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
     level_file_paths.push_back(entry.path());
   }
+  return level_file_paths;
 }
+
+LevelLoader::LevelLoader(const std::filesystem::path& base_path,
+                         LevelChoiceMode choice_mode, int verbose)
+    : levels_(0),
+      cur_level_(levels_.begin()),
+      level_file_paths_(list_levels(base_path)),
+      level_file_paths_iterator_(level_file_paths_.begin()),
+      choice_mode_(choice_mode),
+      verbose_(verbose) {}
 
 const std::string PRINT_LEVEL_KEY = "# .a@$s";
 
@@ -69,13 +79,15 @@ void PrintLevel(std::ostream& os, SokobanLevel vec) {
   }
 }
 
-void LevelLoader::LoadNewFile(std::mt19937& gen) {
+std::filesystem::path LevelLoader::ChooseRandomFile(std::mt19937& gen) {
   std::uniform_int_distribution<size_t> load_file_idx_r(
       0, level_file_paths.size() - 1);
   const size_t load_file_idx = load_file_idx_r(gen);
-  const std::filesystem::path& file_path = level_file_paths.at(load_file_idx);
-  std::ifstream file(file_path);
+  return level_file_paths.at(load_file_idx);
+}
 
+void LevelLoader::LoadNewFile(const std::filesystem::path& file_path) {
+  std::ifstream file(file_path);
   levels.clear();
   std::string line;
   while (std::getline(file, line)) {
@@ -114,17 +126,16 @@ void LevelLoader::LoadNewFile(std::mt19937& gen) {
       }
     }
   }
-  std::shuffle(levels.begin(), levels.end(), gen);
   if (levels.empty()) {
     std::stringstream msg;
     msg << "No levels loaded from file '" << file_path << std::endl;
     throw std::runtime_error(msg.str());
   }
 
-  if(verbose >= 1) {
+  if (verbose_ >= 1) {
     std::cout << "Loaded " << levels.size() << " levels from " << file_path
               << std::endl;
-    if(verbose >= 2) {
+    if (verbose_ >= 2) {
       PrintLevel(std::cout, levels.at(0));
       std::cout << std::endl;
       PrintLevel(std::cout, levels.at(1));
@@ -136,7 +147,21 @@ void LevelLoader::LoadNewFile(std::mt19937& gen) {
 const std::vector<SokobanLevel>::iterator LevelLoader::RandomLevel(
     std::mt19937& gen) {
   if (cur_level == levels.end()) {
-    LoadNewFile(gen);
+    // Load levels from a file
+    if (choice_mode_ == CHOICE_RANDOM) {
+      auto random_file_path = ChooseRandomFile(gen);
+      LoadNewFile(random_file_path);
+      // Shuffle the levels after loading a random level
+      std::shuffle(levels.begin(), levels.end(), gen);
+
+    } else if (choice_mode_ == CHOICE_SEQUENTIAL) {
+    } else {
+      std::stringstream msg;
+      msg << "Unknown choice_mode=" << choice_mode_ << std::endl;
+      throw std::runtime_error(msg.str());
+    }
+
+    // set the next level to be the first loaded level
     cur_level = levels.begin();
     if (cur_level == levels.end()) {
       throw std::runtime_error("No levels loaded.");
