@@ -32,6 +32,8 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             "reward_finished",
             "reward_step",
             "verbose",
+            "load_sequentially",
+            "n_levels_to_load",
         ]
         default_conf = _SokobanEnvSpec._default_config_values
         self.assertTrue(isinstance(default_conf, tuple))

@@ -29,7 +29,9 @@ class SokobanEnvFns {
     return MakeDict("reward_finished"_.Bind(10.0), "reward_box"_.Bind(1.0),
                     "reward_step"_.Bind(-0.1), "dim_room"_.Bind(10),
                     "levels_dir"_.Bind(std::string("")), "verbose"_.Bind(0),
-                    "min_episode_steps"_.Bind(0));
+                    "min_episode_steps"_.Bind(0),
+                    "load_sequentially"_.Bind(false),
+                    "n_levels_to_load"_.Bind(-1));
   }
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
@@ -54,10 +56,13 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         reward_box{static_cast<double>(spec.config["reward_box"_])},
         reward_step{static_cast<double>(spec.config["reward_step"_])},
         levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
-        level_loader(levels_dir),
+        level_loader(levels_dir, spec.config["load_sequentially"_],
+                     static_cast<int>(spec.config["n_levels_to_load"_]),
+                     static_cast<int>(spec.config["verbose"_])),
         world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
         verbose(static_cast<int>(spec.config["verbose"_])),
-        current_max_episode_steps_(static_cast<int>(spec.config["max_episode_steps"_])) {
+        current_max_episode_steps_(
+            static_cast<int>(spec.config["max_episode_steps"_])) {
     if (max_num_players_ != spec_.config["max_num_players"_]) {
       std::stringstream msg;
       msg << "max_num_players_ != spec_['max_num_players'] " << max_num_players_
@@ -74,7 +79,9 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
   }
 
   bool IsDone() override {
-    return (unmatched_boxes == 0) || (current_step_ >= current_max_episode_steps_); }
+    return (unmatched_boxes == 0) ||
+           (current_step_ >= current_max_episode_steps_);
+  }
   void Reset() override;
   void Step(const Action& action) override;
 

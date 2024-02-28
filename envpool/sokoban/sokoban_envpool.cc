@@ -11,10 +11,11 @@ namespace sokoban {
 void SokobanEnv::Reset() {
   const int max_episode_steps = spec_.config["max_episode_steps"_];
   const int min_episode_steps = spec_.config["min_episode_steps"_];
-  std::uniform_int_distribution<int> episode_length_rand(min_episode_steps, max_episode_steps);
+  std::uniform_int_distribution<int> episode_length_rand(min_episode_steps,
+                                                         max_episode_steps);
   current_max_episode_steps_ = episode_length_rand(gen_);
 
-  world = *level_loader.RandomLevel(gen_);
+  world = *level_loader.GetLevel(gen_);
   if (world.size() != dim_room * dim_room) {
     std::stringstream msg;
     msg << "Loaded level is not dim_room x dim_room. world.size()="
@@ -55,29 +56,16 @@ void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
 constexpr std::array<std::array<int, 2>, 4> CHANGE_COORDINATES = {
     {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
-constexpr std::array<const char *, MAX_ACTION+1> action_names = {
-  "ACT_NOOP",
-  "ACT_PUSH_UP",
-  "ACT_PUSH_DOWN",
-  "ACT_PUSH_LEFT",
-  "ACT_PUSH_RIGHT",
-  "ACT_MOVE_UP",
-  "ACT_MOVE_DOWN",
-  "ACT_MOVE_LEFT",
-  "ACT_MOVE_RIGHT",
+constexpr std::array<const char*, MAX_ACTION + 1> action_names = {
+    "ACT_NOOP",      "ACT_PUSH_UP",    "ACT_PUSH_DOWN",
+    "ACT_PUSH_LEFT", "ACT_PUSH_RIGHT", "ACT_MOVE_UP",
+    "ACT_MOVE_DOWN", "ACT_MOVE_LEFT",  "ACT_MOVE_RIGHT",
 };
 
-
-constexpr std::array<const char *, 7> arena_names = {
-  "WALL",
-  "EMPTY",
-  "TARGET",
-  "BOX_ON_TARGET",
-  "BOX",
-  "PLAYER",
-  "PLAYER_ON_TARGET",
+constexpr std::array<const char*, 7> arena_names = {
+    "WALL", "EMPTY",  "TARGET",           "BOX_ON_TARGET",
+    "BOX",  "PLAYER", "PLAYER_ON_TARGET",
 };
-
 
 void SokobanEnv::Step(const Action& action_) {
   current_step_++;
