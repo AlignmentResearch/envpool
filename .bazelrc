@@ -1,3 +1,4 @@
+build --repo_env=CC=clang
 build --action_env=BAZEL_LINKLIBS=-l%:libstdc++.a:-lm
 build --action_env=BAZEL_LINKOPTS=-static-libgcc
 build --action_env=CUDA_DIR=/usr/local/cuda
@@ -10,3 +11,6 @@ build:release --copt=-g0 --copt=-O3 --copt=-DNDEBUG --copt=-msse --copt=-msse2 -
 build:clang-tidy --aspects @bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect
 build:clang-tidy --@bazel_clang_tidy//:clang_tidy_config=//:clang_tidy_config
 build:clang-tidy --output_groups=report
+
+build:asan --copt -fsanitize=address
+build:asan --linkopt -fsanitize=address
