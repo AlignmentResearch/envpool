@@ -23,11 +23,11 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
       levels(0),
       cur_level(levels.begin()),
       level_file_paths(0),
-      cur_file(level_file_paths.begin()),
       verbose(verbose) {
   for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
     level_file_paths.push_back(entry.path());
   }
+  cur_file = level_file_paths.begin();
 }
 
 const std::string PRINT_LEVEL_KEY = "# .a$@s";
