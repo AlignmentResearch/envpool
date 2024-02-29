@@ -1,5 +1,7 @@
 #include "level_loader.h"
 
+#include <pybind11/iostream.h>
+
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -28,7 +30,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
   }
 }
 
-const std::string PRINT_LEVEL_KEY = "# .a@$s";
+const std::string PRINT_LEVEL_KEY = "# .a$@s";
 
 void AddLine(SokobanLevel& level, const std::string& line) {
   auto start = line.at(0);
@@ -142,7 +144,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
   }
 
   if (verbose >= 1) {
-    std::cout << "Loaded " << levels.size() << " levels from " << file_path
+    std::cout << "***Loaded " << levels.size() << " levels from " << file_path
               << std::endl;
     if (verbose >= 2) {
       PrintLevel(std::cout, levels.at(0));
@@ -156,7 +158,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
 const std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(
     std::mt19937& gen) {
   if (n_levels_to_load > 0 && levels_loaded >= n_levels_to_load) {
-    throw std::runtime_error("No more levels to load.");
+    throw std::runtime_error("Loaded all requested levels.");
   }
   if (cur_level == levels.end()) {
     LoadFile(gen);
