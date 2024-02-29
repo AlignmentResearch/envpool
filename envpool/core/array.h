@@ -270,6 +270,8 @@ class TArray : public Array {
    * memory of this Array.
    */
   void Assign(const Dtype* buff, std::size_t sz) const {
+    DCHECK_EQ(sz, size) << " assignment size mismatch";
+    DCHECK_EQ(sizeof(Dtype), element_size) << " element size mismatch";
     std::memcpy(ptr_.get(), buff, sz * sizeof(Dtype));
   }
 

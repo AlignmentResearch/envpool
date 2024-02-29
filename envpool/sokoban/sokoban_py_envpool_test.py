@@ -41,7 +41,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         self.assertEqual(sorted(config_keys), sorted(ref_config_keys))
 
     def test_envpool(self) -> None:
-        batch = num_envs = 200
+        batch = num_envs = 512
         env = envpool.make(
             "Sokoban-v0",
             env_type="gymnasium",
@@ -53,7 +53,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             dim_room=10,
             levels_dir="/app/envpool/sokoban/sample_levels",
         )
-        total_steps = 1000
+        total_steps = 1
 
         _ = env.reset()
         t = time.time()

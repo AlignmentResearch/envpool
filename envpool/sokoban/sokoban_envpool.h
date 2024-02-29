@@ -58,19 +58,6 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
         verbose(static_cast<int>(spec.config["verbose"_])),
         current_max_episode_steps_(static_cast<int>(spec.config["max_episode_steps"_])) {
-    if (max_num_players_ != spec_.config["max_num_players"_]) {
-      std::stringstream msg;
-      msg << "max_num_players_ != spec_['max_num_players'] " << max_num_players_
-          << " != " << spec_.config["max_num_players"_] << std::endl;
-      throw std::runtime_error(msg.str());
-    }
-
-    if (max_num_players_ != spec.config["max_num_players"_]) {
-      std::stringstream msg;
-      msg << "max_num_players_ != spec['max_num_players'] " << max_num_players_
-          << " != " << spec.config["max_num_players"_] << std::endl;
-      throw std::runtime_error(msg.str());
-    }
   }
 
   bool IsDone() override {
