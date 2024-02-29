@@ -9,4 +9,5 @@ register(
     gymnasium_cls="SokobanGymnasiumEnvPool",
     max_episode_steps=60,
     reward_step=-0.1,
+    max_num_players=1,
 )

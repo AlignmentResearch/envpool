@@ -73,6 +73,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
                 num_envs=1,
                 batch_size=1,
                 max_episode_steps=max_episode_steps,
+                min_episode_steps=max_episode_steps,
                 levels_dir="/app/envpool/sokoban/sample_levels",
             )
             env.reset()
