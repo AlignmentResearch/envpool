@@ -1,3 +1,6 @@
+/*
+ * Copyright 2023-2024 FAR AI Inc
+ */
 #include "level_loader.h"
 
 #include <algorithm>
@@ -7,19 +10,23 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 namespace sokoban {
 
 size_t ERROR_SZ = 1024;
 
 LevelLoader::LevelLoader(const std::filesystem::path& base_path, int verbose)
-    : levels(0), cur_level(levels.begin()), level_file_paths(0), verbose(verbose) {
+    : levels(0),
+      cur_level(levels.begin()),
+      level_file_paths(0),
+      verbose(verbose) {
   for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
     level_file_paths.push_back(entry.path());
   }
 }
 
-const std::string PRINT_LEVEL_KEY = "# .a@$s";
+static constexpr std::string PRINT_LEVEL_KEY = "# .a@$s";
 
 void AddLine(SokobanLevel& level, const std::string& line) {
   auto start = line.at(0);
@@ -59,8 +66,8 @@ void AddLine(SokobanLevel& level, const std::string& line) {
 
 void PrintLevel(std::ostream& os, SokobanLevel vec) {
   size_t dim_room = 0;
-  for (; dim_room * dim_room != vec.size() && dim_room <= 100; dim_room++)
-    ;  // take sqrt(vec.size())
+  for (; dim_room * dim_room != vec.size() && dim_room <= 100; dim_room++) {
+  }  // take sqrt(vec.size())
   for (size_t i = 0; i < vec.size(); i++) {
     os << PRINT_LEVEL_KEY.at(vec.at(i));
     if ((i + 1) % dim_room == 0) {
@@ -121,10 +128,10 @@ void LevelLoader::LoadNewFile(std::mt19937& gen) {
     throw std::runtime_error(msg.str());
   }
 
-  if(verbose >= 1) {
+  if (verbose >= 1) {
     std::cout << "Loaded " << levels.size() << " levels from " << file_path
               << std::endl;
-    if(verbose >= 2) {
+    if (verbose >= 2) {
       PrintLevel(std::cout, levels.at(0));
       std::cout << std::endl;
       PrintLevel(std::cout, levels.at(1));

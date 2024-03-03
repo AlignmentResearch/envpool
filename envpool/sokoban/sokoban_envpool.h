@@ -1,5 +1,8 @@
-#ifndef ENVPOOL_SOKOBAN_H_
-#define ENVPOOL_SOKOBAN_H_
+/*
+ * Copyright 2023-2024 FAR AI Inc
+ */
+#ifndef ENVPOOL_SOKOBAN_SOKOBAN_ENVPOOL_H_
+#define ENVPOOL_SOKOBAN_SOKOBAN_ENVPOOL_H_
 
 #include <filesystem>
 #include <sstream>
@@ -57,7 +60,8 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         level_loader(levels_dir),
         world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
         verbose(static_cast<int>(spec.config["verbose"_])),
-        current_max_episode_steps_(static_cast<int>(spec.config["max_episode_steps"_])) {
+        current_max_episode_steps_(
+            static_cast<int>(spec.config["max_episode_steps"_])) {
     if (max_num_players_ != spec_.config["max_num_players"_]) {
       std::stringstream msg;
       msg << "max_num_players_ != spec_['max_num_players'] " << max_num_players_
@@ -74,7 +78,9 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
   }
 
   bool IsDone() override {
-    return (unmatched_boxes == 0) || (current_step_ >= current_max_episode_steps_); }
+    return (unmatched_boxes == 0) ||
+           (current_step_ >= current_max_episode_steps_);
+  }
   void Reset() override;
   void Step(const Action& action) override;
 
@@ -101,4 +107,4 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 using SokobanEnvPool = AsyncEnvPool<SokobanEnv>;
 }  // namespace sokoban
 
-#endif  // ENVPOOL_SOKOBAN_H_
+#endif  // ENVPOOL_SOKOBAN_SOKOBAN_ENVPOOL_H_
