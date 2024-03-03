@@ -90,7 +90,8 @@ buildifier: buildifier-install
 # bazel build/test
 
 bazel-pip-requirement-dev:
-	cd third_party/pip_requirements && (cmp requirements.txt requirements-dev.txt || ln -sf requirements-dev.txt requirements.txt)
+	# Modified to only install dependencies relevant to testing Sokoban (which is the same as release)
+	cd third_party/pip_requirements && (cmp requirements.txt requirements-sokoban.txt || ln -sf requirements-sokoban.txt requirements.txt)
 
 bazel-pip-requirement-release:
 	cd third_party/pip_requirements && (cmp requirements.txt requirements-release.txt || ln -sf requirements-release.txt requirements.txt)
