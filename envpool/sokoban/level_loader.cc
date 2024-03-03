@@ -28,7 +28,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path, int verbose)
 
 static constexpr std::string PRINT_LEVEL_KEY = "# .a@$s";
 
-void AddLine(SokobanLevel& level, const std::string& line) {
+void AddLine(SokobanLevel* level, const std::string& line) {
   auto start = line.at(0);
   auto end = line.at(line.size() - 1);
   if ((start != '#') || (start != '#')) {
@@ -40,19 +40,19 @@ void AddLine(SokobanLevel& level, const std::string& line) {
   for (const char& r : line) {
     switch (r) {
       case '#':
-        level.push_back(WALL);
+        level->push_back(WALL);
         break;
       case '@':
-        level.push_back(PLAYER);
+        level->push_back(PLAYER);
         break;
       case '$':
-        level.push_back(BOX);
+        level->push_back(BOX);
         break;
       case '.':
-        level.push_back(TARGET);
+        level->push_back(TARGET);
         break;
       case ' ':
-        level.push_back(EMPTY);
+        level->push_back(EMPTY);
         break;
       default:
         std::stringstream msg;

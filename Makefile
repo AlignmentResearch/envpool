@@ -79,6 +79,9 @@ cpplint: cpplint-install
 clang-format: clang-format-install
 	clang-format --style=file -i $(CPP_FILES) -n --Werror
 
+clang-format-fix: clang-format-install
+	clang-format --style=file -i $(CPP_FILES) --Werror
+
 # bazel file linter
 
 buildifier: buildifier-install

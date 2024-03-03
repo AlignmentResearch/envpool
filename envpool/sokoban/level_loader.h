@@ -1,8 +1,8 @@
 /*
  * Copyright 2023-2024 FAR AI Inc
  */
-#ifndef LEVEL_LOADER_H_
-#define LEVEL_LOADER_H_
+#ifndef ENVPOOL_SOKOBAN_LEVEL_LOADER_H_
+#define ENVPOOL_SOKOBAN_LEVEL_LOADER_H_
 
 #include <filesystem>
 #include <random>
@@ -25,16 +25,16 @@ class LevelLoader {
   std::vector<SokobanLevel> levels;
   std::vector<SokobanLevel>::iterator cur_level;
   std::vector<std::filesystem::path> level_file_paths;
-  void LoadNewFile(std::mt19937& gen);
+  void LoadNewFile(std::mt19937* gen);
 
  public:
   int verbose;
 
-  const std::vector<SokobanLevel>::iterator RandomLevel(std::mt19937& gen);
-  LevelLoader(const std::filesystem::path& base_path, int verbose = 0);
+  const std::vector<SokobanLevel>::iterator RandomLevel(std::mt19937* gen);
+  explicit LevelLoader(const std::filesystem::path& base_path, int verbose = 0);
 };
 
 void PrintLevel(std::ostream& os, SokobanLevel vec);
 }  // namespace sokoban
 
-#endif  // LEVEL_LOADER_H_
+#endif  // ENVPOOL_SOKOBAN_LEVEL_LOADER_H_

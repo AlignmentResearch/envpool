@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 #include "envpool/core/array.h"
 #include "envpool/core/async_envpool.h"

@@ -6,6 +6,7 @@
 #include <array>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 #include "envpool/core/py_envpool.h"
 
