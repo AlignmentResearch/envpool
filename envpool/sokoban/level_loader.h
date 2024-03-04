@@ -32,6 +32,7 @@ constexpr uint8_t kBoxOnTarget = 3;
 constexpr uint8_t kBox = 4;
 constexpr uint8_t kPlayer = 5;
 constexpr uint8_t kPlayerOnTarget = 6;
+constexpr uint8_t kMaxLevelObject = kPlayerOnTarget;
 
 class LevelLoader {
  protected:

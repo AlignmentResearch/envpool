@@ -85,6 +85,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
         env_type="gymnasium",
         num_envs=1,
         batch_size=1,
+        min_episode_steps=max_episode_steps,
         max_episode_steps=max_episode_steps,
         levels_dir="/app/envpool/sokoban/sample_levels",
       )
