@@ -30,7 +30,7 @@ jobs:
         auth:
           username: "$GHCR_DOCKER_USER"
           password: "$GHCR_DOCKER_TOKEN"
-    resource_class: alignmentresearch/medium
+    resource_class: medium
     working_directory: /app
     steps:
       - checkout
@@ -71,7 +71,7 @@ jobs:
         auth:
           username: "$GHCR_DOCKER_USER"
           password: "$GHCR_DOCKER_TOKEN"
-    resource_class: alignmentresearch/medium
+    resource_class: medium
     working_directory: /app
     steps:
       - checkout
