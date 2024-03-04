@@ -5,7 +5,8 @@ PYTHON_FILES   = $(shell find . -type f -name "*.py")
 CPP_FILES      = $(shell find $(PROJECT_NAME) -type f -name "*.h" -o -name "*.cc")
 BAZEL_FILES    = $(shell find . -type f -name "*BUILD" -o -name "*.bzl")
 COMMIT_HASH    = $(shell git log -1 --format=%h)
-COPYRIGHT      = "Garena Online Private Limited"
+COPYRIGHT      = "FAR AI"
+COPYRIGHT_YEAR = "2023-2024"
 BAZELOPT       =
 DATE           = $(shell date "+%Y-%m-%d")
 DOCKER_TAG     = $(DATE)-$(COMMIT_HASH)
@@ -124,7 +125,7 @@ bazel-clean: bazel-install
 # documentation
 
 addlicense: addlicense-install
-	addlicense -c $(COPYRIGHT) -l apache -y 2023 -check $(PROJECT_FOLDER)
+	addlicense -c $(COPYRIGHT) -l apache -y "$(COPYRIGHT_YEAR)" -check $(PROJECT_FOLDER)
 
 docstyle: doc-install
 	pydocstyle $(PROJECT_NAME) && doc8 docs && cd docs && make html SPHINXOPTS="-W"
@@ -149,7 +150,7 @@ format: py-format-install clang-format-install buildifier-install addlicense-ins
 	yapf -ir $(PYTHON_FILES)
 	clang-format -style=file -i $(CPP_FILES)
 	buildifier -r -lint=fix $(BAZEL_FILES)
-	addlicense -c $(COPYRIGHT) -l apache -y 2023 $(PROJECT_FOLDER)
+	addlicense -c $(COPYRIGHT) -l apache -y "$(COPYRIGHT_YEAR)" $(PROJECT_FOLDER)
 
 # Build docker images
 

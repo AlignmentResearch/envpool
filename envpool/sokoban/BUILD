@@ -1,3 +1,17 @@
+# Copyright 2023-2024 FAR AI
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
@@ -20,7 +34,10 @@ py_library(
 
 cc_library(
     name = "sokoban_envpool_h",
-    hdrs = ["sokoban_envpool.h", "level_loader.h"],
+    hdrs = [
+        "level_loader.h",
+        "sokoban_envpool.h",
+    ],
     deps = [
         "//envpool/core:async_envpool",
         "//envpool/core:env",
@@ -40,12 +57,12 @@ cc_library(
 
 py_test(
     name = "test",
-    main = "sokoban_py_envpool_test.py",
     srcs = ["sokoban_py_envpool_test.py"],
+    main = "sokoban_py_envpool_test.py",
     deps = [
-        ":sokoban",
         ":registration",
-        "//envpool:envpool",
+        ":sokoban",
+        "//envpool",
         requirement("numpy"),
         requirement("absl-py"),
     ],
@@ -54,8 +71,8 @@ py_test(
 pybind_extension(
     name = "sokoban_envpool",
     srcs = [
-        "sokoban_envpool.cc",
         "level_loader.cc",
+        "sokoban_envpool.cc",
     ],
     linkopts = [
         "-ldl",
