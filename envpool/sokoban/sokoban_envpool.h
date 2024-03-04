@@ -16,16 +16,16 @@
 
 namespace sokoban {
 
-constexpr int ACT_NOOP = 0;
-constexpr int ACT_PUSH_UP = 1;
-constexpr int ACT_PUSH_DOWN = 2;
-constexpr int ACT_PUSH_LEFT = 3;
-constexpr int ACT_PUSH_RIGHT = 4;
-constexpr int ACT_MOVE_UP = 5;
-constexpr int ACT_MOVE_DOWN = 6;
-constexpr int ACT_MOVE_LEFT = 7;
-constexpr int ACT_MOVE_RIGHT = 8;
-constexpr int MAX_ACTION = ACT_MOVE_RIGHT;
+constexpr int kActNoop = 0;
+constexpr int kActPushUp = 1;
+constexpr int kActPushDown = 2;
+constexpr int kActPushLeft = 3;
+constexpr int kActPushRight = 4;
+constexpr int kActMoveUp = 5;
+constexpr int kActMoveDown = 6;
+constexpr int kActMoveLeft = 7;
+constexpr int kActMoveRight = 8;
+constexpr int kMaxAction = kActMoveRight;
 
 class SokobanEnvFns {
  public:
@@ -42,7 +42,7 @@ class SokobanEnvFns {
   }
   template <typename Config>
   static decltype(auto) ActionSpec(const Config& conf) {
-    return MakeDict("action"_.Bind(Spec<int>({-1}, {0, MAX_ACTION})));
+    return MakeDict("action"_.Bind(Spec<int>({-1}, {0, kMaxAction})));
   }
 };
 
@@ -53,14 +53,14 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
  public:
   SokobanEnv(const Spec& spec, int env_id)
       : Env<SokobanEnvSpec>(spec, env_id),
-        dim_room{static_cast<int>(spec.config["dim_room"_])},
-        reward_finished{static_cast<double>(spec.config["reward_finished"_])},
-        reward_box{static_cast<double>(spec.config["reward_box"_])},
-        reward_step{static_cast<double>(spec.config["reward_step"_])},
-        levels_dir{static_cast<std::string>(spec.config["levels_dir"_])},
-        level_loader(levels_dir),
-        world(WALL, static_cast<std::size_t>(dim_room * dim_room)),
-        verbose(static_cast<int>(spec.config["verbose"_])),
+        dim_room_{static_cast<int>(spec.config["dim_room"_])},
+        reward_finished_{static_cast<double>(spec.config["reward_finished"_])},
+        reward_box_{static_cast<double>(spec.config["reward_box"_])},
+        reward_step_{static_cast<double>(spec.config["reward_step"_])},
+        levels_dir_{static_cast<std::string>(spec.config["levels_dir"_])},
+        level_loader_(levels_dir_),
+        world_(kWall, static_cast<std::size_t>(dim_room_ * dim_room_)),
+        verbose_(static_cast<int>(spec.config["verbose"_])),
         current_max_episode_steps_(
             static_cast<int>(spec.config["max_episode_steps"_])) {
     if (max_num_players_ != spec_.config["max_num_players"_]) {
@@ -79,29 +79,29 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
   }
 
   bool IsDone() override {
-    return (unmatched_boxes == 0) ||
+    return (unmatched_boxes_ == 0) ||
            (current_step_ >= current_max_episode_steps_);
   }
   void Reset() override;
-  void Step(const Action& action) override;
+  void Step(const Action& action_dict) override;
 
   void WriteState(float reward);
 
  private:
-  int dim_room;
-  double reward_finished, reward_box, reward_step;
-  std::filesystem::path levels_dir;
+  int dim_room_;
+  double reward_finished_, reward_box_, reward_step_;
+  std::filesystem::path levels_dir_;
 
-  LevelLoader level_loader;
-  SokobanLevel world;
-  int verbose;
+  LevelLoader level_loader_;
+  SokobanLevel world_;
+  int verbose_;
 
   int current_max_episode_steps_;
   int current_step_{0};
-  int player_x{0}, player_y{0};
-  int unmatched_boxes{0};
+  int player_x_{0}, player_y_{0};
+  int unmatched_boxes_{0};
 
-  uint8_t WorldAt(int x, int y);
+  [[nodiscard]] uint8_t WorldAt(int x, int y) const;
   void WorldAssignAt(int x, int y, uint8_t value);
 };
 

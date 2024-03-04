@@ -97,7 +97,8 @@ bazel-pip-requirement-release:
 	cd third_party/pip_requirements && (cmp requirements.txt requirements-release.txt || ln -sf requirements-release.txt requirements.txt)
 
 clang-tidy: clang-tidy-install bazel-pip-requirement-dev
-	bazel build $(BAZELOPT) //... --config=clang-tidy --config=test
+	# Only lint the things we actually build
+	bazel build $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=clang-tidy --config=test
 
 bazel-debug: bazel-install bazel-pip-requirement-dev
 	bazel run $(BAZELOPT) //:setup --config=debug -- bdist_wheel
