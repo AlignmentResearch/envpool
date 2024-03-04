@@ -35,7 +35,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path, int verbose)
   }
 }
 
-constexpr std::string kPrintLevelKey("# .a@$s");
+static const std::string kPrintLevelKey("# .a@$s");
 
 void AddLine(SokobanLevel& level, const std::string& line) {
   auto start = line.at(0);

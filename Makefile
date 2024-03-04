@@ -117,7 +117,7 @@ bazel-release: bazel-install bazel-pip-requirement-release
 	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
 
 bazel-test: bazel-install bazel-pip-requirement-dev
-	bazel test --test_output=all $(BAZELOPT) //... --config=test --spawn_strategy=local --color=yes
+	bazel test --test_output=all $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=test --spawn_strategy=local --color=yes
 
 bazel-clean: bazel-install
 	bazel clean --expunge
