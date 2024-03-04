@@ -20,7 +20,7 @@ py_library(
 
 cc_library(
     name="sokoban_envpool_h",
-    hdrs=["sokoban_envpool.h", "level_loader.h, utils.h"],
+    hdrs=["sokoban_envpool.h", "level_loader.h", "utils.h"],
     deps=[
         "//envpool/core:async_envpool",
         "//envpool/core:env",
