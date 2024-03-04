@@ -1,0 +1,80 @@
+version: 2.1
+
+parameters:
+  action:
+    type: enum
+    enum: [oncommit, docker]
+    default: oncommit
+
+  docker_img_version:
+    # Docker image version for running tests.
+    type: string
+    default: "8f41d1e-envpool-ci"
+
+workflows:
+  test-jobs:
+    when:
+      equal: [oncommit, << pipeline.parameters.action >>]
+    jobs:
+      - lint:
+          context:
+            - ghcr-auth
+      - tests:
+          context:
+            - ghcr-auth
+
+jobs:
+  lint:
+    docker:
+      - image: ghcr.io/alignmentresearch/learned-planners:<< pipeline.parameters.docker_img_version >>
+        auth:
+          username: "$GHCR_DOCKER_USER"
+          password: "$GHCR_DOCKER_TOKEN"
+    resource_class: alignmentresearch/medium
+    working_directory: /app
+    steps:
+      - checkout
+      # Copied from .github/workflows/lint.yml
+      - run:
+          name: flake8
+          command: |
+            make flake8
+      - run:
+          name: isort and yapf
+          run: |
+            make py-format
+      - run:
+          name: cpplint
+          run: |
+            make cpplint
+      - run:
+          name: clang-format
+          run: |
+            make clang-format
+      - run:
+          name: clang-tidy
+          run: |
+            make clang-tidy
+      - run:
+          name: buildifier
+          run: |
+            make buildifier
+      - run:
+          name: addlicense
+          run: |
+            make addlicense
+      # Skip mypy, docstyle and spelling
+
+  tests:
+    docker:
+      - image: ghcr.io/alignmentresearch/learned-planners:<< pipeline.parameters.docker_img_version >>
+        auth:
+          username: "$GHCR_DOCKER_USER"
+          password: "$GHCR_DOCKER_TOKEN"
+    resource_class: alignmentresearch/medium
+    working_directory: /app
+    steps:
+      - checkout
+      - run:
+          name: Run tests
+          command: make bazel-test
