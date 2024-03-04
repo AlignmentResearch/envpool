@@ -42,6 +42,7 @@ cc_library(
         "//envpool/core:async_envpool",
         "//envpool/core:env",
         "//envpool/core:env_spec",
+        "//envpool/utils:safe_random_h",
     ],
 )
 

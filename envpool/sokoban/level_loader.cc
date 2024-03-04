@@ -14,6 +14,8 @@
 
 #include "level_loader.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -22,6 +24,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include "envpool/utils/safe_random.h"
 
 namespace sokoban {
 
@@ -90,7 +94,8 @@ void PrintLevel(std::ostream& os, const SokobanLevel& vec) {
 }
 
 void LevelLoader::LoadNewFile(std::mt19937& gen) {
-  std::uniform_int_distribution<size_t> load_file_idx_r(
+  CHECK_GE(level_file_paths_.size(), static_cast<size_t>(1));
+  auto load_file_idx_r = envpool::SafeUniformIntDistribution<size_t>(
       0, level_file_paths_.size() - 1);
   const size_t load_file_idx = load_file_idx_r(gen);
   const std::filesystem::path& file_path = level_file_paths_.at(load_file_idx);
