@@ -2,7 +2,7 @@
 
 import glob
 import time
-import py
+import pytest
 import re
 
 import envpool  # noqa: F401
@@ -88,7 +88,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             assert not np.any(terminated)
             assert np.all(truncated)
 
-    def test_envpool_load_sequentially(self) -> None:
+    def test_envpool_load_sequentially(self, capfd) -> None:
         levels_dir = "/app/envpool/sokoban/sample_levels"
         files = glob.glob(f"{levels_dir}/*.txt")
         levels_by_files = []
@@ -115,14 +115,13 @@ class _SokobanEnvPoolTest(absltest.TestCase):
                 verbose=2,
             )
             dim_room = env.spec.config.dim_room
-            capture = py.io.StdCaptureFD()
             obs, _ = env.reset()
             assert obs.shape == (1, 3, dim_room, dim_room), f"obs shape: {obs.shape}"
             if n_levels_to_load == -1:
                 n_levels_to_load = total_levels
             for _ in range(n_levels_to_load - 1):
                 env.reset()
-            out, err = capture.reset()
+            out, _ = capsys.readouterr()
             files_output = out.split("***")[1:]
             for i, file_output in enumerate(files_output):
                 first_line, out = file_output.strip().split("\n", 1)

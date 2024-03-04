@@ -1,7 +1,5 @@
 #include "level_loader.h"
 
-#include <pybind11/iostream.h>
-
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -9,6 +7,8 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
+
+#include "envpool/sokoban/utils.h"
 
 namespace sokoban {
 
@@ -89,9 +89,8 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     file_path = *cur_file;
     cur_file++;
   } else {
-    std::uniform_int_distribution<size_t> load_file_idx_r(
-        0, level_file_paths.size() - 1);
-    const size_t load_file_idx = load_file_idx_r(gen);
+    const size_t load_file_idx = safe_uniform_int(
+        static_cast<size_t>(0), level_file_paths.size() - 1, gen);
     file_path = level_file_paths.at(load_file_idx);
   }
   std::ifstream file(file_path);
