@@ -41,27 +41,27 @@ jobs:
             make flake8
       - run:
           name: isort and yapf
-          run: |
+          command: |
             make py-format
       - run:
           name: cpplint
-          run: |
+          command: |
             make cpplint
       - run:
           name: clang-format
-          run: |
+          command: |
             make clang-format
       - run:
           name: clang-tidy
-          run: |
+          command: |
             make clang-tidy
       - run:
           name: buildifier
-          run: |
+          command: |
             make buildifier
       - run:
           name: addlicense
-          run: |
+          command: |
             make addlicense
       # Skip mypy, docstyle and spelling
 
