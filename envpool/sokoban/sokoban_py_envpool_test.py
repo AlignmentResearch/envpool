@@ -8,12 +8,10 @@ import re
 import envpool  # noqa: F401
 import envpool.sokoban.registration
 import numpy as np
-from absl import logging
-from absl.testing import absltest
 from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
 
 
-class _SokobanEnvPoolTest(absltest.TestCase):
+class TestSokobanEnvPool:
     def test_config(self) -> None:
         ref_config_keys = [
             # Default environment keys
@@ -39,11 +37,11 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             "n_levels_to_load",
         ]
         default_conf = _SokobanEnvSpec._default_config_values
-        self.assertTrue(isinstance(default_conf, tuple))
+        assert isinstance(default_conf, tuple)
         config_keys = _SokobanEnvSpec._config_keys
-        self.assertTrue(isinstance(config_keys, list))
-        self.assertEqual(len(default_conf), len(config_keys))
-        self.assertEqual(sorted(config_keys), sorted(ref_config_keys))
+        assert isinstance(config_keys, list)
+        assert len(default_conf) == len(config_keys)
+        assert sorted(config_keys) == sorted(ref_config_keys)
 
     def test_envpool(self) -> None:
         batch = num_envs = 200
@@ -66,7 +64,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
             _ = env.step(np.random.randint(low=0, high=9, size=(num_envs,)))
         duration = time.time() - t
         fps = total_steps * batch / duration
-        logging.info(f"FPS = {fps:.6f}")
+        print(f"FPS = {fps:.6f}")
 
     def test_envpool_max_episode_steps(self) -> None:
         for max_episode_steps in [2, 5, 10]:
@@ -121,7 +119,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
                 n_levels_to_load = total_levels
             for _ in range(n_levels_to_load - 1):
                 env.reset()
-            out, _ = capsys.readouterr()
+            out, _ = capfd.readouterr()
             files_output = out.split("***")[1:]
             for i, file_output in enumerate(files_output):
                 first_line, out = file_output.strip().split("\n", 1)
@@ -149,4 +147,4 @@ class _SokobanEnvPoolTest(absltest.TestCase):
 
 
 if __name__ == "__main__":
-    absltest.main()
+    pytest.main(["-v", __file__])
