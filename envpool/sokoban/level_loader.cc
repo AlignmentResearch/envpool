@@ -13,7 +13,10 @@ namespace sokoban {
 size_t ERROR_SZ = 1024;
 
 LevelLoader::LevelLoader(const std::filesystem::path& base_path, int verbose)
-    : levels(0), cur_level(levels.begin()), level_file_paths(0), verbose(verbose) {
+    : levels(0),
+      cur_level(levels.begin()),
+      level_file_paths(0),
+      verbose(verbose) {
   for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
     level_file_paths.push_back(entry.path());
   }
@@ -24,7 +27,7 @@ const std::string PRINT_LEVEL_KEY = "# .a@$s";
 void AddLine(SokobanLevel& level, const std::string& line) {
   auto start = line.at(0);
   auto end = line.at(line.size() - 1);
-  if ((start != '#') || (start != '#')) {
+  if ((start != '#') || (end != '#')) {
     std::stringstream msg;
     msg << "Line '" << line << "' does not start (" << start << ") and end ("
         << end << ") with '#', as it should." << std::endl;
@@ -121,10 +124,10 @@ void LevelLoader::LoadNewFile(std::mt19937& gen) {
     throw std::runtime_error(msg.str());
   }
 
-  if(verbose >= 1) {
+  if (verbose >= 1) {
     std::cout << "Loaded " << levels.size() << " levels from " << file_path
               << std::endl;
-    if(verbose >= 2) {
+    if (verbose >= 2) {
       PrintLevel(std::cout, levels.at(0));
       std::cout << std::endl;
       PrintLevel(std::cout, levels.at(1));
