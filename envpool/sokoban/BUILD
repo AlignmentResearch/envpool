@@ -28,26 +28,22 @@ cc_library(
     ],
 )
 
-cc_test(
-    name="astar_sokoban_test",
-    size="enormous",
-    srcs=["sokoban_node.cc"],
-    hdrs=["fsa.h", "astar.h"],
-    deps=[
-        ":sokoban_envpool_h",
-    ],
+cc_library(
+    name="sokoban_node_h",
+    hdrs=["sokoban_node.h", "level_loader.h", "fsa.h", "astar.h"],
+    deps=[],
 )
 
-
-# cc_test(
-#    name = "sokoban_envpool_test",
-#    size = "enormous",
-#    srcs = ["sokoban_envpool_test.cc"],
-#    deps = [
-#        ":sokoban_envpool_h",
-#        "@com_google_googletest//:gtest_main",
-#    ],
-# )
+cc_test(
+    name="sokoban_astar_test",
+    size="enormous",
+    srcs=["sokoban_astar_test.cc", "sokoban_node.cc", "level_loader.cc"],
+    deps=[
+        ":sokoban_node_h",
+        "@com_github_google_glog//:glog",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 py_test(
     name="test",
