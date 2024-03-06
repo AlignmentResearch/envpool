@@ -11,25 +11,25 @@ TEST(SokobanAStarTest, Basic) {
   std::cout << "STL A* Search implementation\n(C)2001 Justin Heyes-Jones\n";
 
   // Create an instance of the search class...
-
-  std::AStarSearch<SokobanNode> astarsearch;
+  std::AStarSearch<SokobanNode> astarsearch(1000000);
+  std::vector<int> verify_steps = {38, 19};
+  std::vector<int> verify_search_steps = {67921, 26322};
 
   unsigned int SearchCount = 0;
-
-  const unsigned int NumSearches = 1;
+  const unsigned int NumSearches = 2;
+  const std::string level_file = "/envpool/envpool/sokoban/sample_levels/";
+  const int dim_room = 10;
+  LevelLoader level_loader(level_file);
+  std::mt19937 gen(42);
 
   while (SearchCount < NumSearches) {
     // Create a start state
-    const std::string level_file = "/envpool/envpool/sokoban/sample_levels/";
-    const int dim_room = 10;
-
-    LevelLoader level_loader(level_file);
-    // make a rng for the level loader
-    std::mt19937 gen(std::random_device{}());
     SokobanLevel level = *level_loader.RandomLevel(gen);
 
-    SokobanNode nodeStart(dim_room, level);
-    SokobanNode nodeEnd = nodeStart.get_goal_node();
+    SokobanNode nodeStart(dim_room, level, false);
+    SokobanNode nodeEnd(dim_room, level, true);
+    std::vector<std::pair<int, int>>* goals = &nodeEnd.boxes;
+    nodeStart.PrintNodeInfo(goals);
     astarsearch.SetStartAndGoalStates(nodeStart, nodeEnd);
 
     unsigned int SearchState;
@@ -51,7 +51,7 @@ TEST(SokobanAStarTest, Basic) {
       while (p) {
         len++;
 #if !DEBUG_LIST_LENGTHS_ONLY
-        ((SokobanNode*)p)->PrintNodeInfo();
+        ((SokobanNode*)p)->PrintNodeInfo(goals);
 #endif
         p = astarsearch.GetOpenListNext();
       }
@@ -65,7 +65,7 @@ TEST(SokobanAStarTest, Basic) {
       while (p) {
         len++;
 #if !DEBUG_LIST_LENGTHS_ONLY
-        p->PrintNodeInfo();
+        p->PrintNodeInfo(goals);
 #endif
         p = astarsearch.GetClosedListNext();
       }
@@ -81,24 +81,22 @@ TEST(SokobanAStarTest, Basic) {
 
       SokobanNode* node = astarsearch.GetSolutionStart();
 
-#if DISPLAY_SOLUTION
-      std::cout << "Displaying solution\n";
-#endif
       int steps = 0;
 
-      node->PrintNodeInfo();
+      node->PrintNodeInfo(goals);
       for (;;) {
         node = astarsearch.GetSolutionNext();
 
         if (!node) {
           break;
         }
-
-        node->PrintNodeInfo();
+        std::cout << "Step " << steps << std::endl;
+        node->PrintNodeInfo(goals);
         steps++;
       };
 
       std::cout << "Solution steps " << steps << std::endl;
+      EXPECT_EQ(steps, verify_steps.at(SearchCount));
 
       // Once you're done with the solution you can free the nodes up
       astarsearch.FreeSolutionNodes();
@@ -122,6 +120,9 @@ TEST(SokobanAStarTest, Basic) {
 
     // Display the number of loops the search went through
     std::cout << "SearchSteps : " << SearchSteps << "\n";
+    EXPECT_EQ(SearchState,
+              std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED);
+    EXPECT_EQ(SearchSteps, verify_search_steps.at(SearchCount));
 
     SearchCount++;
 
