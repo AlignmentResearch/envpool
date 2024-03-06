@@ -51,6 +51,8 @@ given where due.
 #pragma warning(disable : 4786)
 #endif
 
+namespace std {
+
 template <class T>
 class AStarState;
 
@@ -738,5 +740,7 @@ class AStarState {
       T& rhs) = 0;  // Returns true if this node is the same as the rhs node
   virtual size_t Hash() = 0;  // Returns a hash for the state
 };
+
+}  // namespace std
 
 #endif
