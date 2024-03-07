@@ -14,11 +14,11 @@
 """Unit test for dummy envpool and speed benchmark."""
 
 import glob
-import time
-import pytest
 import re
+import time
 
 import numpy as np
+import pytest
 
 import envpool  # noqa: F401
 import envpool.sokoban.registration
