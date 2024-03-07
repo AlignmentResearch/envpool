@@ -1,5 +1,21 @@
-#ifndef SOKOBAN_UTILS_H
-#define SOKOBAN_UTILS_H
+/*
+ * Copyright 2023-2024 FAR AI
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef ENVPOOL_SOKOBAN_UTILS_H_
+#define ENVPOOL_SOKOBAN_UTILS_H_
 
 #include <random>
 
@@ -11,15 +27,13 @@ T safe_uniform_int(T low, T high, std::mt19937& gen) {
   if (low > high) {
     throw std::invalid_argument("low should be less than high");
   }
-  static_assert(
-      std::is_same_v<T, unsigned> || std::is_same_v<T, unsigned long> ||
-          std::is_same_v<T, unsigned long long> || std::is_same_v<T, int> ||
-          std::is_same_v<T, long> || std::is_same_v<T, long long>,
-      "safe_uniform_int only supports int, long, and long long");
+  static_assert(std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t> ||
+                    std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>,
+                "safe_uniform_int only supports int, long, and long long");
   std::uniform_int_distribution<T> dist(low, high);
   return dist(gen);
 }
 
 }  // namespace sokoban
 
-#endif  // SOKOBAN_UTILS_H
+#endif  // ENVPOOL_SOKOBAN_UTILS_H_
