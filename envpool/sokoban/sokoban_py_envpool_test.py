@@ -94,10 +94,14 @@ class TestSokobanEnvPool:
             )
             env.reset()
             for _ in range(max_episode_steps - 1):
-                _, _, terminated, truncated, _ = env.step(np.zeros([1], dtype=np.int32))
+                _, _, terminated, truncated, _ = env.step(
+                    np.zeros([1], dtype=np.int32)
+                )
                 assert not np.any(terminated | truncated)
 
-            _, _, terminated, truncated, _ = env.step(np.zeros([1], dtype=np.int32))
+            _, _, terminated, truncated, _ = env.step(
+                np.zeros([1], dtype=np.int32)
+            )
             assert not np.any(terminated)
             assert np.all(truncated)
 
@@ -109,7 +113,9 @@ class TestSokobanEnvPool:
                 with open(file, "r") as f:
                     text = f.read()
                 levels = text.split("\n;")
-                levels = ["\n".join(level.split("\n")[1:]).strip() for level in levels]
+                levels = [
+                    "\n".join(level.split("\n")[1:]).strip() for level in levels
+                ]
                 levels_by_files.append((file, levels))
             assert len(levels_by_files) > 1
             assert all(len(levels) > 1 for levels in levels_by_files)
@@ -149,6 +155,7 @@ class TestSokobanEnvPool:
                     n_levels, file_name = int(result.group(1)), result.group(2)
                     lev1, lev2 = out.strip().split("\n\n")
                     assert file_name == levels_by_files[i][0]
+                    assert n_levels == len(levels_by_files[i][1])
                     assert lev1 == levels_by_files[i][1][0]
                     assert lev2 == levels_by_files[i][1][1]
 
