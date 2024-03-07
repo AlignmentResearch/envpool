@@ -5,7 +5,8 @@ PYTHON_FILES   = $(shell find . -type f -name "*.py")
 CPP_FILES      = $(shell find $(PROJECT_NAME) -type f -name "*.h" -o -name "*.cc")
 BAZEL_FILES    = $(shell find . -type f -name "*BUILD" -o -name "*.bzl")
 COMMIT_HASH    = $(shell git log -1 --format=%h)
-COPYRIGHT      = "Garena Online Private Limited"
+COPYRIGHT      = "FAR AI"
+COPYRIGHT_YEAR = "2023-2024"
 BAZELOPT       =
 DATE           = $(shell date "+%Y-%m-%d")
 DOCKER_TAG     = $(DATE)-$(COMMIT_HASH)
@@ -79,6 +80,9 @@ cpplint: cpplint-install
 clang-format: clang-format-install
 	clang-format --style=file -i $(CPP_FILES) -n --Werror
 
+clang-format-fix: clang-format-install
+	clang-format --style=file -i $(CPP_FILES) --Werror
+
 # bazel file linter
 
 buildifier: buildifier-install
@@ -87,13 +91,15 @@ buildifier: buildifier-install
 # bazel build/test
 
 bazel-pip-requirement-dev:
-	cd third_party/pip_requirements && (cmp requirements.txt requirements-dev.txt || ln -sf requirements-dev.txt requirements.txt)
+	# Modified to only install dependencies relevant to testing Sokoban (which is the same as release)
+	cd third_party/pip_requirements && (cmp requirements.txt requirements-sokoban.txt || ln -sf requirements-sokoban.txt requirements.txt)
 
 bazel-pip-requirement-release:
 	cd third_party/pip_requirements && (cmp requirements.txt requirements-release.txt || ln -sf requirements-release.txt requirements.txt)
 
 clang-tidy: clang-tidy-install bazel-pip-requirement-dev
-	bazel build $(BAZELOPT) //... --config=clang-tidy --config=test
+	# Only lint the things we actually build
+	bazel build $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=clang-tidy --config=test
 
 bazel-debug: bazel-install bazel-pip-requirement-dev
 	bazel run $(BAZELOPT) //:setup --config=debug -- bdist_wheel
@@ -111,7 +117,7 @@ bazel-release: bazel-install bazel-pip-requirement-release
 	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
 
 bazel-test: bazel-install bazel-pip-requirement-dev
-	bazel test --test_output=all $(BAZELOPT) //... --config=test --spawn_strategy=local --color=yes
+	bazel test --test_output=all $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=test --spawn_strategy=local --color=yes
 
 bazel-clean: bazel-install
 	bazel clean --expunge
@@ -119,7 +125,7 @@ bazel-clean: bazel-install
 # documentation
 
 addlicense: addlicense-install
-	addlicense -c $(COPYRIGHT) -l apache -y 2023 -check $(PROJECT_FOLDER)
+	addlicense -c $(COPYRIGHT) -l apache -y "$(COPYRIGHT_YEAR)" -check $(PROJECT_FOLDER)
 
 docstyle: doc-install
 	pydocstyle $(PROJECT_NAME) && doc8 docs && cd docs && make html SPHINXOPTS="-W"
@@ -144,7 +150,7 @@ format: py-format-install clang-format-install buildifier-install addlicense-ins
 	yapf -ir $(PYTHON_FILES)
 	clang-format -style=file -i $(CPP_FILES)
 	buildifier -r -lint=fix $(BAZEL_FILES)
-	addlicense -c $(COPYRIGHT) -l apache -y 2023 $(PROJECT_FOLDER)
+	addlicense -c $(COPYRIGHT) -l apache -y "$(COPYRIGHT_YEAR)" $(PROJECT_FOLDER)
 
 # Build docker images
 
