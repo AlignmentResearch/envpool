@@ -20,6 +20,8 @@
 namespace sokoban {
 
 void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
+  std::cout << "Running A* on file " << file_idx << " with fsa_limit "
+            << fsa_limit << std::endl;
   std::stringstream s1, s2;
   s1 << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/train/"
      << file_idx << ".txt";
@@ -50,13 +52,16 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
   log_file_in.close();
 
   while (level_idx < total_levels) {
+    std::cout << "Running level " << level_idx << std::endl;
     SokobanLevel level = *level_loader.GetLevel(gen);
+    std::cout << "Got level" << std::endl;
 
     SokobanNode node_start(dim_room, level, false);
     SokobanNode node_end(dim_room, level, true);
     astarsearch.SetStartAndGoalStates(node_start, node_end);
     unsigned int search_state;
     unsigned int search_steps = 0;
+    std::cout << "Starting search" << std::endl;
     do {
       search_state = astarsearch.SearchStep();
       search_steps++;
@@ -123,8 +128,6 @@ int main(int argc, char** argv) {
   if (argc > 2) {
     fsa_limit = std::stoi(argv[2]);
   }
-  std::cout << "Running A* on file " << file_idx << " with fsa_limit "
-            << fsa_limit << std::endl;
   sokoban::RunAStar(file_idx, fsa_limit);
   return 0;
 }
