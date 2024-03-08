@@ -20,7 +20,7 @@
 namespace sokoban {
 
 const std::vector<std::pair<int, int>> SokobanNode::kDelta = {
-    {0, 1}, {1, 0}, {0, -1}, {-1, 0}  // Up, Right, Down, Left
+    {0, -1}, {0, 1}, {-1, 0}, {1, 0}  // Up, Down, Left, Right
 };
 
 bool SokobanNode::IsSameState(SokobanNode& rhs) {
@@ -37,6 +37,7 @@ bool SokobanNode::IsSameState(SokobanNode& rhs) {
 }
 
 void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
+  std::cout << "Action: " << action_from_parent << std::endl;
   for (int y = 0; y < dim_room; y++) {
     for (int x = 0; x < dim_room; x++) {
       bool is_wall = walls->at(x + y * dim_room);
@@ -81,7 +82,9 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
   }
 }
 
-SokobanNode* SokobanNode::GetChildNode(int delta_x, int delta_y) {
+SokobanNode* SokobanNode::GetChildNode(int action_idx) {
+  int delta_x = kDelta.at(action_idx).first;
+  int delta_y = kDelta.at(action_idx).second;
   int new_player_x = player_x + delta_x;
   int new_player_y = player_y + delta_y;
   // check if the move is valid
@@ -123,7 +126,7 @@ SokobanNode* SokobanNode::GetChildNode(int delta_x, int delta_y) {
     }
   }
   return new SokobanNode(dim_room, new_player_x, new_player_y, new_boxes, walls,
-                         this);
+                         this, action_idx);
 }
 
 bool SokobanNode::CheckWall(int x, int y) {
@@ -178,8 +181,7 @@ float SokobanNode::GetCost(SokobanNode& successor) { return 1; }
 bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                                 SokobanNode* parent_node) {
   for (size_t i = 0; i < kDelta.size(); i++) {
-    SokobanNode* new_node_ptr =
-        GetChildNode(kDelta.at(i).first, kDelta.at(i).second);
+    SokobanNode* new_node_ptr = GetChildNode(i);
     if (new_node_ptr == nullptr) {
       continue;
     }

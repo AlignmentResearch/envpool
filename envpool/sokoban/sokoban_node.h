@@ -33,6 +33,7 @@ class SokobanNode {
   unsigned int total_boxes{0};
   std::shared_ptr<std::vector<bool>> walls;
   SokobanNode* parent_node{nullptr};
+  unsigned int action_from_parent{-1};  // -1 is for when node is root
 
   SokobanNode() = default;
 
@@ -79,18 +80,19 @@ class SokobanNode {
   SokobanNode(int dim_room, int player_x, int player_y,
               std::vector<std::pair<int, int>> boxes,
               std::shared_ptr<std::vector<bool>> walls,
-              SokobanNode* parent_node = nullptr)
+              SokobanNode* parent_node = nullptr, int action_from_parent)
       : dim_room(dim_room),
         player_x(player_x),
         player_y(player_y),
         boxes(boxes),
         total_boxes(boxes.size()),
         walls(walls),
-        parent_node(parent_node) {}
+        parent_node(parent_node),
+        action_from_parent(action_from_parent) {}
 
   bool CheckWall(int x, int y);
 
-  SokobanNode* GetChildNode(int delta_x, int delta_y);
+  SokobanNode* GetChildNode(int action_idx);
 
   float GoalDistanceEstimate(SokobanNode& goal_node);
   bool IsGoal(SokobanNode& goal_node);

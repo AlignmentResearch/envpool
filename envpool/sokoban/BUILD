@@ -58,6 +58,14 @@ cc_library(
   deps=[],
 )
 
+cc_binary(
+  name="astar_log",
+  srcs=["astar_log.cc", "sokoban_node.cc", "level_loader.cc"],
+  deps=[
+    ":sokoban_node_h",
+  ],
+)
+
 cc_test(
   name="sokoban_astar_test",
   size="enormous",
