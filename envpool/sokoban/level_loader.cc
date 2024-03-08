@@ -30,9 +30,9 @@ namespace sokoban {
 LevelLoader::LevelLoader(const std::filesystem::path& base_path,
                          bool load_sequentially, int n_levels_to_load,
                          int verbose)
-    : load_sequentially(load_sequentially),
-      n_levels_to_load(n_levels_to_load),
-      levels_loaded(0),
+    : load_sequentially_(load_sequentially),
+      n_levels_to_load_(n_levels_to_load),
+      levels_loaded_(0),
       levels_(0),
       cur_level_(levels_.begin()),
       level_file_paths_(0),
@@ -40,7 +40,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
   for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
     level_file_paths_.push_back(entry.path());
   }
-  cur_file = level_file_paths_.begin();
+  cur_file_ = level_file_paths_.begin();
 }
 
 static const std::array<char, kMaxLevelObject + 1> kPrintLevelKey{
@@ -99,14 +99,14 @@ void PrintLevel(std::ostream& os, const SokobanLevel& vec) {
 
 void LevelLoader::LoadFile(std::mt19937& gen) {
   std::filesystem::path file_path;
-  if (load_sequentially) {
-    if (cur_file == level_file_paths_.end()) {
+  if (load_sequentially_) {
+    if (cur_file_ == level_file_paths_.end()) {
       throw std::runtime_error("No more files to load.");
     }
-    file_path = *cur_file;
-    cur_file++;
+    file_path = *cur_file_;
+    cur_file_++;
   } else {
-    const size_t load_file_idx = safe_uniform_int(
+    const size_t load_file_idx = SafeUniformInt(
         static_cast<size_t>(0), level_file_paths_.size() - 1, gen);
     file_path = level_file_paths_.at(load_file_idx);
   }
@@ -150,7 +150,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
       }
     }
   }
-  if (!load_sequentially) {
+  if (!load_sequentially_) {
     std::shuffle(levels_.begin(), levels_.end(), gen);
   }
   if (levels_.empty()) {
@@ -172,7 +172,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
 }
 
 std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
-  if (n_levels_to_load > 0 && levels_loaded >= n_levels_to_load) {
+  if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     throw std::runtime_error("Loaded all requested levels.");
   }
   if (cur_level_ == levels_.end()) {
@@ -184,7 +184,7 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   }
   auto out = cur_level_;
   cur_level_++;
-  levels_loaded++;
+  levels_loaded_++;
   return out;
 }
 
