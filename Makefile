@@ -75,7 +75,7 @@ mypy: mypy-install
 # c++ linter
 
 cpplint: cpplint-install
-	cpplint $(CPP_FILES)
+	cpplint --root . $(CPP_FILES)
 
 clang-format: clang-format-install
 	clang-format --style=file -i $(CPP_FILES) -n --Werror
