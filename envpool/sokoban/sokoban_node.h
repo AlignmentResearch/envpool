@@ -26,7 +26,9 @@ namespace sokoban {
 
 class SokobanNode {
  public:
-  static const std::vector<std::pair<int, int>> kDelta;
+  static constexpr std::array<std::array<int, 2>, 4> kDelta = {
+      {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}  // Up, Down, Left, Right
+  };
   int dim_room{0};
   int player_x{0}, player_y{0};
   std::vector<std::pair<int, int>> boxes;
@@ -101,7 +103,7 @@ class SokobanNode {
     action_from_parent = goal_node.action_from_parent;
   }
 
-  bool CheckWall(int x, int y);
+  bool CheckWall(int x, int y) const;
 
   SokobanNode* GetChildNode(int action_idx);
 
@@ -109,8 +111,8 @@ class SokobanNode {
   bool IsGoal(SokobanNode& goal_node);
   bool GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                      SokobanNode* parent_node);
-  float GetCost(SokobanNode& successor);
-  bool IsSameState(SokobanNode& rhs);
+  float GetCost(SokobanNode& successor) const;
+  bool IsSameState(SokobanNode& rhs) const;
   [[nodiscard]] size_t Hash() const;
 
   void PrintNodeInfo(std::vector<std::pair<int, int>>* goals = nullptr);

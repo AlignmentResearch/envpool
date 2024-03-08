@@ -19,12 +19,13 @@
 
 namespace sokoban {
 
-void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
+void RunAStar(std::string file_idx, int fsa_limit = 1000000,
+              std::string dataset = "train") {
   std::cout << "Running A* on file " << file_idx << " with fsa_limit "
             << fsa_limit << std::endl;
   std::stringstream s1, s2;
-  s1 << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/train/"
-     << file_idx << ".txt";
+  s1 << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/ " << dataset
+     << "/" << file_idx << ".txt";
   std::string level_file = s1.str();
   const int dim_room = 10;
   const int total_levels = 1000;
@@ -124,12 +125,16 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
 int main(int argc, char** argv) {
   std::string file_idx = "000";
   int fsa_limit = 1000000;
+  std::string dataset = "train";
   if (argc > 1) {
     file_idx = argv[1];
   }
   if (argc > 2) {
     fsa_limit = std::stoi(argv[2]);
   }
-  sokoban::RunAStar(file_idx, fsa_limit);
+  if (argc > 3) {
+    dataset = argv[3];
+  }
+  sokoban::RunAStar(file_idx, fsa_limit, dataset);
   return 0;
 }

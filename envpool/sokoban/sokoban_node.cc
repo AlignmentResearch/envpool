@@ -19,21 +19,11 @@
 
 namespace sokoban {
 
-const std::vector<std::pair<int, int>> SokobanNode::kDelta = {
-    {0, -1}, {0, 1}, {-1, 0}, {1, 0}  // Up, Down, Left, Right
-};
-
-bool SokobanNode::IsSameState(SokobanNode& rhs) {
+bool SokobanNode::IsSameState(SokobanNode& rhs) const {
   if (player_x != rhs.player_x || player_y != rhs.player_y) {
     return false;
   }
-  for (size_t i = 0; i < boxes.size(); i++) {
-    if (boxes.at(i).first != rhs.boxes.at(i).first ||
-        boxes.at(i).second != rhs.boxes.at(i).second) {
-      return false;
-    }
-  }
-  return true;
+  return boxes == rhs.boxes;
 }
 
 void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
@@ -83,8 +73,8 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
 }
 
 SokobanNode* SokobanNode::GetChildNode(int action_idx) {
-  int delta_x = kDelta.at(action_idx).first;
-  int delta_y = kDelta.at(action_idx).second;
+  int delta_x = kDelta.at(action_idx).at(0);
+  int delta_y = kDelta.at(action_idx).at(1);
   int new_player_x = player_x + delta_x;
   int new_player_y = player_y + delta_y;
   // check if the move is valid
@@ -104,8 +94,8 @@ SokobanNode* SokobanNode::GetChildNode(int action_idx) {
         return nullptr;
       }
       // check if the box is blocked by another box
-      for (size_t j = 0; j < boxes.size(); j++) {
-        if (boxes.at(j).first == new_box_x && boxes.at(j).second == new_box_y) {
+      for (const auto& orig_box : boxes) {
+        if (orig_box.first == new_box_x && orig_box.second == new_box_y) {
           return nullptr;
         }
       }
@@ -129,7 +119,7 @@ SokobanNode* SokobanNode::GetChildNode(int action_idx) {
                          this, action_idx);
 }
 
-bool SokobanNode::CheckWall(int x, int y) {
+bool SokobanNode::CheckWall(int x, int y) const {
   if (x < 0 || x >= dim_room || y < 0 || y >= dim_room) {
     return true;
   }
@@ -140,19 +130,18 @@ size_t SokobanNode::Hash() const {
   size_t hash = 0;
   hash = (hash * 397) ^ std::hash<int>{}(player_x);
   hash = (hash * 397) ^ std::hash<int>{}(player_y);
-  for (size_t i = 0; i < boxes.size(); i++) {
-    hash = (hash * 397) ^ std::hash<int>{}(boxes.at(i).first);
-    hash = (hash * 397) ^ std::hash<int>{}(boxes.at(i).second);
+  for (const auto& box : boxes) {
+    hash = (hash * 397) ^ std::hash<int>{}(box.first);
+    hash = (hash * 397) ^ std::hash<int>{}(box.second);
   }
   return hash;
 }
 
 bool SokobanNode::IsGoal(SokobanNode& goal_node) {
-  for (size_t i = 0; i < boxes.size(); i++) {
+  for (const auto& box : boxes) {
     bool matched = false;
-    for (size_t j = 0; j < goal_node.boxes.size(); j++) {
-      if (boxes.at(i).first == goal_node.boxes.at(j).first &&
-          boxes.at(i).second == goal_node.boxes.at(j).second) {
+    for (const auto& goal_box : goal_node.boxes) {
+      if (box == goal_box) {
         matched = true;
         break;
       }
@@ -164,11 +153,11 @@ bool SokobanNode::IsGoal(SokobanNode& goal_node) {
 
 float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
   float h = 0;
-  for (size_t i = 0; i < boxes.size(); i++) {
+  for (const auto& box : boxes) {
     float min_distance = std::numeric_limits<float>::max();
-    for (size_t j = 0; j < goal_node.boxes.size(); j++) {
-      float distance = abs(boxes.at(i).first - goal_node.boxes.at(j).first) +
-                       abs(boxes.at(i).second - goal_node.boxes.at(j).second);
+    for (const auto& goal_box : goal_node.boxes) {
+      float distance =
+          abs(box.first - goal_box.first) + abs(box.second - goal_box.second);
       min_distance = std::min(min_distance, distance);
     }
     h += min_distance;
@@ -176,7 +165,7 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
   return h;
 }
 
-float SokobanNode::GetCost(SokobanNode& successor) { return 1; }
+float SokobanNode::GetCost(SokobanNode& successor) const { return 1; }
 
 bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                                 SokobanNode* parent_node) {
