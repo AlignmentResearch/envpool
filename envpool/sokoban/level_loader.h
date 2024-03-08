@@ -1,5 +1,21 @@
-#ifndef LEVEL_LOADER_H_
-#define LEVEL_LOADER_H_
+/*
+ * Copyright 2023-2024 FAR AI
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef ENVPOOL_SOKOBAN_LEVEL_LOADER_H_
+#define ENVPOOL_SOKOBAN_LEVEL_LOADER_H_
 
 #include <filesystem>
 #include <random>
@@ -9,30 +25,36 @@ namespace sokoban {
 
 using SokobanLevel = std::vector<uint8_t>;
 
-constexpr uint8_t WALL = 0;
-constexpr uint8_t EMPTY = 1;
-constexpr uint8_t TARGET = 2;
-constexpr uint8_t BOX_ON_TARGET = 3;
-constexpr uint8_t BOX = 4;
-constexpr uint8_t PLAYER = 5;
-constexpr uint8_t PLAYER_ON_TARGET = 6;
+constexpr uint8_t kWall = 0;
+constexpr uint8_t kEmpty = 1;
+constexpr uint8_t kTarget = 2;
+constexpr uint8_t kBoxOnTarget = 3;
+constexpr uint8_t kBox = 4;
+constexpr uint8_t kPlayer = 5;
+constexpr uint8_t kPlayerOnTarget = 6;
+constexpr uint8_t kMaxLevelObject = kPlayerOnTarget;
 
 class LevelLoader {
  protected:
-  std::vector<SokobanLevel> levels;
-  std::vector<SokobanLevel>::iterator cur_level;
-  std::vector<std::filesystem::path> level_file_paths;
-  void LoadNewFile(std::mt19937& gen);
+  bool load_sequentially_;
+  int n_levels_to_load_;
+  int levels_loaded_;
+  std::vector<SokobanLevel> levels_;
+  std::vector<SokobanLevel>::iterator cur_level_;
+  std::vector<std::filesystem::path> level_file_paths_;
+  std::vector<std::filesystem::path>::iterator cur_file_;
+  void LoadFile(std::mt19937& gen);
 
  public:
   int verbose;
 
-  const std::vector<SokobanLevel>::iterator RandomLevel(std::mt19937& gen);
-  LevelLoader(const std::filesystem::path& base_path, int verbose=0);
+  std::vector<SokobanLevel>::iterator GetLevel(std::mt19937& gen);
+  explicit LevelLoader(const std::filesystem::path& base_path,
+                       bool load_sequentially, int n_levels_to_load,
+                       int verbose = 0);
 };
 
-
-void PrintLevel(std::ostream& os, SokobanLevel vec);
+void PrintLevel(std::ostream& os, const SokobanLevel& vec);
 }  // namespace sokoban
 
-#endif  // LEVEL_LOADER_H_
+#endif  // ENVPOOL_SOKOBAN_LEVEL_LOADER_H_
