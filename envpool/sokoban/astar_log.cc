@@ -42,15 +42,13 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
   // check if the file is empty
   if (log_file_in.peek() == std::ifstream::traits_type::eof()) {
     log_file_out << "Level, Actions, Steps, SearchSteps" << std::endl;
-  } else {
-    // skip levels that have already been run
+  } else {  // skip levels that have already been run
     std::string line;
+    std::getline(log_file_in, line);  // skip header
     while (std::getline(log_file_in, line)) {
-      // need to throw out the levels since they are loaded sequentially
       SokobanLevel level = *level_loader.GetLevel(gen);
       level_idx++;
     }
-    level_idx--;
   }
   log_file_in.close();
 
