@@ -43,8 +43,11 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
   if (log_file_in.peek() == std::ifstream::traits_type::eof()) {
     log_file_out << "Level, Actions, Steps, SearchSteps" << std::endl;
   } else {
+    // skip levels that have already been run
     std::string line;
     while (std::getline(log_file_in, line)) {
+      // need to throw out the levels since they are loaded sequentially
+      SokobanLevel level = *level_loader.GetLevel(gen);
       level_idx++;
     }
     level_idx--;
