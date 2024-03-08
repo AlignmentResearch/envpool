@@ -37,7 +37,7 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
      << "log_" << file_idx << ".csv";
   std::string log_file_name = s2.str();
 
-  std::ofstream log_file_out(log_file_name);
+  std::ofstream log_file_out(log_file_name, std::ios_base::app);
   std::ifstream log_file_in(log_file_name);
   // check if the file is empty
   if (log_file_in.peek() == std::ifstream::traits_type::eof()) {

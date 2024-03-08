@@ -93,7 +93,8 @@ class SokobanNode {
         action_from_parent(action_from_parent) {}
 
   void UpdateGoalNode(SokobanNode goal_node) {
-    assert(goal_node.is_goal_node && is_goal_node);
+    assert(is_goal_node);
+    goal_node.is_goal_node = true;
     player_x = goal_node.player_x;
     player_y = goal_node.player_y;
     parent_node = goal_node.parent_node;
