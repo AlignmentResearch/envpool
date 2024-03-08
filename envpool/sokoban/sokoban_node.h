@@ -103,7 +103,7 @@ class SokobanNode {
     action_from_parent = goal_node.action_from_parent;
   }
 
-  bool CheckWall(int x, int y) const;
+  [[nodiscard]] bool CheckWall(int x, int y) const;
 
   SokobanNode* GetChildNode(int action_idx);
 

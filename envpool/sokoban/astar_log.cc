@@ -19,24 +19,24 @@
 
 namespace sokoban {
 
-void RunAStar(std::string file_idx, int fsa_limit = 1000000,
-              std::string dataset = "train") {
+void RunAStar(const std::string& file_idx, int fsa_limit = 1000000,
+              const std::string& dataset = "train") {
   std::cout << "Running A* on file " << file_idx << " with fsa_limit "
             << fsa_limit << std::endl;
-  std::stringstream s1, s2;
-  s1 << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/ " << dataset
-     << "/" << file_idx << ".txt";
-  std::string level_file = s1.str();
+  std::stringstream filestream;
+  filestream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/ "
+             << dataset << "/" << file_idx << ".txt";
+  std::string level_file = filestream.str();
   const int dim_room = 10;
   const int total_levels = 1000;
   int level_idx = 0;
   LevelLoader level_loader(level_file, true, -1);
   std::mt19937 gen(42);
-
-  std::AStarSearch<SokobanNode> astarsearch(fsa_limit);
-  s2 << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/train/logs/"
-     << "log_" << file_idx << ".csv";
-  std::string log_file_name = s2.str();
+  std::stringstream logstream;
+  logstream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/"
+            << dataset << "/logs/"
+            << "log_" << file_idx << ".csv";
+  std::string log_file_name = logstream.str();
 
   std::ofstream log_file_out(log_file_name, std::ios_base::app);
   std::ifstream log_file_in(log_file_name);
@@ -54,9 +54,9 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000,
   log_file_in.close();
 
   while (level_idx < total_levels) {
+    std::AStarSearch<SokobanNode> astarsearch(fsa_limit);
     std::cout << "Running level " << level_idx << std::endl;
     SokobanLevel level = *level_loader.GetLevel(gen);
-    std::cout << "Got level" << std::endl;
 
     SokobanNode node_start(dim_room, level, false);
     SokobanNode node_end(dim_room, level, true);
@@ -73,10 +73,10 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000,
     if (search_state == std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED) {
       std::stringstream loglinestream;
       loglinestream << level_idx << ", ";
-      SokobanNode* node = astarsearch.GetSolutionStart();
+      astarsearch.GetSolutionStart();
       int steps = 0;
       for (;;) {
-        node = astarsearch.GetSolutionNext();
+        SokobanNode* node = astarsearch.GetSolutionNext();
         if (node == nullptr) {
           break;
         }
