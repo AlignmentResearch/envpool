@@ -34,15 +34,15 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
       bool is_player = (x == player_x && y == player_y);
       bool is_box = false;
       bool is_goal = false;
-      for (size_t i = 0; i < boxes.size(); i++) {
-        if (boxes.at(i).first == x && boxes.at(i).second == y) {
+      for (const auto& box : boxes) {
+        if (box.first == x && box.second == y) {
           is_box = true;
           break;
         }
       }
-      if (goals) {
-        for (size_t i = 0; i < goals->size(); i++) {
-          if (goals->at(i).first == x && goals->at(i).second == y) {
+      if (goals != nullptr) {
+        for (const auto& goal : *goals) {
+          if (goal.first == x && goal.second == y) {
             is_goal = true;
             break;
           }
@@ -72,7 +72,7 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
   }
 }
 
-SokobanNode* SokobanNode::GetChildNode(int action_idx) {
+std::unique_ptr<SokobanNode> SokobanNode::GetChildNode(int action_idx) {
   int delta_x = kDelta.at(action_idx).at(0);
   int delta_y = kDelta.at(action_idx).at(1);
   int new_player_x = player_x + delta_x;
@@ -115,8 +115,8 @@ SokobanNode* SokobanNode::GetChildNode(int action_idx) {
       break;
     }
   }
-  return new SokobanNode(dim_room, new_player_x, new_player_y, new_boxes, walls,
-                         this, action_idx);
+  return std::make_unique<SokobanNode>(dim_room, new_player_x, new_player_y,
+                                       new_boxes, walls, this, action_idx);
 }
 
 bool SokobanNode::CheckWall(int x, int y) const {
@@ -146,7 +146,9 @@ bool SokobanNode::IsGoal(SokobanNode& goal_node) {
         break;
       }
     }
-    if (!matched) return false;
+    if (!matched) {
+      return false;
+    }
   }
   return true;
 }
@@ -165,12 +167,12 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
   return h;
 }
 
-float SokobanNode::GetCost(SokobanNode& successor) const { return 1; }
+float SokobanNode::GetCost(SokobanNode& successor) { return 1; }
 
 bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                                 SokobanNode* parent_node) {
   for (size_t i = 0; i < kDelta.size(); i++) {
-    SokobanNode* new_node_ptr = GetChildNode(i);
+    std::unique_ptr<SokobanNode> new_node_ptr = GetChildNode(i);
     if (new_node_ptr == nullptr) {
       continue;
     }

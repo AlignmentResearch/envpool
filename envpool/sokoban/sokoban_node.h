@@ -105,13 +105,13 @@ class SokobanNode {
 
   [[nodiscard]] bool CheckWall(int x, int y) const;
 
-  SokobanNode* GetChildNode(int action_idx);
+  std::unique_ptr<SokobanNode> GetChildNode(int action_idx);
 
   float GoalDistanceEstimate(SokobanNode& goal_node);
   bool IsGoal(SokobanNode& goal_node);
   bool GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                      SokobanNode* parent_node);
-  float GetCost(SokobanNode& successor) const;
+  static float GetCost(SokobanNode& successor);
   bool IsSameState(SokobanNode& rhs) const;
   [[nodiscard]] size_t Hash() const;
 
