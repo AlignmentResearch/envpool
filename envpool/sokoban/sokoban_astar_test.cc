@@ -29,34 +29,34 @@ TEST(SokobanAStarTest, Basic) {
   std::vector<int> verify_steps = {38, 19};
   std::vector<int> verify_search_steps = {67921, 26322};
 
-  unsigned int SearchCount = 0;
-  const unsigned int NumSearches = 2;
+  unsigned int search_count = 0;
+  const unsigned int num_searches = 2;
   const std::string level_file = "/envpool/envpool/sokoban/sample_levels/";
   const int dim_room = 10;
-  LevelLoader level_loader(level_file);
+  LevelLoader level_loader(level_file, false, 2);
   std::mt19937 gen(42);
 
-  while (SearchCount < NumSearches) {
+  while (search_count < num_searches) {
     // Create a start state
-    SokobanLevel level = *level_loader.RandomLevel(gen);
+    SokobanLevel level = *level_loader.GetLevel(gen);
 
-    SokobanNode nodeStart(dim_room, level, false);
-    SokobanNode nodeEnd(dim_room, level, true);
-    std::vector<std::pair<int, int>>* goals = &nodeEnd.boxes;
-    nodeStart.PrintNodeInfo(goals);
-    astarsearch.SetStartAndGoalStates(nodeStart, nodeEnd);
+    SokobanNode node_start(dim_room, level, false);
+    SokobanNode node_end(dim_room, level, true);
+    std::vector<std::pair<int, int>>* goals = &node_end.boxes;
+    node_start.PrintNodeInfo(goals);
+    astarsearch.SetStartAndGoalStates(node_start, node_end);
 
-    unsigned int SearchState;
-    unsigned int SearchSteps = 0;
+    unsigned int search_state;
+    unsigned int search_steps = 0;
 
     do {
-      SearchState = astarsearch.SearchStep();
+      search_state = astarsearch.SearchStep();
 
-      SearchSteps++;
+      search_steps++;
 
 #if DEBUG_LISTS
 
-      std::cout << "Steps:" << SearchSteps << "\n";
+      std::cout << "Steps:" << search_steps << "\n";
 
       int len = 0;
 
@@ -86,10 +86,10 @@ TEST(SokobanAStarTest, Basic) {
 
       std::cout << "Closed list has " << len << " nodes\n";
 #endif
-    } while (SearchState ==
+    } while (search_state ==
              std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING);
 
-    if (SearchState == std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED) {
+    if (search_state == std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED) {
       std::cout << "Search found goal state\n";
 
       SokobanNode* node = astarsearch.GetSolutionStart();
@@ -100,7 +100,7 @@ TEST(SokobanAStarTest, Basic) {
       for (;;) {
         node = astarsearch.GetSolutionNext();
 
-        if (!node) {
+        if (node == nullptr) {
           break;
         }
         std::cout << "Step " << steps << std::endl;
@@ -108,35 +108,35 @@ TEST(SokobanAStarTest, Basic) {
         steps++;
       }
       std::cout << "Solution steps " << steps << std::endl;
-      EXPECT_EQ(steps, verify_steps.at(SearchCount));
+      EXPECT_EQ(steps, verify_steps.at(search_count));
 
       // Once you're done with the solution you can free the nodes up
       astarsearch.FreeSolutionNodes();
 
-    } else if (SearchState ==
+    } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_FAILED) {
       std::cout << "Search terminated. Did not find goal state\n";
-    } else if (SearchState ==
+    } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_NOT_INITIALISED) {
       std::cout << "SEARCH_STATE_NOT_INITIALISED\n";
-    } else if (SearchState ==
+    } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING) {
       std::cout << "SEARCH_STATE_SEARCHING\n";
-    } else if (SearchState ==
+    } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
       std::cout << "SEARCH_STATE_OUT_OF_MEMORY\n";
-    } else if (SearchState ==
+    } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
       std::cout << "SEARCH_STATE_INVALID\n";
     }
 
     // Display the number of loops the search went through
-    std::cout << "SearchSteps : " << SearchSteps << "\n";
-    EXPECT_EQ(SearchState,
+    std::cout << "search_steps : " << search_steps << "\n";
+    EXPECT_EQ(search_state,
               std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED);
-    EXPECT_EQ(SearchSteps, verify_search_steps.at(SearchCount));
+    EXPECT_EQ(search_steps, verify_search_steps.at(search_count));
 
-    SearchCount++;
+    search_count++;
 
     astarsearch.EnsureMemoryFreed();
   }

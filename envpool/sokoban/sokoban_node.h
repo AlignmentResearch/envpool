@@ -26,7 +26,7 @@ namespace sokoban {
 
 class SokobanNode {
  public:
-  static const std::vector<std::pair<int, int>> delta;
+  static const std::vector<std::pair<int, int>> kDelta;
   int dim_room{0};
   int player_x{0}, player_y{0};
   std::vector<std::pair<int, int>> boxes;
@@ -34,7 +34,7 @@ class SokobanNode {
   std::shared_ptr<std::vector<bool>> walls;
   SokobanNode* parent_node{nullptr};
 
-  SokobanNode() {}
+  SokobanNode() = default;
 
   SokobanNode(int dim_room, const SokobanLevel& world, bool is_goal_node)
       : dim_room(dim_room),
@@ -49,18 +49,18 @@ class SokobanNode {
           case kBox:
             if (!is_goal_node) {
               total_boxes++;
-              boxes.push_back(std::make_pair(x, y));
+              boxes.emplace_back(std::make_pair(x, y));
             }
             break;
           case kTarget:
             if (is_goal_node) {
               total_boxes++;
-              boxes.push_back(std::make_pair(x, y));
+              boxes.emplace_back(std::make_pair(x, y));
             }
             break;
           case kBoxOnTarget:
             total_boxes++;
-            boxes.push_back(std::make_pair(x, y));
+            boxes.emplace_back(std::make_pair(x, y));
             break;
           case kPlayerOnTarget:
             player_x = x;
@@ -88,11 +88,9 @@ class SokobanNode {
         walls(walls),
         parent_node(parent_node) {}
 
-  bool check_wall(int x, int y);
+  bool CheckWall(int x, int y);
 
-  SokobanNode get_goal_node();
-
-  SokobanNode* get_child_node(int delta_x, int delta_y);
+  SokobanNode* GetChildNode(int delta_x, int delta_y);
 
   float GoalDistanceEstimate(SokobanNode& goal_node);
   bool IsGoal(SokobanNode& goal_node);
@@ -100,7 +98,7 @@ class SokobanNode {
                      SokobanNode* parent_node);
   float GetCost(SokobanNode& successor);
   bool IsSameState(SokobanNode& rhs);
-  size_t Hash() const;
+  [[nodiscard]] size_t Hash() const;
 
   void PrintNodeInfo(std::vector<std::pair<int, int>>* goals = nullptr);
 };

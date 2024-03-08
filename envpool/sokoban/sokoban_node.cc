@@ -19,7 +19,7 @@
 
 namespace sokoban {
 
-const std::vector<std::pair<int, int>> SokobanNode::delta = {
+const std::vector<std::pair<int, int>> SokobanNode::kDelta = {
     {0, 1}, {1, 0}, {0, -1}, {-1, 0}  // Up, Right, Down, Left
 };
 
@@ -81,11 +81,11 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
   }
 }
 
-SokobanNode* SokobanNode::get_child_node(int delta_x, int delta_y) {
+SokobanNode* SokobanNode::GetChildNode(int delta_x, int delta_y) {
   int new_player_x = player_x + delta_x;
   int new_player_y = player_y + delta_y;
   // check if the move is valid
-  if (check_wall(new_player_x, new_player_y)) {
+  if (CheckWall(new_player_x, new_player_y)) {
     return nullptr;
   }
   // check if (new_player_x, new_player_y) is a box, if it is not, return a
@@ -97,7 +97,7 @@ SokobanNode* SokobanNode::get_child_node(int delta_x, int delta_y) {
       int new_box_x = boxes.at(i).first + delta_x;
       int new_box_y = boxes.at(i).second + delta_y;
       // check if the box can move
-      if (check_wall(new_box_x, new_box_y)) {
+      if (CheckWall(new_box_x, new_box_y)) {
         return nullptr;
       }
       // check if the box is blocked by another box
@@ -126,7 +126,7 @@ SokobanNode* SokobanNode::get_child_node(int delta_x, int delta_y) {
                          this);
 }
 
-bool SokobanNode::check_wall(int x, int y) {
+bool SokobanNode::CheckWall(int x, int y) {
   if (x < 0 || x >= dim_room || y < 0 || y >= dim_room) {
     return true;
   }
@@ -177,9 +177,9 @@ float SokobanNode::GetCost(SokobanNode& successor) { return 1; }
 
 bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
                                 SokobanNode* parent_node) {
-  for (size_t i = 0; i < delta.size(); i++) {
+  for (size_t i = 0; i < kDelta.size(); i++) {
     SokobanNode* new_node_ptr =
-        get_child_node(delta.at(i).first, delta.at(i).second);
+        GetChildNode(kDelta.at(i).first, kDelta.at(i).second);
     if (new_node_ptr == nullptr) {
       continue;
     }

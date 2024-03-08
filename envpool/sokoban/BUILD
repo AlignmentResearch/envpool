@@ -48,7 +48,13 @@ cc_library(
 
 cc_library(
   name="sokoban_node_h",
-  hdrs=["sokoban_node.h", "level_loader.h", "fsa.h", "astar.h"],
+  hdrs=[
+    "sokoban_node.h",
+    "level_loader.h",
+    "fsa.h",
+    "astar.h",
+    "utils.h",
+  ],
   deps=[],
 )
 
