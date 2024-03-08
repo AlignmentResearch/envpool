@@ -46,7 +46,9 @@ class SokobanEnvFns {
     return MakeDict("reward_finished"_.Bind(10.0), "reward_box"_.Bind(1.0),
                     "reward_step"_.Bind(-0.1), "dim_room"_.Bind(10),
                     "levels_dir"_.Bind(std::string("")), "verbose"_.Bind(0),
-                    "min_episode_steps"_.Bind(0));
+                    "min_episode_steps"_.Bind(0),
+                    "load_sequentially"_.Bind(false),
+                    "n_levels_to_load"_.Bind(-1));
   }
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
@@ -71,7 +73,9 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         reward_box_{static_cast<double>(spec.config["reward_box"_])},
         reward_step_{static_cast<double>(spec.config["reward_step"_])},
         levels_dir_{static_cast<std::string>(spec.config["levels_dir"_])},
-        level_loader_(levels_dir_),
+        level_loader_(levels_dir_, spec.config["load_sequentially"_],
+                      static_cast<int>(spec.config["n_levels_to_load"_]),
+                      static_cast<int>(spec.config["verbose"_])),
         world_(kWall, static_cast<std::size_t>(dim_room_ * dim_room_)),
         verbose_(static_cast<int>(spec.config["verbose"_])),
         current_max_episode_steps_(

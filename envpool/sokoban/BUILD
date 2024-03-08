@@ -15,30 +15,31 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility=["//visibility:public"])
 
 py_library(
-    name = "sokoban",
-    srcs = ["__init__.py"],
-    data = [":sokoban_envpool.so"],
-    deps = ["//envpool/python:api"],
+    name="sokoban",
+    srcs=["__init__.py"],
+    data=[":sokoban_envpool.so"],
+    deps=["//envpool/python:api"],
 )
 
 py_library(
-    name = "registration",
-    srcs = ["registration.py"],
-    deps = [
+    name="registration",
+    srcs=["registration.py"],
+    deps=[
         "//envpool:registration",
     ],
 )
 
 cc_library(
-    name = "sokoban_envpool_h",
-    hdrs = [
+    name="sokoban_envpool_h",
+    hdrs=[
         "level_loader.h",
         "sokoban_envpool.h",
+        "utils.h",
     ],
-    deps = [
+    deps=[
         "//envpool/core:async_envpool",
         "//envpool/core:env",
         "//envpool/core:env_spec",
@@ -56,28 +57,28 @@ cc_library(
 # )
 
 py_test(
-    name = "test",
-    srcs = ["sokoban_py_envpool_test.py"],
-    main = "sokoban_py_envpool_test.py",
-    deps = [
+    name="test",
+    srcs=["sokoban_py_envpool_test.py"],
+    main="sokoban_py_envpool_test.py",
+    deps=[
         ":registration",
         ":sokoban",
         "//envpool",
         requirement("numpy"),
-        requirement("absl-py"),
+        requirement("pytest"),
     ],
 )
 
 pybind_extension(
-    name = "sokoban_envpool",
-    srcs = [
+    name="sokoban_envpool",
+    srcs=[
         "level_loader.cc",
         "sokoban_envpool.cc",
     ],
-    linkopts = [
+    linkopts=[
         "-ldl",
     ],
-    deps = [
+    deps=[
         ":sokoban_envpool_h",
         "//envpool/core:py_envpool",
     ],

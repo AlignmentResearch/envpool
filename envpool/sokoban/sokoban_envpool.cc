@@ -20,17 +20,17 @@
 #include <vector>
 
 #include "envpool/core/py_envpool.h"
+#include "envpool/sokoban/utils.h"
 
 namespace sokoban {
 
 void SokobanEnv::Reset() {
   const int max_episode_steps = spec_.config["max_episode_steps"_];
   const int min_episode_steps = spec_.config["min_episode_steps"_];
-  std::uniform_int_distribution<int> episode_length_rand(min_episode_steps,
-                                                         max_episode_steps);
-  current_max_episode_steps_ = episode_length_rand(gen_);
+  current_max_episode_steps_ =
+      SafeUniformInt(min_episode_steps, max_episode_steps, gen_);
 
-  world_ = *(level_loader_.RandomLevel(gen_));
+  world_ = *(level_loader_.GetLevel(gen_));
   if (world_.size() != dim_room_ * dim_room_) {
     std::stringstream msg;
     msg << "Loaded level is not dim_room x dim_room. world_.size()="

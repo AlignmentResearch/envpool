@@ -13,18 +13,19 @@
 # limitations under the License.
 """Unit test for dummy envpool and speed benchmark."""
 
+import glob
+import re
 import time
 
 import numpy as np
-from absl import logging
-from absl.testing import absltest
+import pytest
 
 import envpool  # noqa: F401
 import envpool.sokoban.registration
 from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
 
 
-class _SokobanEnvPoolTest(absltest.TestCase):
+class TestSokobanEnvPool:
 
   def test_config(self) -> None:
     ref_config_keys = [
@@ -47,13 +48,15 @@ class _SokobanEnvPoolTest(absltest.TestCase):
       "reward_finished",
       "reward_step",
       "verbose",
+      "load_sequentially",
+      "n_levels_to_load",
     ]
     default_conf = _SokobanEnvSpec._default_config_values
-    self.assertTrue(isinstance(default_conf, tuple))
+    assert isinstance(default_conf, tuple)
     config_keys = _SokobanEnvSpec._config_keys
-    self.assertTrue(isinstance(config_keys, list))
-    self.assertEqual(len(default_conf), len(config_keys))
-    self.assertEqual(sorted(config_keys), sorted(ref_config_keys))
+    assert isinstance(config_keys, list)
+    assert len(default_conf) == len(config_keys)
+    assert sorted(config_keys) == sorted(ref_config_keys)
 
   def test_envpool(self) -> None:
     batch = num_envs = 200
@@ -76,7 +79,7 @@ class _SokobanEnvPoolTest(absltest.TestCase):
       _ = env.step(np.random.randint(low=0, high=9, size=(num_envs,)))
     duration = time.time() - t
     fps = total_steps * batch / duration
-    logging.info(f"FPS = {fps:.6f}")
+    print(f"FPS = {fps:.6f}")
 
   def test_envpool_max_episode_steps(self) -> None:
     for max_episode_steps in [2, 5, 10]:
@@ -98,6 +101,58 @@ class _SokobanEnvPoolTest(absltest.TestCase):
       assert not np.any(terminated)
       assert np.all(truncated)
 
+    def test_envpool_load_sequentially(self, capfd) -> None:
+      levels_dir = "/app/envpool/sokoban/sample_levels"
+      files = glob.glob(f"{levels_dir}/*.txt")
+      levels_by_files = []
+      for file in files:
+        with open(file, "r") as f:
+          text = f.read()
+        levels = text.split("\n;")
+        levels = ["\n".join(level.split("\n")[1:]).strip() for level in levels]
+        levels_by_files.append((file, levels))
+      assert len(levels_by_files) > 1
+      assert all(len(levels) > 1 for levels in levels_by_files)
+      total_levels = sum(len(levels) for levels in levels_by_files)
+      for n_levels_to_load in range(1, total_levels + 1):
+        env = envpool.make(
+          "Sokoban-v0",
+          env_type="gymnasium",
+          num_envs=1,
+          batch_size=1,
+          max_episode_steps=60,
+          min_episode_steps=60,
+          levels_dir=levels_dir,
+          load_sequentially=True,
+          n_levels_to_load=n_levels_to_load,
+          verbose=2,
+        )
+        dim_room = env.spec.config.dim_room
+        obs, _ = env.reset()
+        assert obs.shape == (
+          1,
+          3,
+          dim_room,
+          dim_room,
+        ), f"obs shape: {obs.shape}"
+        if n_levels_to_load == -1:
+          n_levels_to_load = total_levels
+        for _ in range(n_levels_to_load - 1):
+          env.reset()
+        out, _ = capfd.readouterr()
+        files_output = out.split("***")[1:]
+        for i, file_output in enumerate(files_output):
+          first_line, out = file_output.strip().split("\n", 1)
+          result = re.search(
+            r'Loaded (\d+) levels from "(.*\.txt)"', first_line
+          )
+          n_levels, file_name = int(result.group(1)), result.group(2)
+          lev1, lev2 = out.strip().split("\n\n")
+          assert file_name == levels_by_files[i][0]
+          assert n_levels == len(levels_by_files[i][1])
+          assert lev1 == levels_by_files[i][1][0]
+          assert lev2 == levels_by_files[i][1][1]
+
   def test_xla(self) -> None:
     num_envs = 10
     env = envpool.make(
@@ -115,4 +170,4 @@ class _SokobanEnvPoolTest(absltest.TestCase):
 
 
 if __name__ == "__main__":
-  absltest.main()
+  pytest.main(["-v", __file__])

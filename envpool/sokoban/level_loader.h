@@ -36,16 +36,22 @@ constexpr uint8_t kMaxLevelObject = kPlayerOnTarget;
 
 class LevelLoader {
  protected:
+  bool load_sequentially_;
+  int n_levels_to_load_;
+  int levels_loaded_;
   std::vector<SokobanLevel> levels_;
   std::vector<SokobanLevel>::iterator cur_level_;
   std::vector<std::filesystem::path> level_file_paths_;
-  void LoadNewFile(std::mt19937& gen);
+  std::vector<std::filesystem::path>::iterator cur_file_;
+  void LoadFile(std::mt19937& gen);
 
  public:
   int verbose;
 
-  std::vector<SokobanLevel>::iterator RandomLevel(std::mt19937& gen);
-  explicit LevelLoader(const std::filesystem::path& base_path, int verbose = 0);
+  std::vector<SokobanLevel>::iterator GetLevel(std::mt19937& gen);
+  explicit LevelLoader(const std::filesystem::path& base_path,
+                       bool load_sequentially, int n_levels_to_load,
+                       int verbose = 0);
 };
 
 void PrintLevel(std::ostream& os, const SokobanLevel& vec);
