@@ -54,7 +54,6 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
 
     SokobanNode node_start(dim_room, level, false);
     SokobanNode node_end(dim_room, level, true);
-    std::vector<std::pair<int, int>>* goals = &node_end.boxes;
     astarsearch.SetStartAndGoalStates(node_start, node_end);
     unsigned int search_state;
     unsigned int search_steps = 0;
@@ -113,6 +112,7 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
     log_file_out.flush();
   }
 }
+}  // namespace sokoban
 
 int main(int argc, char** argv) {
   std::string file_idx = "000";
@@ -125,7 +125,6 @@ int main(int argc, char** argv) {
   }
   std::cout << "Running A* on file " << file_idx << " with fsa_limit "
             << fsa_limit << std::endl;
-  RunAStar(file_idx, fsa_limit);
+  sokoban::RunAStar(file_idx, fsa_limit);
   return 0;
 }
-}  // namespace sokoban

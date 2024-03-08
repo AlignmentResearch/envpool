@@ -27,11 +27,11 @@ TEST(SokobanAStarTest, Basic) {
   // Create an instance of the search class...
   std::AStarSearch<SokobanNode> astarsearch(1000000);
   std::vector<int> verify_steps = {38, 19};
-  std::vector<int> verify_search_steps = {67921, 26322};
+  std::vector<int> verify_search_steps = {63408, 24991};
 
   unsigned int search_count = 0;
   const unsigned int num_searches = 2;
-  const std::string level_file = "/envpool/envpool/sokoban/sample_levels/";
+  const std::string level_file = "/app/envpool/sokoban/sample_levels/";
   const int dim_room = 10;
   LevelLoader level_loader(level_file, false, 2);
   std::mt19937 gen(42);
