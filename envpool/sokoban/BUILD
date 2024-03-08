@@ -15,92 +15,98 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
 
 py_library(
-  name="sokoban",
-  srcs=["__init__.py"],
-  data=[":sokoban_envpool.so"],
-  deps=["//envpool/python:api"],
+    name = "sokoban",
+    srcs = ["__init__.py"],
+    data = [":sokoban_envpool.so"],
+    deps = ["//envpool/python:api"],
 )
 
 py_library(
-  name="registration",
-  srcs=["registration.py"],
-  deps=[
-    "//envpool:registration",
-  ],
+    name = "registration",
+    srcs = ["registration.py"],
+    deps = [
+        "//envpool:registration",
+    ],
 )
 
 cc_library(
-  name="sokoban_envpool_h",
-  hdrs=[
-    "level_loader.h",
-    "sokoban_envpool.h",
-    "utils.h",
-  ],
-  deps=[
-    "//envpool/core:async_envpool",
-    "//envpool/core:env",
-    "//envpool/core:env_spec",
-  ],
+    name = "sokoban_envpool_h",
+    hdrs = [
+        "level_loader.h",
+        "sokoban_envpool.h",
+        "utils.h",
+    ],
+    deps = [
+        "//envpool/core:async_envpool",
+        "//envpool/core:env",
+        "//envpool/core:env_spec",
+    ],
 )
 
 cc_library(
-  name="sokoban_node_h",
-  hdrs=[
-    "sokoban_node.h",
-    "level_loader.h",
-    "fsa.h",
-    "astar.h",
-    "utils.h",
-  ],
-  deps=[],
+    name = "sokoban_node_h",
+    hdrs = [
+        "level_loader.h",
+        "sokoban_node.h",
+        "utils.h",
+    ],
+    deps = ["//third_party/astar_stl:astar_stl_h"],
 )
 
 cc_binary(
-  name="astar_log",
-  srcs=["astar_log.cc", "sokoban_node.cc", "level_loader.cc"],
-  deps=[
-    ":sokoban_node_h",
-  ],
+    name = "astar_log",
+    srcs = [
+        "astar_log.cc",
+        "level_loader.cc",
+        "sokoban_node.cc",
+    ],
+    deps = [
+        ":sokoban_node_h",
+    ],
 )
 
 cc_test(
-  name="sokoban_astar_test",
-  size="enormous",
-  srcs=["sokoban_astar_test.cc", "sokoban_node.cc", "level_loader.cc"],
-  deps=[
-    ":sokoban_node_h",
-    "@com_github_google_glog//:glog",
-    "@com_google_googletest//:gtest_main",
-  ],
+    name = "sokoban_astar_test",
+    size = "enormous",
+    srcs = [
+        "level_loader.cc",
+        "sokoban_astar_test.cc",
+        "sokoban_node.cc",
+    ],
+    deps = [
+        ":sokoban_node_h",
+        "@com_github_google_glog//:glog",
+        "@com_google_googletest//:gtest_main",
+    ],
 )
 
 py_test(
-  name="test",
-  srcs=["sokoban_py_envpool_test.py"],
-  main="sokoban_py_envpool_test.py",
-  deps=[
-    ":registration",
-    ":sokoban",
-    "//envpool",
-    requirement("numpy"),
-    requirement("pytest"),
-  ],
+    name = "test",
+    srcs = ["sokoban_py_envpool_test.py"],
+    main = "sokoban_py_envpool_test.py",
+    deps = [
+        ":registration",
+        ":sokoban",
+        "//envpool",
+        requirement("numpy"),
+        requirement("pytest"),
+    ],
 )
 
 pybind_extension(
-  name="sokoban_envpool",
-  srcs=[
-    "level_loader.cc",
-    "sokoban_envpool.cc",
-  ],
-  linkopts=[
-    "-ldl",
-  ],
-  deps=[
-    ":sokoban_envpool_h",
-    "//envpool/core:py_envpool",
-  ],
+    name = "sokoban_envpool",
+    srcs = [
+        "level_loader.cc",
+        "sokoban_envpool.cc",
+    ],
+    linkopts = [
+        "-ldl",
+    ],
+    deps = [
+        ":sokoban_envpool_h",
+        "//envpool/core:py_envpool",
+    ],
 )

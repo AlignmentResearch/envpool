@@ -19,8 +19,8 @@
 #include <utility>
 #include <vector>
 
-#include "astar.h"
 #include "envpool/sokoban/level_loader.h"
+#include "third_party/astar_stl/astar.h"
 
 namespace sokoban {
 
@@ -80,7 +80,7 @@ class SokobanNode {
   }
 
   SokobanNode(int dim_room, int player_x, int player_y,
-              std::vector<std::pair<int, int>> boxes,
+              const std::vector<std::pair<int, int>>& boxes,
               std::shared_ptr<std::vector<bool>> walls,
               SokobanNode* parent_node = nullptr, int action_from_parent = -1)
       : dim_room(dim_room),
@@ -88,7 +88,7 @@ class SokobanNode {
         player_y(player_y),
         boxes(boxes),
         total_boxes(boxes.size()),
-        walls(walls),
+        walls(std::move(walls)),
         parent_node(parent_node),
         action_from_parent(action_from_parent) {}
 
