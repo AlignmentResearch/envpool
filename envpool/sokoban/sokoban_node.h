@@ -34,12 +34,14 @@ class SokobanNode {
   std::shared_ptr<std::vector<bool>> walls;
   SokobanNode* parent_node{nullptr};
   int action_from_parent{-1};  // -1 is for when node is root
+  bool is_goal_node{false};
 
   SokobanNode() = default;
 
   SokobanNode(int dim_room, const SokobanLevel& world, bool is_goal_node)
       : dim_room(dim_room),
-        walls(std::make_shared<std::vector<bool>>(dim_room * dim_room, false)) {
+        walls(std::make_shared<std::vector<bool>>(dim_room * dim_room, false)),
+        is_goal_node(is_goal_node) {
     for (int y = 0; y < dim_room; y++) {
       for (int x = 0; x < dim_room; x++) {
         switch (world.at(x + y * dim_room)) {
@@ -89,6 +91,14 @@ class SokobanNode {
         walls(walls),
         parent_node(parent_node),
         action_from_parent(action_from_parent) {}
+
+  void UpdateGoalNode(SokobanNode goal_node) {
+    assert(goal_node.is_goal_node && is_goal_node);
+    player_x = goal_node.player_x;
+    player_y = goal_node.player_y;
+    parent_node = goal_node.parent_node;
+    action_from_parent = goal_node.action_from_parent;
+  }
 
   bool CheckWall(int x, int y);
 

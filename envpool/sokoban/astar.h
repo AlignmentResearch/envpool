@@ -195,6 +195,7 @@ class AStarSearch {
       // so copy the parent pointer of n
       m_Goal->parent = n->parent;
       m_Goal->g = n->g;
+      m_Goal->m_UserState.UpdateGoalNode(n->m_UserState);
 
       // A special case is that the goal was passed in as the start state
       // so handle that here

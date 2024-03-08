@@ -75,12 +75,12 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
       int steps = 0;
       for (;;) {
         node = astarsearch.GetSolutionNext();
-        int action = node->action_from_parent;
-        assert(action >= 0 && action < 4);
-        loglinestream << action;
         if (node == nullptr) {
           break;
         }
+        int action = node->action_from_parent;
+        assert(action >= 0 && action < 4);
+        loglinestream << action;
         steps++;
       }
       loglinestream << ", " << steps << ", " << search_steps << std::endl;
@@ -115,6 +115,7 @@ void RunAStar(std::string file_idx, int fsa_limit = 1000000) {
                    << "UNKNOWN, -1, " << search_steps << std::endl;
     }
     log_file_out.flush();
+    level_idx++;
   }
 }
 }  // namespace sokoban
