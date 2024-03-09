@@ -37,8 +37,12 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
       cur_level_(levels_.begin()),
       level_file_paths_(0),
       verbose(verbose) {
-  for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
-    level_file_paths_.push_back(entry.path());
+  if (std::filesystem::is_regular_file(base_path)) {
+    level_file_paths_.push_back(base_path);
+  } else {
+    for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
+      level_file_paths_.push_back(entry.path());
+    }
   }
   cur_file_ = level_file_paths_.begin();
 }
@@ -49,7 +53,7 @@ static const std::array<char, kMaxLevelObject + 1> kPrintLevelKey{
 void AddLine(SokobanLevel& level, const std::string& line) {
   auto start = line.at(0);
   auto end = line.at(line.size() - 1);
-  if ((start != '#') || (start != '#')) {
+  if ((start != '#') || (end != '#')) {
     std::stringstream msg;
     msg << "Line '" << line << "' does not start (" << start << ") and end ("
         << end << ") with '#', as it should." << std::endl;
