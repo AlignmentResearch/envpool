@@ -24,7 +24,7 @@ void RunAStar(const std::string& file_idx, int fsa_limit = 1000000,
   std::cout << "Running A* on file " << file_idx << " with fsa_limit "
             << fsa_limit << std::endl;
   std::stringstream filestream;
-  filestream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/ "
+  filestream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/"
              << dataset << "/" << file_idx << ".txt";
   std::string level_file = filestream.str();
   const int dim_room = 10;
