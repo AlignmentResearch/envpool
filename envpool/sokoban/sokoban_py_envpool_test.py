@@ -15,7 +15,9 @@
 
 import glob
 import re
+import subprocess
 import time
+import tempfile
 
 import numpy as np
 import pytest
@@ -165,6 +167,23 @@ class TestSokobanEnvPool:
       levels_dir="/app/envpool/sokoban/sample_levels",
     )
     handle, recv, send, step = env.xla()
+
+
+def test_astar_log(self) -> None:
+  level_file_name = "/app/envpool/sokoban/sample_levels/001.txt"
+  # temp log file
+  with tempfile.NamedTemporaryFile() as f:
+    log_file_name = f.name
+    subprocess.run(
+      [
+        "bazel", "run", "//envpool/sokoban:astar_log", "--", level_file_name,
+        log_file_name, 1
+      ],
+      check=True,
+    )
+    with open(log_file_name, "r") as f:
+      log = f.read()
+    assert "0, 301333002213130203303031, 24, 40611" == log.split("\n")[1]
 
 
 if __name__ == "__main__":

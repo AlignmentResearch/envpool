@@ -20,11 +20,11 @@
 namespace sokoban {
 
 void RunAStar(const std::string& level_file_name,
-              const std::string& log_file_name, int fsa_limit = 1000000) {
+              const std::string& log_file_name, int total_levels_to_run = 1000,
+              int fsa_limit = 1000000) {
   std::cout << "Running A* on file " << level_file_name << " and logging to "
             << log_file_name << " with fsa_limit " << fsa_limit << std::endl;
   const int dim_room = 10;
-  const int total_levels = 1000;
   int level_idx = 0;
   LevelLoader level_loader(level_file_name, true, -1);
   std::mt19937 gen(42);
@@ -44,7 +44,7 @@ void RunAStar(const std::string& level_file_name,
   }
   log_file_in.close();
 
-  while (level_idx < total_levels) {
+  while (level_idx < total_levels_to_run) {
     std::AStarSearch<SokobanNode> astarsearch(fsa_limit);
     std::cout << "Running level " << level_idx << std::endl;
     SokobanLevel level = *level_loader.GetLevel(gen);
@@ -114,17 +114,25 @@ void RunAStar(const std::string& level_file_name,
 }  // namespace sokoban
 
 int main(int argc, char** argv) {
+  int total_levels_to_run = 1000;
   int fsa_limit = 1000000;
   if (argc < 3) {
-    std::cout << "Usage: " << argv[0]
-              << " level_file_name log_file_name [fsa_limit]" << std::endl;
+    std::cout
+        << "Usage: " << argv[0]
+        << " level_file_name log_file_name [total_levels_to_run] [fsa_limit]"
+        << std::endl;
     return 1;
   }
   std::string level_file_name = argv[1];
   std::string log_file_name = argv[2];
   if (argc > 3) {
-    fsa_limit = std::stoi(argv[3]);
+    total_levels_to_run = std::stoi(argv[3]);
   }
-  sokoban::RunAStar(level_file_name, log_file_name, fsa_limit);
+  if (argc > 4) {
+    fsa_limit = std::stoi(argv[4]);
+  }
+
+  sokoban::RunAStar(level_file_name, log_file_name, total_levels_to_run,
+                    fsa_limit);
   return 0;
 }
