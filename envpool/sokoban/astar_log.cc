@@ -19,24 +19,15 @@
 
 namespace sokoban {
 
-void RunAStar(const std::string& file_idx, int fsa_limit = 1000000,
-              const std::string& dataset = "train") {
-  std::cout << "Running A* on file " << file_idx << " with fsa_limit "
-            << fsa_limit << std::endl;
-  std::stringstream filestream;
-  filestream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/"
-             << dataset << "/" << file_idx << ".txt";
-  std::string level_file = filestream.str();
+void RunAStar(const std::string& level_file_name,
+              const std::string& log_file_name, int fsa_limit = 1000000) {
+  std::cout << "Running A* on file " << level_file_name << " and logging to "
+            << log_file_name << " with fsa_limit " << fsa_limit << std::endl;
   const int dim_room = 10;
   const int total_levels = 1000;
   int level_idx = 0;
-  LevelLoader level_loader(level_file, true, -1);
+  LevelLoader level_loader(level_file_name, true, -1);
   std::mt19937 gen(42);
-  std::stringstream logstream;
-  logstream << "/training/.sokoban_cache/boxoban-levels-master/unfiltered/"
-            << dataset << "/logs/"
-            << "log_" << file_idx << ".csv";
-  std::string log_file_name = logstream.str();
 
   std::ofstream log_file_out(log_file_name, std::ios_base::app);
   std::ifstream log_file_in(log_file_name);
@@ -123,18 +114,17 @@ void RunAStar(const std::string& file_idx, int fsa_limit = 1000000,
 }  // namespace sokoban
 
 int main(int argc, char** argv) {
-  std::string file_idx = "000";
   int fsa_limit = 1000000;
-  std::string dataset = "train";
-  if (argc > 1) {
-    file_idx = argv[1];
+  if (argc < 3) {
+    std::cout << "Usage: " << argv[0]
+              << " level_file_name log_file_name [fsa_limit]" << std::endl;
+    return 1;
   }
-  if (argc > 2) {
-    fsa_limit = std::stoi(argv[2]);
-  }
+  std::string level_file_name = argv[1];
+  std::string log_file_name = argv[2];
   if (argc > 3) {
-    dataset = argv[3];
+    fsa_limit = std::stoi(argv[3]);
   }
-  sokoban::RunAStar(file_idx, fsa_limit, dataset);
+  sokoban::RunAStar(level_file_name, log_file_name, fsa_limit);
   return 0;
 }
