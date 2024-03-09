@@ -16,8 +16,8 @@
 import glob
 import re
 import subprocess
-import time
 import tempfile
+import time
 
 import numpy as np
 import pytest
@@ -171,7 +171,6 @@ class TestSokobanEnvPool:
 
 def test_astar_log(self) -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/001.txt"
-  # temp log file
   with tempfile.NamedTemporaryFile() as f:
     log_file_name = f.name
     subprocess.run(
