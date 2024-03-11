@@ -157,12 +157,26 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
   float h = 0;
   for (const auto& box : boxes) {
     float min_distance = std::numeric_limits<float>::max();
+    bool goal_along_x = false;
+    bool goal_along_y = false;
     for (const auto& goal_box : goal_node.boxes) {
       float distance =
           abs(box.first - goal_box.first) + abs(box.second - goal_box.second);
       min_distance = std::min(min_distance, distance);
+      if (box.first == goal_box.first) {
+        goal_along_y = true;
+      }
+      if (box.second == goal_box.second) {
+        goal_along_x = true;
+      }
     }
     h += min_distance;
+    int surr_walls = SurroundingWalls(box);
+    if (surr_walls > 1 && min_distance != 0) {
+      h += 10;
+    } else if (surr_walls == 1 && !goal_along_x && !goal_along_y) {
+      h += 10;
+    }
   }
   return h;
 }
@@ -182,6 +196,18 @@ bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
     astarsearch->AddSuccessor(*new_node_ptr);
   }
   return true;
+}
+
+int SokobanNode::SurroundingWalls(const std::pair<int, int>& box) {
+  int num_walls = 0;
+  for (size_t i = 0; i < kDelta.size(); i++) {
+    int new_x = box.first + kDelta.at(i).at(0);
+    int new_y = box.second + kDelta.at(i).at(1);
+    if (CheckWall(new_x, new_y)) {
+      num_walls++;
+    }
+  }
+  return num_walls;
 }
 
 }  // namespace sokoban

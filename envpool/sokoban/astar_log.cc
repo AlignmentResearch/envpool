@@ -38,6 +38,9 @@ void RunAStar(const std::string& level_file_name,
     std::string line;
     std::getline(log_file_in, line);  // skip header
     while (std::getline(log_file_in, line)) {
+      if (line.empty()) {
+        continue;
+      }
       SokobanLevel level = *level_loader.GetLevel(gen);
       level_idx++;
     }
