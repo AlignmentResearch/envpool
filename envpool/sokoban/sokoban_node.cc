@@ -216,10 +216,10 @@ std::pair<int, bool> SokobanNode::SurroundingWalls(
       found_wall = false;
     }
   }
-  if (found_wall) {
+  if (found_wall && !found_contiguous_wall) {
     int new_x = box.first + kDelta.at(0).at(0);
     int new_y = box.second + kDelta.at(0).at(1);
-    found_contiguous_wall = found_contiguous_wall || CheckWall(new_x, new_y);
+    found_contiguous_wall = CheckWall(new_x, new_y);
   }
   return std::make_pair(num_walls, found_contiguous_wall);
 }
