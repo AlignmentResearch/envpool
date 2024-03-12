@@ -173,7 +173,7 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
     h += min_distance;
     auto [surr_walls, contiguous_walls] = SurroundingWalls(box);
     if (contiguous_walls && min_distance != 0) {
-      h += 10;
+      h += 1000;
     } else if (surr_walls == 1 && !goal_along_x && !goal_along_y) {
       h += 2;
     }
@@ -219,7 +219,7 @@ std::pair<int, bool> SokobanNode::SurroundingWalls(
   if (found_wall) {
     int new_x = box.first + kDelta.at(0).at(0);
     int new_y = box.second + kDelta.at(0).at(1);
-    found_contiguous_wall = CheckWall(new_x, new_y);
+    found_contiguous_wall = found_contiguous_wall || CheckWall(new_x, new_y);
   }
   return std::make_pair(num_walls, found_contiguous_wall);
 }
