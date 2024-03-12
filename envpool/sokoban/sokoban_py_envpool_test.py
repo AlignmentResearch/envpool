@@ -58,6 +58,7 @@ def test_config() -> None:
   assert len(default_conf) == len(config_keys)
   assert sorted(config_keys) == sorted(ref_config_keys)
 
+
 def test_envpool() -> None:
   batch = num_envs = 200
   env = envpool.make(
@@ -81,6 +82,7 @@ def test_envpool() -> None:
   fps = total_steps * batch / duration
   print(f"FPS = {fps:.6f}")
 
+
 def test_envpool_max_episode_steps() -> None:
   for max_episode_steps in [2, 5, 10]:
     env = envpool.make(
@@ -100,6 +102,7 @@ def test_envpool_max_episode_steps() -> None:
     _, _, terminated, truncated, _ = env.step(np.zeros([1], dtype=np.int32))
     assert not np.any(terminated)
     assert np.all(truncated)
+
 
 def test_envpool_load_sequentially(capfd) -> None:
   levels_dir = "/app/envpool/sokoban/sample_levels"
@@ -151,6 +154,7 @@ def test_envpool_load_sequentially(capfd) -> None:
       assert lev1 == levels_by_files[i][1][0]
       assert lev2 == levels_by_files[i][1][1]
 
+
 def test_xla() -> None:
   num_envs = 10
   env = envpool.make(
@@ -165,6 +169,7 @@ def test_xla() -> None:
     levels_dir="/app/envpool/sokoban/sample_levels",
   )
   handle, recv, send, step = env.xla()
+
 
 def test_astar_log() -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/001.txt"
