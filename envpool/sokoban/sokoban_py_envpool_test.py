@@ -178,7 +178,7 @@ def test_astar_log() -> None:
     subprocess.run(
       [
         "bazel", "run", "//envpool/sokoban:astar_log", "--", level_file_name,
-        log_file_name, 1
+        log_file_name, "1"
       ],
       check=True,
     )
