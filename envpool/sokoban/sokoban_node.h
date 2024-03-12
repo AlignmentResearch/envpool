@@ -116,7 +116,8 @@ class SokobanNode {
   [[nodiscard]] size_t Hash() const;
 
   void PrintNodeInfo(std::vector<std::pair<int, int>>* goals = nullptr);
-  std::pair<int, bool> SurroundingWalls(const std::pair<int, int>& box) const;
+  [[nodiscard]] std::pair<int, bool> SurroundingWalls(
+      const std::pair<int, int>& box) const;
 };
 }  // namespace sokoban
 

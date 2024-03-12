@@ -172,7 +172,7 @@ def test_xla() -> None:
 
 
 def test_astar_log() -> None:
-  level_file_name = "/app/envpool/sokoban/sample_levels/001.txt"
+  level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
   with tempfile.NamedTemporaryFile() as f:
     log_file_name = f.name
     subprocess.run(
@@ -184,7 +184,7 @@ def test_astar_log() -> None:
     )
     with open(log_file_name, "r") as f:
       log = f.read()
-    assert "0, 111023301012123001101012, 24, 26001" == log.split("\n")[1]
+    assert "1, 222200001112330322210, 21, 1443" == log.split("\n")[1]
 
 
 if __name__ == "__main__":
