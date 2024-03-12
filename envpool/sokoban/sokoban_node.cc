@@ -199,7 +199,7 @@ bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
 }
 
 std::pair<int, bool> SokobanNode::SurroundingWalls(
-    const std::pair<int, int>& box) {
+    const std::pair<int, int>& box) const {
   int num_walls = 0;
   bool found_wall = false;
   bool found_contiguous_wall = false;
