@@ -168,7 +168,6 @@ class TestSokobanEnvPool:
     )
     handle, recv, send, step = env.xla()
 
-
 def test_astar_log(self) -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/001.txt"
   with tempfile.NamedTemporaryFile() as f:
@@ -182,7 +181,7 @@ def test_astar_log(self) -> None:
     )
     with open(log_file_name, "r") as f:
       log = f.read()
-    assert "0, 301333002213130203303031, 24, 40611" == log.split("\n")[1]
+    assert "0, 111023301012123001101012, 24, 26001" == log.split("\n")[1]
 
 
 if __name__ == "__main__":

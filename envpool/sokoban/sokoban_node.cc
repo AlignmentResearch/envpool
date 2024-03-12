@@ -171,11 +171,11 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
       }
     }
     h += min_distance;
-    int surr_walls = SurroundingWalls(box);
-    if (surr_walls > 1 && min_distance != 0) {
+    auto [surr_walls, contiguous_walls] = SurroundingWalls(box);
+    if (contiguous_walls && min_distance != 0) {
       h += 10;
     } else if (surr_walls == 1 && !goal_along_x && !goal_along_y) {
-      h += 10;
+      h += 2;
     }
   }
   return h;
@@ -198,16 +198,30 @@ bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
   return true;
 }
 
-int SokobanNode::SurroundingWalls(const std::pair<int, int>& box) {
+std::pair<int, bool> SokobanNode::SurroundingWalls(
+    const std::pair<int, int>& box) {
   int num_walls = 0;
-  for (size_t i = 0; i < kDelta.size(); i++) {
-    int new_x = box.first + kDelta.at(i).at(0);
-    int new_y = box.second + kDelta.at(i).at(1);
+  bool found_wall = false;
+  bool found_contiguous_wall = false;
+  for (const auto& delta : kDelta) {
+    int new_x = box.first + delta.at(0);
+    int new_y = box.second + delta.at(1);
     if (CheckWall(new_x, new_y)) {
       num_walls++;
+      if (found_wall) {
+        found_contiguous_wall = true;
+      }
+      found_wall = true;
+    } else {
+      found_wall = false;
     }
   }
-  return num_walls;
+  if (found_wall) {
+    int new_x = box.first + kDelta.at(0).at(0);
+    int new_y = box.second + kDelta.at(0).at(1);
+    found_contiguous_wall = CheckWall(new_x, new_y);
+  }
+  return std::make_pair(num_walls, found_contiguous_wall);
 }
 
 }  // namespace sokoban
