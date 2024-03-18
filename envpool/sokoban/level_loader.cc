@@ -41,7 +41,9 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
     level_file_paths_.push_back(base_path);
   } else {
     for (const auto& entry : std::filesystem::directory_iterator(base_path)) {
-      level_file_paths_.push_back(entry.path());
+      if (entry.is_regular_file()) {
+        level_file_paths_.push_back(entry.path());
+      }
     }
   }
   cur_file_ = level_file_paths_.begin();
