@@ -157,25 +157,15 @@ float SokobanNode::GoalDistanceEstimate(SokobanNode& goal_node) {
   float h = 0;
   for (const auto& box : boxes) {
     float min_distance = std::numeric_limits<float>::max();
-    bool goal_along_x = false;
-    bool goal_along_y = false;
     for (const auto& goal_box : goal_node.boxes) {
       float distance =
           abs(box.first - goal_box.first) + abs(box.second - goal_box.second);
       min_distance = std::min(min_distance, distance);
-      if (box.first == goal_box.first) {
-        goal_along_y = true;
-      }
-      if (box.second == goal_box.second) {
-        goal_along_x = true;
-      }
     }
     h += min_distance;
-    auto [surr_walls, contiguous_walls] = SurroundingWalls(box);
+    bool contiguous_walls = CornerWalls(box);
     if (contiguous_walls && min_distance != 0) {
       h += 1000;
-    } else if (surr_walls == 1 && !goal_along_x && !goal_along_y) {
-      h += 2;
     }
   }
   return h;
@@ -198,16 +188,13 @@ bool SokobanNode::GetSuccessors(std::AStarSearch<SokobanNode>* astarsearch,
   return true;
 }
 
-std::pair<int, bool> SokobanNode::SurroundingWalls(
-    const std::pair<int, int>& box) const {
-  int num_walls = 0;
+bool SokobanNode::CornerWalls(const std::pair<int, int>& box) const {
   bool found_wall = false;
   bool found_contiguous_wall = false;
   for (const auto& delta : kDelta) {
     int new_x = box.first + delta.at(0);
     int new_y = box.second + delta.at(1);
     if (CheckWall(new_x, new_y)) {
-      num_walls++;
       if (found_wall) {
         found_contiguous_wall = true;
       }
@@ -221,7 +208,7 @@ std::pair<int, bool> SokobanNode::SurroundingWalls(
     int new_y = box.second + kDelta.at(0).at(1);
     found_contiguous_wall = CheckWall(new_x, new_y);
   }
-  return std::make_pair(num_walls, found_contiguous_wall);
+  return found_contiguous_wall;
 }
 
 }  // namespace sokoban
