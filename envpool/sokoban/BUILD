@@ -68,6 +68,18 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "astar_log_level",
+    srcs = [
+        "astar_log_level.cc",
+        "level_loader.cc",
+        "sokoban_node.cc",
+    ],
+    deps = [
+        ":sokoban_node_h",
+    ],
+)
+
 cc_test(
     name = "sokoban_astar_test",
     size = "enormous",
