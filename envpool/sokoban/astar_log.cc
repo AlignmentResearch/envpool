@@ -67,8 +67,10 @@ void RunAStar(const std::string& level_file_name,
     if (search_state == std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED) {
       std::stringstream loglinestream;
       loglinestream << level_idx << ", ";
-      astarsearch.GetSolutionStart();
+      SokobanNode* node = astarsearch.GetSolutionStart();
       int steps = 0;
+      int prev_x = node->player_x;
+      int prev_y = node->player_y;
       for (;;) {
         SokobanNode* node = astarsearch.GetSolutionNext();
         if (node == nullptr) {
@@ -78,6 +80,14 @@ void RunAStar(const std::string& level_file_name,
         assert(action >= 0 && action < 4);
         loglinestream << action;
         steps++;
+        int curr_x = node->player_x;
+        int curr_y = node->player_y;
+        int delta_x = node->kDelta.at(action).at(0);
+        int delta_y = node->kDelta.at(action).at(1);
+        assert(curr_x == prev_x + delta_x);
+        assert(curr_y == prev_y + delta_y);
+        prev_x = curr_x;
+        prev_y = curr_y;
       }
       loglinestream << ", " << steps << ", " << search_steps << std::endl;
       log_file_out << loglinestream.str();

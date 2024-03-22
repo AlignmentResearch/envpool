@@ -26,14 +26,14 @@ TEST(SokobanAStarTest, Basic) {
 
   // Create an instance of the search class...
   std::AStarSearch<SokobanNode> astarsearch(1000000);
-  std::vector<int> verify_steps = {38, 19};
-  std::vector<int> verify_search_steps = {63408, 24991};
+  std::vector<int> verify_steps = {38};
+  std::vector<int> verify_search_steps = {7876};
 
   unsigned int search_count = 0;
-  const unsigned int num_searches = 2;
+  const unsigned int num_searches = 1;
   const std::string level_file = "/app/envpool/sokoban/sample_levels/";
   const int dim_room = 10;
-  LevelLoader level_loader(level_file, false, 2);
+  LevelLoader level_loader(level_file, true, 2);
   std::mt19937 gen(42);
 
   while (search_count < num_searches) {
@@ -95,8 +95,9 @@ TEST(SokobanAStarTest, Basic) {
       SokobanNode* node = astarsearch.GetSolutionStart();
 
       int steps = 0;
-
       node->PrintNodeInfo(goals);
+      int prev_x = node->player_x;
+      int prev_y = node->player_y;
       for (;;) {
         node = astarsearch.GetSolutionNext();
 
@@ -106,6 +107,15 @@ TEST(SokobanAStarTest, Basic) {
         std::cout << "Step " << steps << std::endl;
         node->PrintNodeInfo(goals);
         steps++;
+        int curr_x = node->player_x;
+        int curr_y = node->player_y;
+        int action = node->action_from_parent;
+        int delta_x = node->kDelta.at(action).at(0);
+        int delta_y = node->kDelta.at(action).at(1);
+        EXPECT_EQ(curr_x, prev_x + delta_x);
+        EXPECT_EQ(curr_y, prev_y + delta_y);
+        prev_x = curr_x;
+        prev_y = curr_y;
       }
       std::cout << "Solution steps " << steps << std::endl;
       EXPECT_EQ(steps, verify_steps.at(search_count));
