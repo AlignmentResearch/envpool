@@ -32,7 +32,7 @@ void RunAStar(const std::string& level_file_name,
   // extract 3 digits from the level_file_name of the form "a/b/c/d/123.txt"
   std::string file_idx =
       level_file_name.substr(level_file_name.find_last_of("/\\") + 1);
-  file_idx = file_idx.substr(0, file_idx.find("."));
+  file_idx = file_idx.substr(0, file_idx.find('.'));
 
   std::ofstream log_file_out(log_file_name, std::ios_base::app);
   // std::ifstream log_file_in(log_file_name);
