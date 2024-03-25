@@ -82,8 +82,9 @@ void RunAStar(const std::string& level_file_name,
       int curr_y = node->player_y;
       int delta_x = node->kDelta.at(action).at(0);
       int delta_y = node->kDelta.at(action).at(1);
-      assert(curr_x == prev_x + delta_x);
-      assert(curr_y == prev_y + delta_y);
+      if (curr_x != prev_x + delta_x || curr_y != prev_y + delta_y) {
+        throw std::runtime_error("curr_x != prev_x + delta_x");
+      }
       prev_x = curr_x;
       prev_y = curr_y;
     }
