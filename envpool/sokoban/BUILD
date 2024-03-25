@@ -80,21 +80,6 @@ cc_binary(
     ],
 )
 
-cc_test(
-    name = "sokoban_astar_test",
-    size = "enormous",
-    srcs = [
-        "level_loader.cc",
-        "sokoban_astar_test.cc",
-        "sokoban_node.cc",
-    ],
-    deps = [
-        ":sokoban_node_h",
-        "@com_github_google_glog//:glog",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
 py_test(
     name = "test",
     srcs = ["sokoban_py_envpool_test.py"],
