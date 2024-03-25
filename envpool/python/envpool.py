@@ -144,11 +144,13 @@ class EnvPoolMixin(ABC):
   def reset(
     self: EnvPool,
     env_id: Optional[np.ndarray] = None,
+    options: Optional[Dict[str, Any]] = None,
   ) -> Union[TimeStep, Tuple]:
     """Reset envs in env_id.
 
     This behavior is not defined in async mode.
     """
+    assert options is None, "reset doesn't support any options."
     if env_id is None:
       env_id = self.all_env_ids
     self._reset(env_id)
