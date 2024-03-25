@@ -32,10 +32,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
                          int verbose)
     : load_sequentially_(load_sequentially),
       n_levels_to_load_(n_levels_to_load),
-      levels_loaded_(0),
-      levels_(0),
       cur_level_(levels_.begin()),
-      level_file_paths_(0),
       verbose(verbose) {
   if (std::filesystem::is_regular_file(base_path)) {
     level_file_paths_.push_back(base_path);

@@ -38,10 +38,10 @@ class LevelLoader {
  protected:
   bool load_sequentially_;
   int n_levels_to_load_;
-  int levels_loaded_;
-  std::vector<SokobanLevel> levels_;
+  int levels_loaded_{0};
+  std::vector<SokobanLevel> levels_{0};
   std::vector<SokobanLevel>::iterator cur_level_;
-  std::vector<std::filesystem::path> level_file_paths_;
+  std::vector<std::filesystem::path> level_file_paths_{0};
   std::vector<std::filesystem::path>::iterator cur_file_;
   void LoadFile(std::mt19937& gen);
 
