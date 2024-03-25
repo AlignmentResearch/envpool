@@ -228,6 +228,7 @@ class EnvPool(Protocol):
   def reset(
     self,
     env_id: Optional[np.ndarray] = None,
+    options: Optional[Dict[str, Any]] = None,
   ) -> Union[TimeStep, Tuple]:
     """Envpool reset interface."""
 
