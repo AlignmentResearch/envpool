@@ -29,18 +29,11 @@ void RunAStar(const std::string& level_file_name,
   int level_idx = 0;
   LevelLoader level_loader(level_file_name, true, -1);
   std::mt19937 gen(42);
-  // extract 3 digits from the level_file_name of the form "a/b/c/d/123.txt"
   std::string file_idx =
       level_file_name.substr(level_file_name.find_last_of("/\\") + 1);
   file_idx = file_idx.substr(0, file_idx.find('.'));
 
   std::ofstream log_file_out(log_file_name, std::ios_base::app);
-  // std::ifstream log_file_in(log_file_name);
-  // check if the file is empty
-  // if (log_file_in.peek() == std::ifstream::traits_type::eof()) {
-  //   log_file_out << "File,Level,Actions,Steps,SearchSteps" << std::endl;
-  // }
-  // log_file_in.close();
 
   while (level_idx < level_to_run) {
     level_loader.GetLevel(gen);
@@ -69,6 +62,7 @@ void RunAStar(const std::string& level_file_name,
     int steps = 0;
     int prev_x = node->player_x;
     int prev_y = node->player_y;
+    bool correct_solution = true;
     for (;;) {
       SokobanNode* node = astarsearch.GetSolutionNext();
       if (node == nullptr) {
@@ -83,12 +77,16 @@ void RunAStar(const std::string& level_file_name,
       int delta_x = node->kDelta.at(action).at(0);
       int delta_y = node->kDelta.at(action).at(1);
       if (curr_x != prev_x + delta_x || curr_y != prev_y + delta_y) {
-        throw std::runtime_error("curr_x != prev_x + delta_x");
+        correct_solution = false;
       }
       prev_x = curr_x;
       prev_y = curr_y;
     }
-    loglinestream << "," << steps << "," << search_steps << std::endl;
+    if (!correct_solution) {
+      loglinestream << "INCORRECT_SOLUTION_FOUND,search_steps" << std::endl;
+    } else {
+      loglinestream << "," << steps << "," << search_steps << std::endl;
+    }
     log_file_out << loglinestream.str();
     astarsearch.FreeSolutionNodes();
     astarsearch.EnsureMemoryFreed();

@@ -71,6 +71,7 @@ void RunAStar(const std::string& level_file_name,
       int steps = 0;
       int prev_x = node->player_x;
       int prev_y = node->player_y;
+      bool correct_solution = true;
       for (;;) {
         SokobanNode* node = astarsearch.GetSolutionNext();
         if (node == nullptr) {
@@ -85,12 +86,16 @@ void RunAStar(const std::string& level_file_name,
         int delta_x = node->kDelta.at(action).at(0);
         int delta_y = node->kDelta.at(action).at(1);
         if (curr_x != prev_x + delta_x || curr_y != prev_y + delta_y) {
-          throw std::runtime_error("curr_x != prev_x + delta_x");
+          correct_solution = false;
         }
         prev_x = curr_x;
         prev_y = curr_y;
       }
-      loglinestream << "," << steps << "," << search_steps << std::endl;
+      if (!correct_solution) {
+        loglinestream << "INCORRECT_SOLUTION_FOUND,search_steps" << std::endl;
+      } else {
+        loglinestream << "," << steps << "," << search_steps << std::endl;
+      }
       log_file_out << loglinestream.str();
       astarsearch.FreeSolutionNodes();
       astarsearch.EnsureMemoryFreed();
