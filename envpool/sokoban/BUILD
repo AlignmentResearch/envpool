@@ -68,6 +68,18 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "astar_log_level",
+    srcs = [
+        "astar_log_level.cc",
+        "level_loader.cc",
+        "sokoban_node.cc",
+    ],
+    deps = [
+        ":sokoban_node_h",
+    ],
+)
+
 py_test(
     name = "test",
     srcs = ["sokoban_py_envpool_test.py"],

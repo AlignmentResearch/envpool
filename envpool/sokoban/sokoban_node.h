@@ -27,7 +27,7 @@ namespace sokoban {
 class SokobanNode {
  public:
   static constexpr std::array<std::array<int, 2>, 4> kDelta = {
-      {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}  // Up, Down, Left, Right
+      {{0, -1}, {1, 0}, {0, 1}, {-1, 0}}  // Up, Right, Down, Left
   };
   int dim_room{0};
   int player_x{0}, player_y{0};
@@ -116,6 +116,7 @@ class SokobanNode {
   [[nodiscard]] size_t Hash() const;
 
   void PrintNodeInfo(std::vector<std::pair<int, int>>* goals = nullptr);
+  [[nodiscard]] bool CornerWalls(const std::pair<int, int>& box) const;
 };
 }  // namespace sokoban
 

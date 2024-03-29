@@ -33,11 +33,14 @@ void RunAStar(const std::string& level_file_name,
   std::ifstream log_file_in(log_file_name);
   // check if the file is empty
   if (log_file_in.peek() == std::ifstream::traits_type::eof()) {
-    log_file_out << "Level, Actions, Steps, SearchSteps" << std::endl;
+    log_file_out << "Level,Actions,Steps,SearchSteps" << std::endl;
   } else {  // skip levels that have already been run
     std::string line;
     std::getline(log_file_in, line);  // skip header
     while (std::getline(log_file_in, line)) {
+      if (line.empty()) {
+        continue;
+      }
       SokobanLevel level = *level_loader.GetLevel(gen);
       level_idx++;
     }
@@ -63,9 +66,12 @@ void RunAStar(const std::string& level_file_name,
 
     if (search_state == std::AStarSearch<SokobanNode>::SEARCH_STATE_SUCCEEDED) {
       std::stringstream loglinestream;
-      loglinestream << level_idx << ", ";
-      astarsearch.GetSolutionStart();
+      loglinestream << level_idx << ",";
+      SokobanNode* node = astarsearch.GetSolutionStart();
       int steps = 0;
+      int prev_x = node->player_x;
+      int prev_y = node->player_y;
+      bool correct_solution = true;
       for (;;) {
         SokobanNode* node = astarsearch.GetSolutionNext();
         if (node == nullptr) {
@@ -75,37 +81,50 @@ void RunAStar(const std::string& level_file_name,
         assert(action >= 0 && action < 4);
         loglinestream << action;
         steps++;
+        int curr_x = node->player_x;
+        int curr_y = node->player_y;
+        int delta_x = node->kDelta.at(action).at(0);
+        int delta_y = node->kDelta.at(action).at(1);
+        if (curr_x != prev_x + delta_x || curr_y != prev_y + delta_y) {
+          correct_solution = false;
+        }
+        prev_x = curr_x;
+        prev_y = curr_y;
       }
-      loglinestream << ", " << steps << ", " << search_steps << std::endl;
+      if (!correct_solution) {
+        loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps
+                      << std::endl;
+      } else {
+        loglinestream << "," << steps << "," << search_steps << std::endl;
+      }
       log_file_out << loglinestream.str();
       astarsearch.FreeSolutionNodes();
       astarsearch.EnsureMemoryFreed();
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_FAILED) {
-      log_file_out << level_idx << ", "
-                   << "SEARCH_STATE_FAILED, -1, " << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_FAILED,-1," << search_steps << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_NOT_INITIALISED) {
-      log_file_out << level_idx << ", "
-                   << "SEARCH_STATE_NOT_INITIALISED, -1, " << search_steps
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_NOT_INITIALISED,-1," << search_steps
                    << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING) {
-      log_file_out << level_idx << ", "
-                   << "SEARCH_STATE_SEARCHING, -1, " << search_steps
-                   << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_SEARCHING,-1," << search_steps << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
-      log_file_out << level_idx << ", "
-                   << "SEARCH_STATE_OUT_OF_MEMORY, -1, " << search_steps
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps
                    << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
-      log_file_out << level_idx << ", "
-                   << "SEARCH_STATE_INVALID, -1, " << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_INVALID,-1," << search_steps << std::endl;
     } else {
-      log_file_out << level_idx << ", "
-                   << "UNKNOWN, -1, " << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "UNKNOWN,-1," << search_steps << std::endl;
     }
     log_file_out.flush();
     level_idx++;
