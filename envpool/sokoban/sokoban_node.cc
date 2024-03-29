@@ -194,14 +194,10 @@ bool SokobanNode::CornerWalls(const std::pair<int, int>& box) const {
   for (const auto& delta : kDelta) {
     int new_x = box.first + delta.at(0);
     int new_y = box.second + delta.at(1);
-    if (CheckWall(new_x, new_y)) {
-      if (found_wall) {
-        found_contiguous_wall = true;
-      }
-      found_wall = true;
-    } else {
-      found_wall = false;
-    }
+    bool new_found_wall = CheckWall(new_x, new_y);
+    found_contiguous_wall =
+        found_contiguous_wall || (found_wall && new_found_wall);
+    found_wall = new_found_wall;
   }
   if (found_wall && !found_contiguous_wall) {
     int new_x = box.first + kDelta.at(0).at(0);

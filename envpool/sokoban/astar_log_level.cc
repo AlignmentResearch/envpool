@@ -83,7 +83,8 @@ void RunAStar(const std::string& level_file_name,
       prev_y = curr_y;
     }
     if (!correct_solution) {
-      loglinestream << "INCORRECT_SOLUTION_FOUND,search_steps" << std::endl;
+      loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps
+                    << std::endl;
     } else {
       loglinestream << "," << steps << "," << search_steps << std::endl;
     }
