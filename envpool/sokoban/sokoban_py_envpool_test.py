@@ -230,6 +230,9 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     levels_dir="/app/envpool/sokoban/sample_levels",
     load_sequentially=True,
   )
+  # Skip levels in 000.txt and 001.txt
+  for _ in range(3 + 3):
+    env.reset()
   env.reset()  # Load level 0
 
   for a in SOLVE_LEVEL_ZERO[:-1]:
