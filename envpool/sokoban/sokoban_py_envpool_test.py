@@ -171,6 +171,33 @@ def test_xla() -> None:
   handle, recv, send, step = env.xla()
 
 
+def test_truncation_unsolved_episodes_only():
+  """
+  Test that only episodes that do *not* get solved within the time limit get truncated. That is, a large 'solution'
+  reward and truncation should never co-occur.
+  """
+  max_episode_steps = 120
+  env = envpool.make(
+    "Sokoban-v0",
+    env_type="gymnasium",
+    num_envs=1,
+    batch_size=1,
+    min_episode_steps=max_episode_steps,
+    max_episode_steps=max_episode_steps,
+    levels_dir="/app/envpool/sokoban/sample_levels",
+    load_sequentially=True,
+  )
+  env.reset()  # Load level 0 and discard it
+  env.reset()  # Load level 1
+
+  solve_actions = "222200001112330322210"
+  for a in solve_actions[:-1]:
+    env.step(int(a))
+
+  obs, reward, term, trunc, infos = env.step(int(solve_actions[-1]))
+  assert reward == env.spec.reward_step + env.spec.reward_box + env.spec.reward_finished
+
+
 def test_astar_log() -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
   with tempfile.NamedTemporaryFile() as f:
