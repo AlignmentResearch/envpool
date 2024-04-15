@@ -172,7 +172,6 @@ def test_xla() -> None:
   handle, recv, send, step = env.xla()
 
 
-
 SOLVE_LEVEL_ZERO: str = "222200001112330322210"
 TINY_COLORS: list[tuple[tuple[int, int, int], str]] = [
   ((0, 0, 0), "#"),
@@ -209,16 +208,16 @@ action_astar_to_envpool = {
   "3": 3,
 }
 
+
 def make_1d_array(action: int | str) -> np.ndarray:
   return np.array(int(action))[None]
-
 
 
 @pytest.mark.parametrize("solve_on_time", [True, False])
 def test_solved_level_does_not_truncate(solve_on_time: bool):
   """
-  Test that a level that gets solved just in time does not get truncated. But if it does not get solved just in time, it
-  gets truncated.
+  Test that a level that gets solved just in time does not get truncated. But if
+  it does not get solved just in time, it gets truncated.
   """
   max_episode_steps = len(SOLVE_LEVEL_ZERO)
   env = envpool.make(
@@ -234,27 +233,31 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
   env.reset()  # Load level 0
 
   for a in SOLVE_LEVEL_ZERO[:-1]:
-    obs, reward, term, trunc, infos = env.step(make_1d_array(action_astar_to_envpool[a]))
+    obs, reward, term, trunc, infos = env.step(
+      make_1d_array(action_astar_to_envpool[a])
+    )
     # print_obs(obs[0])
-    assert not term and not trunc, "Level should not have reached time limit yet"
+    assert not term and not trunc, "Level should not have reached time limit"
 
   NOOP = 0
 
   if solve_on_time:
-    obs, reward, term, trunc, infos = env.step(make_1d_array(action_astar_to_envpool[SOLVE_LEVEL_ZERO[-1]]))
-    # print_obs(obs[0])
-    assert reward == env.spec.config.reward_step + env.spec.config.reward_box + env.spec.config.reward_finished, (
-      f"the level wasn't solved successfully. Level: {print_obs(obs[0])}"
+    obs, reward, term, trunc, infos = env.step(
+      make_1d_array(action_astar_to_envpool[SOLVE_LEVEL_ZERO[-1]])
     )
-    assert term and not trunc, "Level should have finished within the time limit"
+    # print_obs(obs[0])
+    assert reward == (
+      env.spec.config.reward_step + env.spec.config.reward_box +
+      env.spec.config.reward_finished
+    ), (f"the level wasn't solved successfully. Level: {print_obs(obs[0])}")
+    assert term and not trunc, "Level should finish within the time limit"
 
   else:
     obs, reward, term, trunc, infos = env.step(make_1d_array(NOOP))
-    assert not term and trunc, "Level should get truncated at precisely this step"
+    assert not term and trunc, "Level should truncate at precisely this step"
 
-  _, _, term, trunc, _ =env.step(make_1d_array(NOOP))
+  _, _, term, trunc, _ = env.step(make_1d_array(NOOP))
   assert not term and not trunc, "Level should reset correctly"
-
 
 
 def test_astar_log() -> None:
@@ -264,8 +267,8 @@ def test_astar_log() -> None:
     return
     subprocess.run(
       [
-        "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--", level_file_name,
-        log_file_name, "1"
+        "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--",
+        level_file_name, log_file_name, "1"
       ],
       check=True,
       cwd="/app",

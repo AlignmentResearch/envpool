@@ -162,8 +162,9 @@ constexpr std::array<std::array<uint8_t, 3>, kPlayerOnTarget + 1> kTinyColors{{
 
 void SokobanEnv::WriteState(float reward) {
   auto state = Allocate();
-  if(unmatched_boxes_ == 0) {
-    // Never mark the episode as truncated if we're getting the big final reward.
+  if (unmatched_boxes_ == 0) {
+    // Never mark the episode as truncated if we're getting the big final
+    // reward.
     state["trunc"_] = false;
   }
   state["reward"_] = reward;
