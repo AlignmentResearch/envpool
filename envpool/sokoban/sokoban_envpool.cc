@@ -76,7 +76,7 @@ void SokobanEnv::Step(const Action& action_dict) {
 
   const int action = action_dict["action"_];
 
-  const int change_coordinates_idx = (action) % kChangeCoordinates.size();
+  const int change_coordinates_idx = action;
   const int delta_x = kChangeCoordinates.at(change_coordinates_idx).at(0);
   const int delta_y = kChangeCoordinates.at(change_coordinates_idx).at(1);
 
