@@ -268,12 +268,15 @@ def test_astar_log(tmp_path) -> None:
   subprocess.run(
     [
       "/root/go/bin/bazel", f"--output_base={str(tmp_path)}", "run",
-      "//envpool/sokoban:astar_log", "--",
-      level_file_name, str(log_file_name), "1"
+      "//envpool/sokoban:astar_log", "--", level_file_name,
+      str(log_file_name), "1"
     ],
     check=True,
     cwd="/app/envpool",
-    env={"HOME": "/root", "PATH": "/opt/conda/bin:/usr/bin"},
+    env={
+      "HOME": "/root",
+      "PATH": "/opt/conda/bin:/usr/bin"
+    },
   )
   log = log_file_name.read_text()
   assert f"0,{SOLVE_LEVEL_ZERO},21,1380" == log.split("\n")[1]
