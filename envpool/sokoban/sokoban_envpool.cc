@@ -166,7 +166,12 @@ void SokobanEnv::WriteState(float reward) {
     // Never mark the episode as truncated if we're getting the big final
     // reward.
     state["trunc"_] = false;
+  } else if (IsDone()) {
+    // But if there are unmatched boxes and the current step is the last
+    // one we will get, truncate the episode.
+    state["trunc"_] = true;
   }
+
   state["reward"_] = reward;
   Array& obs = state["obs"_];
   if (obs.size != 3 * world_.size()) {
