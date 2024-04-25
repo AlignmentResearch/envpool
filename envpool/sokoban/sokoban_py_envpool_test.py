@@ -267,7 +267,8 @@ def test_astar_log(tmp_path) -> None:
   log_file_name = tmp_path / "log_file.csv"
   subprocess.run(
     [
-      "/root/go/bin/bazel", f"--output_base={str(tmp_path)}", "run", "//envpool/sokoban:astar_log", "--",
+      "/root/go/bin/bazel", f"--output_base={str(tmp_path)}", "run",
+      "//envpool/sokoban:astar_log", "--",
       level_file_name, str(log_file_name), "1"
     ],
     check=True,
