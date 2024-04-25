@@ -29,16 +29,11 @@
 
 namespace sokoban {
 
-constexpr int kActNoop = 0;
-constexpr int kActPushUp = 1;
-constexpr int kActPushDown = 2;
-constexpr int kActPushLeft = 3;
-constexpr int kActPushRight = 4;
-constexpr int kActMoveUp = 5;
-constexpr int kActMoveDown = 6;
-constexpr int kActMoveLeft = 7;
-constexpr int kActMoveRight = 8;
-constexpr int kMaxAction = kActMoveRight;
+constexpr int kActPushUp = 0;
+constexpr int kActPushDown = 1;
+constexpr int kActPushLeft = 2;
+constexpr int kActPushRight = 3;
+constexpr int kMaxAction = kActPushRight;
 
 class SokobanEnvFns {
  public:

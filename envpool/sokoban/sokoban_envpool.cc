@@ -75,13 +75,8 @@ void SokobanEnv::Step(const Action& action_dict) {
   current_step_++;
 
   const int action = action_dict["action"_];
-  if (action == kActNoop) {
-    WriteState(static_cast<float>(reward_step_));
-    return;
-  }
-  // From here on, assume the agent will try to move
 
-  const int change_coordinates_idx = (action - 1) % kChangeCoordinates.size();
+  const int change_coordinates_idx = action;
   const int delta_x = kChangeCoordinates.at(change_coordinates_idx).at(0);
   const int delta_y = kChangeCoordinates.at(change_coordinates_idx).at(1);
 

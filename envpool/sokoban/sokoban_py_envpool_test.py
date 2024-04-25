@@ -77,8 +77,10 @@ def test_envpool() -> None:
 
   _ = env.reset()
   t = time.time()
+
+  assert env.action_space.n == 4
   for _ in range(total_steps):
-    _ = env.step(np.random.randint(low=0, high=9, size=(num_envs,)))
+    _ = env.step(np.random.randint(low=0, high=4, size=(num_envs,)))
   duration = time.time() - t
   fps = total_steps * batch / duration
   print(f"FPS = {fps:.6f}")
