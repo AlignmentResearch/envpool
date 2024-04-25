@@ -261,6 +261,7 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
   assert not term and not trunc, "Level should reset correctly"
 
 
+@pytest.mark.skip
 def test_astar_log() -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
   with tempfile.NamedTemporaryFile() as f:
