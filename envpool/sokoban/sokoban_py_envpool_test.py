@@ -111,7 +111,7 @@ def test_envpool_load_sequentially(capfd) -> None:
   levels_dir = "/app/envpool/sokoban/sample_levels"
   files = glob.glob(f"{levels_dir}/*.txt")
   levels_by_files = []
-  for file in files:
+  for file in sorted(files):
     with open(file, "r") as f:
       text = f.read()
     levels = text.split("\n;")
@@ -243,7 +243,7 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     )
     assert not term and not trunc, "Level should not have reached time limit"
 
-  NOOP = 0
+  wrong_action = str((int(SOLVE_LEVEL_ZERO[-1]) + 1) % 4)
 
   if solve_on_time:
     obs, reward, term, trunc, infos = env.step(
@@ -256,29 +256,26 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     assert term and not trunc, "Level should finish within the time limit"
 
   else:
-    obs, reward, term, trunc, infos = env.step(make_1d_array(NOOP))
+    obs, reward, term, trunc, infos = env.step(make_1d_array(wrong_action))
     assert not term and trunc, "Level should truncate at precisely this step"
 
-  _, _, term, trunc, _ = env.step(make_1d_array(NOOP))
+  _, _, term, trunc, _ = env.step(make_1d_array(wrong_action))
   assert not term and not trunc, "Level should reset correctly"
 
 
-def test_astar_log() -> None:
+def test_astar_log(tmp_path) -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
-  with tempfile.NamedTemporaryFile() as f:
-    log_file_name = f.name
-    subprocess.run(
-      [
-        "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--",
-        level_file_name, log_file_name, "1"
-      ],
-      check=True,
-      cwd="/app",
-      env=dict(HOME="/root"),
-    )
-    with open(log_file_name, "r") as f:
-      log = f.read()
-    assert f"1, {SOLVE_LEVEL_ZERO}, 21, 1443" == log.split("\n")[1]
+  log_file_name = tmp_path / "log_file.csv"
+  subprocess.run(
+    [
+      "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--",
+      level_file_name, str(log_file_name), "1"
+    ],
+    check=True,
+    cwd="/app",
+  )
+  log = log_file_name.read_text()
+  assert f"0,{SOLVE_LEVEL_ZERO},21,1380" == log.split("\n")[1]
 
 
 if __name__ == "__main__":

@@ -42,6 +42,11 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
         level_file_paths_.push_back(entry.path());
       }
     }
+    std::sort(
+        level_file_paths_.begin(), level_file_paths_.end(),
+        [](const std::filesystem::path& a, const std::filesystem::path& b) {
+          return a.filename().string() < b.filename().string();
+        });
   }
   cur_file_ = level_file_paths_.begin();
 }
