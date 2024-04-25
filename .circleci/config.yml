@@ -71,10 +71,11 @@ jobs:
         auth:
           username: "$GHCR_DOCKER_USER"
           password: "$GHCR_DOCKER_TOKEN"
-    resource_class: medium
+    resource_class: large
     working_directory: /app
     steps:
       - checkout
       - run:
           name: Run tests
-          command: make bazel-test
+          command: |
+            BAZEL_OPT=--host_jvm_args=-Xmx3g make bazel-test

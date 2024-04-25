@@ -16,6 +16,7 @@
 import glob
 import re
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -171,21 +172,114 @@ def test_xla() -> None:
   handle, recv, send, step = env.xla()
 
 
+SOLVE_LEVEL_ZERO: str = "222200001112330322210"
+TINY_COLORS: list[tuple[tuple[int, int, int], str]] = [
+  ((0, 0, 0), "#"),
+  ((243, 248, 238), " "),
+  ((254, 126, 125), "."),
+  ((254, 95, 56), "s"),
+  ((142, 121, 56), "$"),
+  ((160, 212, 56), "@"),
+  ((219, 212, 56), "a"),
+]
+
+
+def print_obs(obs: np.ndarray):
+  assert obs.shape == (3, 10, 10)
+  for y in range(obs.shape[1]):
+    for x in range(obs.shape[2]):
+      arr = obs[:, y, x]
+      printed_any = False
+      for color, symbol in TINY_COLORS:
+        assert arr.shape == (3,)
+        if np.array_equal(arr, color):
+          print(symbol, end="")
+          printed_any = True
+          break
+      assert printed_any, f"Could not find match for {arr}"
+    print("\n", end="")
+  print("\n", end="")
+
+
+action_astar_to_envpool = {
+  "0": 1,
+  "1": 4,
+  "2": 2,
+  "3": 3,
+}
+
+
+def make_1d_array(action: int | str) -> np.ndarray:
+  return np.array(int(action))[None]
+
+
+@pytest.mark.parametrize("solve_on_time", [True, False])
+def test_solved_level_does_not_truncate(solve_on_time: bool):
+  """
+  Test that a level that gets solved just in time does not get truncated. But if
+  it does not get solved just in time, it gets truncated.
+  """
+  max_episode_steps = len(SOLVE_LEVEL_ZERO)
+  env = envpool.make(
+    "Sokoban-v0",
+    env_type="gymnasium",
+    num_envs=1,
+    batch_size=1,
+    min_episode_steps=max_episode_steps,
+    max_episode_steps=max_episode_steps,
+    levels_dir="/app/envpool/sokoban/sample_levels",
+    load_sequentially=True,
+  )
+  # Skip levels in 000.txt and 001.txt
+  for _ in range(3 + 3):
+    env.reset()
+  env.reset()  # Load level 0
+
+  for a in SOLVE_LEVEL_ZERO[:-1]:
+    obs, reward, term, trunc, infos = env.step(
+      make_1d_array(action_astar_to_envpool[a])
+    )
+    assert not term and not trunc, "Level should not have reached time limit"
+
+  NOOP = 0
+
+  if solve_on_time:
+    obs, reward, term, trunc, infos = env.step(
+      make_1d_array(action_astar_to_envpool[SOLVE_LEVEL_ZERO[-1]])
+    )
+    assert reward == (
+      env.spec.config.reward_step + env.spec.config.reward_box +
+      env.spec.config.reward_finished
+    ), (f"the level wasn't solved successfully. Level: {print_obs(obs[0])}")
+    assert term and not trunc, "Level should finish within the time limit"
+
+  else:
+    obs, reward, term, trunc, infos = env.step(make_1d_array(NOOP))
+    assert not term and trunc, "Level should truncate at precisely this step"
+
+  _, _, term, trunc, _ = env.step(make_1d_array(NOOP))
+  assert not term and not trunc, "Level should reset correctly"
+
+
+@pytest.mark.skip
 def test_astar_log() -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
   with tempfile.NamedTemporaryFile() as f:
     log_file_name = f.name
     subprocess.run(
       [
-        "bazel", "run", "//envpool/sokoban:astar_log", "--", level_file_name,
-        log_file_name, "1"
+        "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--",
+        level_file_name, log_file_name, "1"
       ],
       check=True,
+      cwd="/app",
+      env=dict(HOME="/root"),
     )
     with open(log_file_name, "r") as f:
       log = f.read()
-    assert "1, 222200001112330322210, 21, 1443" == log.split("\n")[1]
+    assert f"1, {SOLVE_LEVEL_ZERO}, 21, 1443" == log.split("\n")[1]
 
 
 if __name__ == "__main__":
-  pytest.main(["-v", __file__])
+  retcode = pytest.main(["-v", __file__])
+  sys.exit(retcode)
