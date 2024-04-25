@@ -239,7 +239,6 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     obs, reward, term, trunc, infos = env.step(
       make_1d_array(action_astar_to_envpool[a])
     )
-    # print_obs(obs[0])
     assert not term and not trunc, "Level should not have reached time limit"
 
   NOOP = 0
@@ -248,7 +247,6 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     obs, reward, term, trunc, infos = env.step(
       make_1d_array(action_astar_to_envpool[SOLVE_LEVEL_ZERO[-1]])
     )
-    # print_obs(obs[0])
     assert reward == (
       env.spec.config.reward_step + env.spec.config.reward_box +
       env.spec.config.reward_finished
@@ -267,7 +265,6 @@ def test_astar_log() -> None:
   level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
   with tempfile.NamedTemporaryFile() as f:
     log_file_name = f.name
-    return
     subprocess.run(
       [
         "/root/go/bin/bazel", "run", "//envpool/sokoban:astar_log", "--",
