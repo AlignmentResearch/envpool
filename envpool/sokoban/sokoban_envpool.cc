@@ -142,7 +142,11 @@ void SokobanEnv::Step(const Action& action_dict) {
                         reward_box_ * static_cast<double>(prev_unmatched_boxes -
                                                           unmatched_boxes_) +
                         ((unmatched_boxes_ == 0) ? reward_finished_ : 0.0f);
-  WriteState(static_cast<float>(reward));
+  if (IsDone()) {
+    Reset();
+  } else {
+    WriteState(static_cast<float>(reward));
+  }
 }
 
 constexpr std::array<std::array<uint8_t, 3>, kPlayerOnTarget + 1> kTinyColors{{
