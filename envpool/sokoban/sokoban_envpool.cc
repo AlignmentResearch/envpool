@@ -24,7 +24,7 @@
 
 namespace sokoban {
 
-void SokobanEnv::Reset() {
+void SokobanEnv::ResetWithoutWrite() {
   const int max_episode_steps = spec_.config["max_episode_steps"_];
   const int min_episode_steps = spec_.config["min_episode_steps"_];
   current_max_episode_steps_ =
@@ -52,6 +52,10 @@ void SokobanEnv::Reset() {
     }
   }
   current_step_ = 0;
+}
+
+void SokobanEnv::Reset() {
+  ResetWithoutWrite();
   WriteState(0.0f);
 }
 
@@ -142,11 +146,8 @@ void SokobanEnv::Step(const Action& action_dict) {
                         reward_box_ * static_cast<double>(prev_unmatched_boxes -
                                                           unmatched_boxes_) +
                         ((unmatched_boxes_ == 0) ? reward_finished_ : 0.0f);
-  if (IsDone()) {
-    Reset();
-  } else {
-    WriteState(static_cast<float>(reward));
-  }
+
+  WriteState(static_cast<float>(reward));
 }
 
 constexpr std::array<std::array<uint8_t, 3>, kPlayerOnTarget + 1> kTinyColors{{
@@ -179,6 +180,10 @@ void SokobanEnv::WriteState(float reward) {
         << "/3, level_size=" << world_.size() << ", dim_room=" << dim_room_
         << std::endl;
     throw std::runtime_error(msg.str());
+  }
+
+  if (IsDone()) {
+    ResetWithoutWrite();
   }
 
   std::vector<uint8_t> out(3 * world_.size());
