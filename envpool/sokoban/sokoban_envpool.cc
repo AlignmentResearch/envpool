@@ -183,7 +183,8 @@ void SokobanEnv::WriteState(float reward) {
   }
 
   if (IsDone()) {
-    // If this episode truncates or terminates, the observation should be the one for the next episode.
+    // If this episode truncates or terminates, the observation should be the
+    // one for the next episode.
     ResetWithoutWrite();
   }
 
