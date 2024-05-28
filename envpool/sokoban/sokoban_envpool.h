@@ -115,6 +115,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 
   [[nodiscard]] uint8_t WorldAt(int x, int y) const;
   void WorldAssignAt(int x, int y, uint8_t value);
+  void ResetWithoutWrite();
 };
 
 using SokobanEnvPool = AsyncEnvPool<SokobanEnv>;
