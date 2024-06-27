@@ -18,15 +18,14 @@ import re
 import subprocess
 import sys
 import time
-
-import numpy as np
-import pytest
+from pathlib import Path
+from typing import List
 
 import envpool  # noqa: F401
 import envpool.sokoban.registration
+import numpy as np
+import pytest
 from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
-from pathlib import Path
-from typing import List
 
 
 def test_config() -> None:
