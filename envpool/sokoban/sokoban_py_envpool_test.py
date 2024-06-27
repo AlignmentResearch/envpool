@@ -21,10 +21,11 @@ import time
 from pathlib import Path
 from typing import List
 
-import envpool  # noqa: F401
-import envpool.sokoban.registration
 import numpy as np
 import pytest
+
+import envpool  # noqa: F401
+import envpool.sokoban.registration
 from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
 
 
