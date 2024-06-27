@@ -188,13 +188,16 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     throw std::runtime_error("Loaded all requested levels.");
   }
+  // Load new files until the current level index is within the loaded levels
+  // this is required when new files have lesser levels than the number of envs
   while (cur_level_ >= levels_.size()) {
     cur_level_ -= levels_.size();
     LoadFile(gen);
-    if (levels_.empty()) {
+    if (levels_.empty()) {  // new file is empty
       throw std::runtime_error("No levels loaded.");
     }
   }
+  // no need for bound checks since it is checked in the while loop above
   auto out = levels_.begin() + cur_level_;
   cur_level_ += num_envs_;
   levels_loaded_++;
