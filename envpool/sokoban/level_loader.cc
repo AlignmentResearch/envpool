@@ -191,7 +191,7 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   while (cur_level_ >= levels_.size()) {
     cur_level_ -= levels_.size();
     LoadFile(gen);
-    if (levels_.size() == 0) {
+    if (levels_.empty()) {
       throw std::runtime_error("No levels loaded.");
     }
   }
