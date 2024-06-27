@@ -29,10 +29,11 @@ namespace sokoban {
 
 LevelLoader::LevelLoader(const std::filesystem::path& base_path,
                          bool load_sequentially, int n_levels_to_load,
-                         int verbose)
+                         int env_id, int num_envs, int verbose)
     : load_sequentially_(load_sequentially),
       n_levels_to_load_(n_levels_to_load),
-      cur_level_(levels_.begin()),
+      num_envs_(num_envs),
+      cur_level_(env_id),
       verbose(verbose) {
   if (std::filesystem::is_regular_file(base_path)) {
     level_file_paths_.push_back(base_path);
@@ -49,6 +50,10 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
         });
   }
   cur_file_ = level_file_paths_.begin();
+  if (n_levels_to_load_ > 0 && n_levels_to_load_ % num_envs_ != 0) {
+    throw std::runtime_error(
+        "n_levels_to_load must be a multiple of num_envs.");
+  }
 }
 
 static const std::array<char, kMaxLevelObject + 1> kPrintLevelKey{
@@ -183,15 +188,18 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     throw std::runtime_error("Loaded all requested levels.");
   }
-  if (cur_level_ == levels_.end()) {
+  // Load new files until the current level index is within the loaded levels
+  // this is required when new files have lesser levels than the number of envs
+  while (cur_level_ >= levels_.size()) {
+    cur_level_ -= levels_.size();
     LoadFile(gen);
-    cur_level_ = levels_.begin();
-    if (cur_level_ == levels_.end()) {
+    if (levels_.empty()) {  // new file is empty
       throw std::runtime_error("No levels loaded.");
     }
   }
-  auto out = cur_level_;
-  cur_level_++;
+  // no need for bound checks since it is checked in the while loop above
+  auto out = levels_.begin() + cur_level_;
+  cur_level_ += num_envs_;
   levels_loaded_++;
   return out;
 }
