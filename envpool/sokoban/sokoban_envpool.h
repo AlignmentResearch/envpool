@@ -70,6 +70,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         levels_dir_{static_cast<std::string>(spec.config["levels_dir"_])},
         level_loader_(levels_dir_, spec.config["load_sequentially"_],
                       static_cast<int>(spec.config["n_levels_to_load"_]),
+                      env_id, static_cast<int>(spec.config["num_envs"_]),
                       static_cast<int>(spec.config["verbose"_])),
         world_(kWall, static_cast<std::size_t>(dim_room_ * dim_room_)),
         verbose_(static_cast<int>(spec.config["verbose"_])),

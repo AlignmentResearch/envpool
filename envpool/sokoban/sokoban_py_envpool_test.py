@@ -25,7 +25,8 @@ import pytest
 import envpool  # noqa: F401
 import envpool.sokoban.registration
 from envpool.sokoban.sokoban_envpool import _SokobanEnvSpec
-
+from pathlib import Path
+from typing import List
 
 def test_config() -> None:
   ref_config_keys = [
@@ -260,6 +261,58 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
 
   _, _, term, trunc, _ = env.step(make_1d_array(wrong_action))
   assert not term and not trunc, "Level should reset correctly"
+
+def read_levels_file(fpath: Path) -> List[List[str]]:
+    maps = []
+    current_map = []
+    with open(fpath, "r") as sf:
+        for line in sf.readlines():
+            if ";" in line and current_map:
+                maps.append(current_map)
+                current_map = []
+            if "#" == line[0]:
+                current_map.append(line.strip())
+
+    maps.append(current_map)
+    return maps
+
+def test_load_sequentially_with_multiple_envs() -> None:
+    levels_dir = "/app/envpool/sokoban/sample_levels"
+    files = glob.glob(f"{levels_dir}/*.txt")
+    levels_by_files = []
+    total_levels, num_envs = 8, 2
+    for file in sorted(files):
+        levels = read_levels_file(file)
+        levels_by_files.extend(levels)
+    assert len(levels_by_files) == total_levels, "8 levels stored in files."
+    
+    env = envpool.make(
+        "Sokoban-v0",
+        env_type="gymnasium",
+        num_envs=num_envs,
+        batch_size=num_envs,
+        max_episode_steps=60,
+        min_episode_steps=60,
+        levels_dir=levels_dir,
+        load_sequentially=True,
+        n_levels_to_load=total_levels,
+        verbose=2,
+    )
+    dim_room = env.spec.config.dim_room
+    printed_obs = []
+    for _ in range(total_levels // num_envs):
+        obs, _ = env.reset()
+        assert obs.shape == (
+            num_envs,
+            3,
+            dim_room,
+            dim_room,
+        ), f"obs shape: {obs.shape}"
+        for idx in range(num_envs):
+            printed_obs.append(print_obs(obs[idx]))
+    for i, level in enumerate(levels_by_files):
+        for j, line in enumerate(level):
+            assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
 
 
 def test_astar_log(tmp_path) -> None:
