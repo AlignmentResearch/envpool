@@ -52,8 +52,8 @@ class LevelLoader {
 
   std::vector<SokobanLevel>::iterator GetLevel(std::mt19937& gen);
   explicit LevelLoader(const std::filesystem::path& base_path,
-                       bool load_sequentially, int n_levels_to_load, int env_id,
-                       int num_envs, int verbose = 0);
+                       bool load_sequentially, int n_levels_to_load,
+                       int env_id = 0, int num_envs = 1, int verbose = 0);
 };
 
 void PrintLevel(std::ostream& os, const SokobanLevel& vec);

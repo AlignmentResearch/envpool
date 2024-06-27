@@ -188,6 +188,7 @@ TINY_COLORS: list[tuple[tuple[int, int, int], str]] = [
 
 def print_obs(obs: np.ndarray):
   assert obs.shape == (3, 10, 10)
+  printed = ""
   for y in range(obs.shape[1]):
     for x in range(obs.shape[2]):
       arr = obs[:, y, x]
@@ -195,12 +196,13 @@ def print_obs(obs: np.ndarray):
       for color, symbol in TINY_COLORS:
         assert arr.shape == (3,)
         if np.array_equal(arr, color):
-          print(symbol, end="")
+          printed += symbol
           printed_any = True
           break
       assert printed_any, f"Could not find match for {arr}"
-    print("\n", end="")
-  print("\n", end="")
+    printed += "\n"
+  printed += "\n"
+  return printed
 
 
 action_astar_to_envpool = {
@@ -309,7 +311,7 @@ def test_load_sequentially_with_multiple_envs() -> None:
             dim_room,
         ), f"obs shape: {obs.shape}"
         for idx in range(num_envs):
-            printed_obs.append(print_obs(obs[idx]))
+            printed_obs.append(print_obs(obs[idx]).strip().split("\n"))
     for i, level in enumerate(levels_by_files):
         for j, line in enumerate(level):
             assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
