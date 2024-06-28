@@ -305,19 +305,21 @@ def test_load_sequentially_with_multiple_envs() -> None:
   )
   dim_room = env.spec.config.dim_room
   printed_obs = []
-  for _ in range(total_levels // num_envs):
-    obs, _ = env.reset()
-    assert obs.shape == (
-      num_envs,
-      3,
-      dim_room,
-      dim_room,
-    ), f"obs shape: {obs.shape}"
-    for idx in range(num_envs):
-      printed_obs.append(print_obs(obs[idx]).strip().split("\n"))
-  for i, level in enumerate(levels_by_files):
-    for j, line in enumerate(level):
-      assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
+
+  for _ in range(2): # check loader loops around and loads levels again
+    for _ in range(total_levels // num_envs):
+      obs, _ = env.reset()
+      assert obs.shape == (
+        num_envs,
+        3,
+        dim_room,
+        dim_room,
+      ), f"obs shape: {obs.shape}"
+      for idx in range(num_envs):
+        printed_obs.append(print_obs(obs[idx]).strip().split("\n"))
+    for i, level in enumerate(levels_by_files):
+      for j, line in enumerate(level):
+        assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
 
 
 def test_astar_log(tmp_path) -> None:

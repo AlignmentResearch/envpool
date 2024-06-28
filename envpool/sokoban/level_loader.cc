@@ -186,7 +186,8 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
 
 std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
-    throw std::runtime_error("Loaded all requested levels.");
+    std::cerr << "Warning: All levels loaded. Looping around now." << std::endl;
+    levels_loaded_ = 0;
   }
   // Load new files until the current level index is within the loaded levels
   // this is required when new files have lesser levels than the number of envs
