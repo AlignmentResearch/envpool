@@ -32,6 +32,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
                          int env_id, int num_envs, int verbose)
     : load_sequentially_(load_sequentially),
       n_levels_to_load_(n_levels_to_load),
+      env_id_(env_id),
       num_envs_(num_envs),
       cur_level_(env_id),
       verbose(verbose) {
@@ -54,6 +55,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
     throw std::runtime_error(
         "n_levels_to_load must be a multiple of num_envs.");
   }
+  n_levels_to_load_ /= num_envs_;
 }
 
 static const std::array<char, kMaxLevelObject + 1> kPrintLevelKey{
@@ -186,17 +188,18 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
 
 std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
-    std::cerr << "Warning: All levels loaded. Looping around now." << std::endl;
+    // std::cerr << "Warning: All levels loaded. Looping around now." <<
+    // std::endl;
     levels_loaded_ = 0;
+    cur_file_ = level_file_paths_.begin();
+    LoadFile(gen);
+    cur_level_ = env_id_;
   }
   // Load new files until the current level index is within the loaded levels
   // this is required when new files have lesser levels than the number of envs
   while (cur_level_ >= levels_.size()) {
     cur_level_ -= levels_.size();
     LoadFile(gen);
-    if (levels_.empty()) {  // new file is empty
-      throw std::runtime_error("No levels loaded.");
-    }
   }
   // no need for bound checks since it is checked in the while loop above
   auto out = levels_.begin() + cur_level_;

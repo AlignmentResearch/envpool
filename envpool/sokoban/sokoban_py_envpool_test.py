@@ -306,7 +306,7 @@ def test_load_sequentially_with_multiple_envs() -> None:
   dim_room = env.spec.config.dim_room
   printed_obs = []
 
-  for _ in range(2): # check loader loops around and loads levels again
+  for _ in range(2):  # check loader loops around and loads levels again
     for _ in range(total_levels // num_envs):
       obs, _ = env.reset()
       assert obs.shape == (
