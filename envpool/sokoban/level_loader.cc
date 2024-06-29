@@ -193,7 +193,7 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
     levels_loaded_ = 0;
     cur_file_ = level_file_paths_.begin();
     LoadFile(gen);
-    cur_level_ = env_id_;
+    cur_level_ = env_id_;  // re-start from the `env_id`th level, like we do in the constructor.
   }
   // Load new files until the current level index is within the loaded levels
   // this is required when new files have lesser levels than the number of envs
