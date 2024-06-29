@@ -79,10 +79,11 @@ constexpr std::array<std::array<int, 2>, 4> kChangeCoordinates = {
 void SokobanEnv::Step(const Action& action_dict) {
   const int action = action_dict["action"_];
   // Sneaky Noop action
-  if(action < 0) {
+  if (action < 0) {
     WriteState(std::numeric_limits<float>::signaling_NaN());
-    // Avoid advancing the current_step_. `envpool/core/env.h` advances `current_step_` at every non-Reset step, and
-    // sets it to 0 when it is a Reset.
+    // Avoid advancing the current_step_. `envpool/core/env.h` advances
+    // `current_step_` at every non-Reset step, and sets it to 0 when it is a
+    // Reset.
     return;
   }
 

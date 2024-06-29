@@ -344,7 +344,8 @@ def test_astar_log(tmp_path) -> None:
 
 def test_sneaky_noop():
   """
-  Even though an action < 0 is not part of the environment, we overload it to mean NOOP.
+  Even though an action < 0 is not part of the environment, we overload it to
+  mean NOOP.
 
   This lets us easily do thinking-time experiments
   """
@@ -363,8 +364,10 @@ def test_sneaky_noop():
   )
   init_obs, _ = env.reset()
   assert env.action_space.n == 4
-  for _ in range(MAX_EP_STEPS*5):
-    obs, reward, terminated, truncated, info = env.step(-np.ones([NUM_ENVS], dtype=np.int64))
+  for _ in range(MAX_EP_STEPS * 5):
+    obs, reward, terminated, truncated, info = env.step(
+      -np.ones([NUM_ENVS], dtype=np.int64)
+    )
     assert np.array_equal(init_obs, obs)
     assert not np.any(terminated | truncated)
     assert np.all(np.isnan(reward))
