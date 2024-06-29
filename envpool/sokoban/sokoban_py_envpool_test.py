@@ -360,7 +360,6 @@ def test_sneaky_noop():
     min_episode_steps=MIN_EP_STEPS,
     max_episode_steps=MAX_EP_STEPS,
     levels_dir="/app/envpool/sokoban/sample_levels",
-    load_sequentially=True,
   )
   init_obs, _ = env.reset()
   assert env.action_space.n == 4
