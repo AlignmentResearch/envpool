@@ -76,10 +76,14 @@ constexpr std::array<std::array<int, 2>, 4> kChangeCoordinates = {
     {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
 void SokobanEnv::Step(const Action& action_dict) {
-  current_step_++;
-
   const int action = action_dict["action"_];
+  if(action < 0) {
+    // Sneaky Noop action
+    WriteState(std::nanf(""));
+    return;
+  }
 
+  current_step_++;
   const int change_coordinates_idx = action;
   const int delta_x = kChangeCoordinates.at(change_coordinates_idx).at(0);
   const int delta_y = kChangeCoordinates.at(change_coordinates_idx).at(1);
