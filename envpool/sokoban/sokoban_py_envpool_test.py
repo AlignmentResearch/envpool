@@ -342,6 +342,44 @@ def test_astar_log(tmp_path) -> None:
   assert f"0,{SOLVE_LEVEL_ZERO},21,1380" == log.split("\n")[1]
 
 
+def test_sneaky_noop():
+  """
+  Even though an action < 0 is not part of the environment, we overload it to
+  mean NOOP.
+
+  This lets us easily do thinking-time experiments
+  """
+  MIN_EP_STEPS = 1
+  MAX_EP_STEPS = 3
+  NUM_ENVS = 5
+
+  env = envpool.make(
+    "Sokoban-v0",
+    env_type="gymnasium",
+    num_envs=NUM_ENVS,
+    batch_size=NUM_ENVS,
+    min_episode_steps=MIN_EP_STEPS,
+    max_episode_steps=MAX_EP_STEPS,
+    levels_dir="/app/envpool/sokoban/sample_levels",
+  )
+  init_obs, _ = env.reset()
+  assert env.action_space.n == 4
+  for _ in range(MAX_EP_STEPS * 5):
+    obs, reward, terminated, truncated, info = env.step(
+      -np.ones([NUM_ENVS], dtype=np.int64)
+    )
+    assert np.array_equal(init_obs, obs)
+    assert not np.any(terminated | truncated)
+    assert np.all(np.isnan(reward))
+
+  truncs = []
+  for _ in range(MAX_EP_STEPS):
+    _, _, _, truncated, _ = env.step(np.zeros([NUM_ENVS], dtype=np.int64))
+    truncs.append(truncated)
+
+  assert np.all(np.any(truncated, axis=0), axis=0)
+
+
 if __name__ == "__main__":
   retcode = pytest.main(["-v", __file__])
   sys.exit(retcode)

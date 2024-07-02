@@ -15,6 +15,7 @@
 #include "envpool/sokoban/sokoban_envpool.h"
 
 #include <array>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -76,10 +77,17 @@ constexpr std::array<std::array<int, 2>, 4> kChangeCoordinates = {
     {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
 
 void SokobanEnv::Step(const Action& action_dict) {
-  current_step_++;
-
   const int action = action_dict["action"_];
+  // Sneaky Noop action
+  if (action < 0) {
+    WriteState(std::numeric_limits<float>::signaling_NaN());
+    // Avoid advancing the current_step_. `envpool/core/env.h` advances
+    // `current_step_` at every non-Reset step, and sets it to 0 when it is a
+    // Reset.
+    return;
+  }
 
+  current_step_++;
   const int change_coordinates_idx = action;
   const int delta_x = kChangeCoordinates.at(change_coordinates_idx).at(0);
   const int delta_y = kChangeCoordinates.at(change_coordinates_idx).at(1);
