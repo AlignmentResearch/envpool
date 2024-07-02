@@ -35,7 +35,6 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
       env_id_(env_id),
       num_envs_(num_envs),
       cur_level_(env_id),
-      cur_level_file_(-1),
       verbose(verbose) {
   if (std::filesystem::is_regular_file(base_path)) {
     level_file_paths_.push_back(base_path);
