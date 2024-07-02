@@ -15,6 +15,7 @@
 #include "envpool/sokoban/sokoban_envpool.h"
 
 #include <array>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -32,11 +33,12 @@ void SokobanEnv::ResetWithoutWrite() {
   current_max_episode_steps_ =
       SafeUniformInt(min_episode_steps, max_episode_steps, gen_);
 
-  std::pair<std::vector<SokobanLevel>::iterator, std::pair<int, int>> level =
+  std::pair<std::vector<std::pair<int, SokobanLevel>>::iterator, int> level =
       level_loader_.GetLevel(gen_);
-  world_ = *level.first;
-  level_file_idx_ = level.second.first;
-  level_idx_ = level.second.second;
+  world_ = (*level.first).second;
+  level_idx_ = (*level.first).first;
+  level_file_idx_ = level.second;
+
   if (world_.size() != dim_room_ * dim_room_) {
     std::stringstream msg;
     msg << "Loaded level is not dim_room x dim_room. world_.size()="

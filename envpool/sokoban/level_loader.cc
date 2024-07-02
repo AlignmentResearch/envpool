@@ -129,6 +129,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
   std::ifstream file(file_path);
 
   levels_.clear();
+  int cur_level_idx = 0;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty()) {
@@ -136,7 +137,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     }
 
     if (line.at(0) == '#') {
-      SokobanLevel& cur_level = levels_.emplace_back(0);
+      SokobanLevel cur_level(0);
       cur_level.reserve(10 * 10);  // In practice most levels are this size
 
       // Count contiguous '#' characters and use this as the box dimension
@@ -164,6 +165,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
             << "x" << dim_room << std::endl;
         throw std::runtime_error(msg.str());
       }
+      levels_.emplace_back(std::make_pair(cur_level_idx++, cur_level));
     }
   }
   if (!load_sequentially_) {
@@ -179,15 +181,15 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     std::cout << "***Loaded " << levels_.size() << " levels from " << file_path
               << std::endl;
     if (verbose >= 2) {
-      PrintLevel(std::cout, levels_.at(0));
+      PrintLevel(std::cout, levels_.at(0).second);
       std::cout << std::endl;
-      PrintLevel(std::cout, levels_.at(1));
+      PrintLevel(std::cout, levels_.at(1).second);
       std::cout << std::endl;
     }
   }
 }
 
-std::pair<std::vector<SokobanLevel>::iterator, std::pair<int, int>>
+std::pair<std::vector<std::pair<int, SokobanLevel>>::iterator, int>
 LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     // std::cerr << "Warning: All levels loaded. Looping around now." <<
@@ -207,10 +209,9 @@ LevelLoader::GetLevel(std::mt19937& gen) {
   }
   // no need for bound checks since it is checked in the while loop above
   auto out = levels_.begin() + cur_level_;
-  int out_level_idx = cur_level_;
   cur_level_ += num_envs_;
   levels_loaded_++;
-  return {out, {cur_level_file_, out_level_idx}};
+  return {out, cur_level_file_};
 }
 
 }  // namespace sokoban
