@@ -35,6 +35,7 @@ LevelLoader::LevelLoader(const std::filesystem::path& base_path,
       env_id_(env_id),
       num_envs_(num_envs),
       cur_level_(env_id),
+      cur_level_file_(-1),
       verbose(verbose) {
   if (std::filesystem::is_regular_file(base_path)) {
     level_file_paths_.push_back(base_path);
@@ -118,12 +119,13 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     if (cur_file_ == level_file_paths_.end()) {
       throw std::runtime_error("No more files to load.");
     }
+    cur_level_file_++;
     file_path = *cur_file_;
     cur_file_++;
   } else {
-    const size_t load_file_idx = SafeUniformInt(
-        static_cast<size_t>(0), level_file_paths_.size() - 1, gen);
-    file_path = level_file_paths_.at(load_file_idx);
+    cur_level_file_ = SafeUniformInt(static_cast<size_t>(0),
+                                     level_file_paths_.size() - 1, gen);
+    file_path = level_file_paths_.at(cur_level_file_);
   }
   std::ifstream file(file_path);
 
@@ -186,12 +188,14 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
   }
 }
 
-std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
+std::pair<std::vector<SokobanLevel>::iterator, std::pair<int, int>>
+LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     // std::cerr << "Warning: All levels loaded. Looping around now." <<
     // std::endl;
     levels_loaded_ = 0;
     cur_file_ = level_file_paths_.begin();
+    cur_level_file_ = -1;
     LoadFile(gen);
     // re-start from the `env_id`th level, like we do in the constructor.
     cur_level_ = env_id_;
@@ -204,9 +208,10 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   }
   // no need for bound checks since it is checked in the while loop above
   auto out = levels_.begin() + cur_level_;
+  int out_level_idx = cur_level_;
   cur_level_ += num_envs_;
   levels_loaded_++;
-  return out;
+  return {out, {cur_level_file_, out_level_idx}};
 }
 
 }  // namespace sokoban

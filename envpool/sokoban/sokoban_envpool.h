@@ -48,7 +48,9 @@ class SokobanEnvFns {
   template <typename Config>
   static decltype(auto) StateSpec(const Config& conf) {
     int dim_room = conf["dim_room"_];
-    return MakeDict("obs"_.Bind(Spec<uint8_t>({3, dim_room, dim_room})));
+    return MakeDict("obs"_.Bind(Spec<uint8_t>({3, dim_room, dim_room})),
+                    "info:level_file_idx"_.Bind(Spec<int>({-1})),
+                    "info:level_idx"_.Bind(Spec<int>({-1})));
   }
   template <typename Config>
   static decltype(auto) ActionSpec(const Config& conf) {
@@ -106,6 +108,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
   std::filesystem::path levels_dir_;
 
   LevelLoader level_loader_;
+  int level_file_idx_{-1}, level_idx_{-1};
   SokobanLevel world_;
   int verbose_;
 
