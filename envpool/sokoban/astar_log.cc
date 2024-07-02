@@ -41,7 +41,7 @@ void RunAStar(const std::string& level_file_name,
       if (line.empty()) {
         continue;
       }
-      SokobanLevel level = *level_loader.GetLevel(gen).first;
+      SokobanLevel level = *(level_loader.GetLevel(gen).first);
       level_idx++;
     }
   }
@@ -102,27 +102,29 @@ void RunAStar(const std::string& level_file_name,
       astarsearch.EnsureMemoryFreed();
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_FAILED) {
-      log_file_out << level_idx << "," << "SEARCH_STATE_FAILED,-1,"
-                   << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_FAILED,-1," << search_steps << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_NOT_INITIALISED) {
-      log_file_out << level_idx << "," << "SEARCH_STATE_NOT_INITIALISED,-1,"
-                   << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_NOT_INITIALISED,-1," << search_steps
+                   << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING) {
-      log_file_out << level_idx << "," << "SEARCH_STATE_SEARCHING,-1,"
-                   << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_SEARCHING,-1," << search_steps << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
-      log_file_out << level_idx << "," << "SEARCH_STATE_OUT_OF_MEMORY,-1,"
-                   << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps
+                   << std::endl;
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
-      log_file_out << level_idx << "," << "SEARCH_STATE_INVALID,-1,"
-                   << search_steps << std::endl;
+      log_file_out << level_idx << ","
+                   << "SEARCH_STATE_INVALID,-1," << search_steps << std::endl;
     } else {
-      log_file_out << level_idx << "," << "UNKNOWN,-1," << search_steps
-                   << std::endl;
+      log_file_out << level_idx << ","
+                   << "UNKNOWN,-1," << search_steps << std::endl;
     }
     log_file_out.flush();
     level_idx++;
