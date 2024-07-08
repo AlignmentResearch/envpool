@@ -189,8 +189,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
   }
 }
 
-std::pair<std::vector<std::pair<int, SokobanLevel>>::iterator, int>
-LevelLoader::GetLevel(std::mt19937& gen) {
+TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     // std::cerr << "Warning: All levels loaded. Looping around now." <<
     // std::endl;
@@ -211,7 +210,9 @@ LevelLoader::GetLevel(std::mt19937& gen) {
   auto out = levels_.begin() + cur_level_;
   cur_level_ += num_envs_;
   levels_loaded_++;
-  return {out, cur_level_file_};
+
+  TaggedSokobanLevel tagged_level = {cur_level_file_, out->first, out->second};
+  return tagged_level;
 }
 
 }  // namespace sokoban

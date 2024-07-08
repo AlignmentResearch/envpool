@@ -35,6 +35,11 @@ constexpr uint8_t kPlayer = 5;
 constexpr uint8_t kPlayerOnTarget = 6;
 constexpr uint8_t kMaxLevelObject = kPlayerOnTarget;
 
+struct TaggedSokobanLevel {
+  int file_idx, level_idx;
+  SokobanLevel data;
+};
+
 class LevelLoader {
  protected:
   bool load_sequentially_;
@@ -51,8 +56,7 @@ class LevelLoader {
  public:
   int verbose;
 
-  std::pair<std::vector<std::pair<int, SokobanLevel>>::iterator, int> GetLevel(
-      std::mt19937& gen);
+  TaggedSokobanLevel GetLevel(std::mt19937& gen);
   explicit LevelLoader(const std::filesystem::path& base_path,
                        bool load_sequentially, int n_levels_to_load,
                        int env_id = 0, int num_envs = 1, int verbose = 0);

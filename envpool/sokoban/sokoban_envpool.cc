@@ -33,11 +33,10 @@ void SokobanEnv::ResetWithoutWrite() {
   current_max_episode_steps_ =
       SafeUniformInt(min_episode_steps, max_episode_steps, gen_);
 
-  std::pair<std::vector<std::pair<int, SokobanLevel>>::iterator, int> level =
-      level_loader_.GetLevel(gen_);
-  world_ = (*level.first).second;
-  level_idx_ = (*level.first).first;
-  level_file_idx_ = level.second;
+  TaggedSokobanLevel level = level_loader_.GetLevel(gen_);
+  world_ = level.data;
+  level_idx_ = level.level_idx;
+  level_file_idx_ = level.file_idx;
 
   if (world_.size() != dim_room_ * dim_room_) {
     std::stringstream msg;
