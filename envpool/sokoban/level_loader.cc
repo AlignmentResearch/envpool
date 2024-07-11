@@ -165,7 +165,8 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
             << "x" << dim_room << std::endl;
         throw std::runtime_error(msg.str());
       }
-      levels_.push_back(std::make_pair(cur_level_idx++, std::move(cur_level)));
+      levels_.emplace_back(
+          std::make_pair(cur_level_idx++, std::move(cur_level)));
     }
   }
   if (!load_sequentially_) {
