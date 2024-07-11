@@ -165,7 +165,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
             << "x" << dim_room << std::endl;
         throw std::runtime_error(msg.str());
       }
-      levels_.emplace_back(std::make_pair(cur_level_idx++, cur_level));
+      levels_.push_back(std::make_pair(cur_level_idx++, std::move(cur_level)));
     }
   }
   if (!load_sequentially_) {
@@ -211,7 +211,7 @@ TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   cur_level_ += num_envs_;
   levels_loaded_++;
 
-  TaggedSokobanLevel tagged_level = {cur_level_file_, out->first, out->second};
+  TaggedSokobanLevel tagged_level{cur_level_file_, out->first, out->second};
   return tagged_level;
 }
 
