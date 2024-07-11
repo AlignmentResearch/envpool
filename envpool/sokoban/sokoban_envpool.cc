@@ -15,9 +15,11 @@
 #include "envpool/sokoban/sokoban_envpool.h"
 
 #include <array>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "envpool/core/py_envpool.h"
@@ -31,7 +33,11 @@ void SokobanEnv::ResetWithoutWrite() {
   current_max_episode_steps_ =
       SafeUniformInt(min_episode_steps, max_episode_steps, gen_);
 
-  world_ = *(level_loader_.GetLevel(gen_));
+  TaggedSokobanLevel level = level_loader_.GetLevel(gen_);
+  world_ = level.data;
+  level_idx_ = level.level_idx;
+  level_file_idx_ = level.file_idx;
+
   if (world_.size() != dim_room_ * dim_room_) {
     std::stringstream msg;
     msg << "Loaded level is not dim_room x dim_room. world_.size()="
@@ -204,6 +210,9 @@ void SokobanEnv::WriteState(float reward) {
     }
   }
   obs.Assign(out.data(), out.size());
+
+  state["info:level_file_idx"_] = level_file_idx_;
+  state["info:level_idx"_] = level_idx_;
 }
 
 }  // namespace sokoban

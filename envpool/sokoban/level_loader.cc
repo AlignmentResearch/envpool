@@ -118,16 +118,18 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     if (cur_file_ == level_file_paths_.end()) {
       throw std::runtime_error("No more files to load.");
     }
+    cur_level_file_++;
     file_path = *cur_file_;
     cur_file_++;
   } else {
-    const size_t load_file_idx = SafeUniformInt(
-        static_cast<size_t>(0), level_file_paths_.size() - 1, gen);
-    file_path = level_file_paths_.at(load_file_idx);
+    cur_level_file_ = SafeUniformInt(static_cast<size_t>(0),
+                                     level_file_paths_.size() - 1, gen);
+    file_path = level_file_paths_.at(cur_level_file_);
   }
   std::ifstream file(file_path);
 
   levels_.clear();
+  int cur_level_idx = 0;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty()) {
@@ -135,7 +137,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     }
 
     if (line.at(0) == '#') {
-      SokobanLevel& cur_level = levels_.emplace_back(0);
+      SokobanLevel cur_level(0);
       cur_level.reserve(10 * 10);  // In practice most levels are this size
 
       // Count contiguous '#' characters and use this as the box dimension
@@ -163,6 +165,8 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
             << "x" << dim_room << std::endl;
         throw std::runtime_error(msg.str());
       }
+      levels_.emplace_back(
+          std::make_pair(cur_level_idx++, std::move(cur_level)));
     }
   }
   if (!load_sequentially_) {
@@ -178,20 +182,21 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
     std::cout << "***Loaded " << levels_.size() << " levels from " << file_path
               << std::endl;
     if (verbose >= 2) {
-      PrintLevel(std::cout, levels_.at(0));
+      PrintLevel(std::cout, levels_.at(0).second);
       std::cout << std::endl;
-      PrintLevel(std::cout, levels_.at(1));
+      PrintLevel(std::cout, levels_.at(1).second);
       std::cout << std::endl;
     }
   }
 }
 
-std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
+TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     // std::cerr << "Warning: All levels loaded. Looping around now." <<
     // std::endl;
     levels_loaded_ = 0;
     cur_file_ = level_file_paths_.begin();
+    cur_level_file_ = -1;
     LoadFile(gen);
     // re-start from the `env_id`th level, like we do in the constructor.
     cur_level_ = env_id_;
@@ -206,7 +211,9 @@ std::vector<SokobanLevel>::iterator LevelLoader::GetLevel(std::mt19937& gen) {
   auto out = levels_.begin() + cur_level_;
   cur_level_ += num_envs_;
   levels_loaded_++;
-  return out;
+
+  TaggedSokobanLevel tagged_level{cur_level_file_, out->first, out->second};
+  return tagged_level;
 }
 
 }  // namespace sokoban

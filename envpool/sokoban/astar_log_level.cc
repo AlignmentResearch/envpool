@@ -41,7 +41,7 @@ void RunAStar(const std::string& level_file_name,
   }
   std::AStarSearch<SokobanNode> astarsearch(fsa_limit);
   std::cout << "Running level " << level_idx << std::endl;
-  SokobanLevel level = *level_loader.GetLevel(gen);
+  SokobanLevel level = level_loader.GetLevel(gen).data;
 
   SokobanNode node_start(dim_room, level, false);
   SokobanNode node_end(dim_room, level, true);

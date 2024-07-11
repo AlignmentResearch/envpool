@@ -285,10 +285,12 @@ def test_load_sequentially_with_multiple_envs() -> None:
   levels_dir = "/app/envpool/sokoban/sample_levels"
   files = glob.glob(f"{levels_dir}/*.txt")
   levels_by_files = []
+  levels_per_file = []
   total_levels, num_envs = 8, 2
   for file in sorted(files):
     levels = read_levels_file(file)
     levels_by_files.extend(levels)
+    levels_per_file.append(len(levels))
   assert len(levels_by_files) == total_levels, "8 levels stored in files."
 
   env = envpool.make(
@@ -307,8 +309,17 @@ def test_load_sequentially_with_multiple_envs() -> None:
   printed_obs = []
 
   for _ in range(2):  # check loader loops around and loads levels again
+    gt_file_idx, gt_level_idx = 0, 0
     for _ in range(total_levels // num_envs):
-      obs, _ = env.reset()
+      obs, info = env.reset()
+      level_file_idxs, level_idxs = info["level_file_idx"], info["level_idx"]
+      for lfi, li in zip(level_file_idxs, level_idxs):
+        assert lfi == gt_file_idx, f"lfi: {lfi}, gt_file_idx: {gt_file_idx}"
+        assert li == gt_level_idx, f"li: {li}, gt_level_idx: {gt_level_idx}"
+        gt_level_idx += 1
+        if gt_level_idx == levels_per_file[gt_file_idx]:
+          gt_file_idx += 1
+          gt_level_idx = 0
       assert obs.shape == (
         num_envs,
         3,
