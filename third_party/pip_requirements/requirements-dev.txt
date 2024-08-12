@@ -1,4 +1,4 @@
-setuptools
+setuptools==65.5.0
 wheel
 numpy
 dm-env
