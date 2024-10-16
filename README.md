@@ -6,6 +6,27 @@
 
 [![PyPI](https://img.shields.io/pypi/v/envpool)](https://pypi.org/project/envpool/) [![Downloads](https://static.pepy.tech/personalized-badge/envpool?period=total&units=international_system&left_color=grey&right_color=orange&left_text=PyPI%20Download)](https://pepy.tech/project/envpool) [![arXiv](https://img.shields.io/badge/arXiv-2206.10558-b31b1b.svg)](https://arxiv.org/abs/2206.10558) [![Read the Docs](https://img.shields.io/readthedocs/envpool)](https://envpool.readthedocs.io/) [![Unittest](https://github.com/sail-sg/envpool/workflows/Bazel%20Build%20and%20Test/badge.svg?branch=main)](https://github.com/sail-sg/envpool/actions) [![GitHub issues](https://img.shields.io/github/issues/sail-sg/envpool)](https://github.com/sail-sg/envpool/issues) [![GitHub stars](https://img.shields.io/github/stars/sail-sg/envpool)](https://github.com/sail-sg/envpool/stargazers) [![GitHub forks](https://img.shields.io/github/forks/sail-sg/envpool)](https://github.com/sail-sg/envpool/network) [![GitHub license](https://img.shields.io/github/license/sail-sg/envpool)](https://github.com/sail-sg/envpool/blob/main/LICENSE)
 
+## Envpool Sokoban Build Instructions
+
+The dockerfile `docker/dev.dockerfile` is used to build the environment for the Envpool Sokoban environment with Python 3.11.
+```bash
+docker build -f docker/dev.dockerfile -t envpool-sokoban .
+docker run -it --rm envpool-sokoban
+# Inside the Docker container
+export USE_BAZEL_VERSION=6.4.0
+make bazel-release # to get the python wheel published in release
+make bazel-test # to run the tests
+```
+
+For Python 3.10 wheel, run the following commands inside the docker image:
+```bash
+rm /usr/bin/python3 && ln -s /usr/bin/python3.10 /usr/bin/python3
+make bazel-release
+```
+
+
+## Actual EnvPool README
+
 **EnvPool** is a C++-based batched environment pool with pybind11 and thread pool. It has high performance (\~1M raw FPS with Atari games, \~3M raw FPS with Mujoco simulator on DGX-A100) and compatible APIs (supports both gym and dm\_env, both sync and async, both single and multi player environment). Currently it supports:
 
 - [x] [Atari games](https://envpool.readthedocs.io/en/latest/env/atari.html)
