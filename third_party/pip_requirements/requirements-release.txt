@@ -1,10 +1,10 @@
 setuptools==70.3.0 # last setuptools version that doesn't give the Lorem Ipsum.txt error
 wheel
-numpy==1.26.4 # latest numpy fails the test_load_sequentially_with_multiple_envs
+numpy==1.26.4 # test_load_sequentially_with_multiple_envs fails with latest version
 dm-env
 gym>=0.26
 gymnasium>=0.26,!=0.27.0
 optree>=0.6.0
-jax[cpu]==0.4.25 # test_xla fails with latest version
+jax[cpu]==0.4.27 # test_xla fails with latest version
 packaging
 pytest
