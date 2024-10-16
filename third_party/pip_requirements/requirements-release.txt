@@ -1,6 +1,6 @@
-setuptools
+setuptools==68.2.2
 wheel
-numpy
+numpy==1.26.3
 dm-env
 gym>=0.26
 gymnasium>=0.26,!=0.27.0
