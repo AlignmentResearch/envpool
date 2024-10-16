@@ -6,10 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH=$PATH:$HOME/go/bin
 
 RUN apt-get update \
-    && apt-get install -y python3-pip python3-dev golang-1.18 git wget curl tmux vim ssh \
+    && apt-get install -y python3-pip python3.11-dev golang-1.18 git wget curl tmux vim ssh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -s /usr/bin/python3.11 /usr/bin/python && rm /usr/bin/python3 && ln -s /usr/bin/python3.11 /usr/bin/python3
 RUN ln -sf /usr/lib/go-1.18/bin/go /usr/bin/go
 
 # Install Bazel
