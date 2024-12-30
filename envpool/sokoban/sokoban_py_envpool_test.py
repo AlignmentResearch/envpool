@@ -49,6 +49,7 @@ def test_config() -> None:
     "reward_box",
     "reward_finished",
     "reward_step",
+    "reward_noop",
     "verbose",
     "load_sequentially",
     "n_levels_to_load",
