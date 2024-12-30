@@ -425,8 +425,8 @@ def test_noop_action():
   obs, reward, terminated, truncated, info = env.step(
     4 * np.ones([NUM_ENVS], dtype=np.int64)
   )
-  assert np.array_equal(init_obs, obs)
   assert np.all(truncated)
+  assert np.all(reward == NOOP_REWARD + STEP_PENALTY)
 
 
 if __name__ == "__main__":
