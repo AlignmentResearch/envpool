@@ -160,7 +160,7 @@ void SokobanEnv::Step(const Action& action_dict) {
                         reward_box_ * static_cast<double>(prev_unmatched_boxes -
                                                           unmatched_boxes_) +
                         ((unmatched_boxes_ == 0) ? reward_finished_ : 0.0f) +
-                        reward_noop_ * static_cast<double>(action == kActNoop);
+                        reward_noop_ * static_cast<double>(action == kActNoOp);
 
   WriteState(static_cast<float>(reward));
 }
