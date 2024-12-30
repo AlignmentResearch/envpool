@@ -79,7 +79,7 @@ def test_envpool() -> None:
   _ = env.reset()
   t = time.time()
 
-  assert env.action_space.n == 4
+  assert env.action_space.n == 5
   for _ in range(total_steps):
     _ = env.step(np.random.randint(low=0, high=4, size=(num_envs,)))
   duration = time.time() - t
@@ -211,6 +211,7 @@ action_astar_to_envpool = {
   "1": 3,
   "2": 1,
   "3": 2,
+  "4": 4,
 }
 
 
@@ -246,7 +247,7 @@ def test_solved_level_does_not_truncate(solve_on_time: bool):
     )
     assert not term and not trunc, "Level should not have reached time limit"
 
-  wrong_action = str((int(SOLVE_LEVEL_ZERO[-1]) + 1) % 4)
+  wrong_action = str((int(SOLVE_LEVEL_ZERO[-1]) + 1) % 5)
 
   if solve_on_time:
     obs, reward, term, trunc, infos = env.step(
@@ -374,7 +375,7 @@ def test_sneaky_noop():
     levels_dir="/app/envpool/sokoban/sample_levels",
   )
   init_obs, _ = env.reset()
-  assert env.action_space.n == 4
+  assert env.action_space.n == 5
   for _ in range(MAX_EP_STEPS * 5):
     obs, reward, terminated, truncated, info = env.step(
       -np.ones([NUM_ENVS], dtype=np.int64)
@@ -389,6 +390,43 @@ def test_sneaky_noop():
     truncs.append(truncated)
 
   assert np.all(np.any(truncated, axis=0), axis=0)
+
+
+def test_noop_action():
+  """
+  Action = 4 is a NOOP action.
+  """
+  MIN_EP_STEPS = 3
+  MAX_EP_STEPS = 3
+  NUM_ENVS = 5
+  NOOP_REWARD = 0.02
+  STEP_PENALTY = -0.1
+
+  env = envpool.make(
+    "Sokoban-v0",
+    env_type="gymnasium",
+    num_envs=NUM_ENVS,
+    batch_size=NUM_ENVS,
+    min_episode_steps=MIN_EP_STEPS,
+    max_episode_steps=MAX_EP_STEPS,
+    levels_dir="/app/envpool/sokoban/sample_levels",
+    reward_noop=NOOP_REWARD,
+    reward_step=STEP_PENALTY,
+  )
+  init_obs, _ = env.reset()
+  assert env.action_space.n == 5
+  for _ in range(MAX_EP_STEPS - 1):
+    obs, reward, terminated, truncated, info = env.step(
+      4 * np.ones([NUM_ENVS], dtype=np.int64)
+    )
+    assert np.array_equal(init_obs, obs)
+    assert not np.any(terminated | truncated)
+    assert np.all(reward == NOOP_REWARD + STEP_PENALTY)
+  obs, reward, terminated, truncated, info = env.step(
+    4 * np.ones([NUM_ENVS], dtype=np.int64)
+  )
+  assert np.array_equal(init_obs, obs)
+  assert np.all(truncated)
 
 
 if __name__ == "__main__":
