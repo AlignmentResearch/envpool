@@ -33,15 +33,16 @@ constexpr int kActPushUp = 0;
 constexpr int kActPushDown = 1;
 constexpr int kActPushLeft = 2;
 constexpr int kActPushRight = 3;
-constexpr int kMaxAction = kActPushRight;
+constexpr int kActNoOp = 4;
+constexpr int kMaxAction = kActNoOp;
 
 class SokobanEnvFns {
  public:
   static decltype(auto) DefaultConfig() {
     return MakeDict("reward_finished"_.Bind(10.0), "reward_box"_.Bind(1.0),
-                    "reward_step"_.Bind(-0.1), "dim_room"_.Bind(10),
-                    "levels_dir"_.Bind(std::string("")), "verbose"_.Bind(0),
-                    "min_episode_steps"_.Bind(0),
+                    "reward_step"_.Bind(-0.1), "reward_noop"_.Bind(0.0),
+                    "dim_room"_.Bind(10), "levels_dir"_.Bind(std::string("")),
+                    "verbose"_.Bind(0), "min_episode_steps"_.Bind(0),
                     "load_sequentially"_.Bind(false),
                     "n_levels_to_load"_.Bind(-1));
   }
@@ -69,6 +70,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
         reward_finished_{static_cast<double>(spec.config["reward_finished"_])},
         reward_box_{static_cast<double>(spec.config["reward_box"_])},
         reward_step_{static_cast<double>(spec.config["reward_step"_])},
+        reward_noop_{static_cast<double>(spec.config["reward_noop"_])},
         levels_dir_{static_cast<std::string>(spec.config["levels_dir"_])},
         level_loader_(levels_dir_, spec.config["load_sequentially"_],
                       static_cast<int>(spec.config["n_levels_to_load"_]),
@@ -104,7 +106,7 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
 
  private:
   int dim_room_;
-  double reward_finished_, reward_box_, reward_step_;
+  double reward_finished_, reward_box_, reward_step_, reward_noop_;
   std::filesystem::path levels_dir_;
 
   LevelLoader level_loader_;
