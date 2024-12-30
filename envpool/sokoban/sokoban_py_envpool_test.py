@@ -348,7 +348,8 @@ def test_astar_log(tmp_path) -> None:
     cwd="/app/envpool",
     env={
       "HOME": "/root",
-      "PATH": "/opt/conda/bin:/usr/bin"
+      "PATH": "/opt/conda/bin:/usr/bin",
+      "USE_BAZEL_VERSION": "6.4.0",
     },
   )
   log = log_file_name.read_text()
