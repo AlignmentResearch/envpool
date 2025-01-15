@@ -79,8 +79,8 @@ void SokobanEnv::WorldAssignAt(int x, int y, uint8_t value) {
   world_.at(x + y * dim_room_) = value;
 }
 
-constexpr std::array<std::array<int, 2>, 4> kChangeCoordinates = {
-    {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
+constexpr std::array<std::array<int, 2>, 5> kChangeCoordinates = {
+    {{0, -1}, {0, 1}, {-1, 0}, {1, 0}, {0, 0}}};
 
 void SokobanEnv::Step(const Action& action_dict) {
   const int action = action_dict["action"_];
@@ -159,7 +159,8 @@ void SokobanEnv::Step(const Action& action_dict) {
   const double reward = reward_step_ +
                         reward_box_ * static_cast<double>(prev_unmatched_boxes -
                                                           unmatched_boxes_) +
-                        ((unmatched_boxes_ == 0) ? reward_finished_ : 0.0f);
+                        ((unmatched_boxes_ == 0) ? reward_finished_ : 0.0f) +
+                        reward_noop_ * static_cast<double>(action == kActNoOp);
 
   WriteState(static_cast<float>(reward));
 }
