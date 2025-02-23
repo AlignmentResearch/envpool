@@ -30,7 +30,7 @@ cc_library(
     name = "spec",
     hdrs = ["spec.h"],
     deps = [
-        "@com_github_google_glog//:glog",
+        "@glog//:glog",
     ],
 )
 
@@ -39,7 +39,7 @@ cc_library(
     hdrs = ["array.h"],
     deps = [
         ":spec",
-        "@com_github_google_glog//:glog",
+        "@glog//:glog",
     ],
 )
 
@@ -51,7 +51,7 @@ cc_library(
         ":spec",
         ":tuple_utils",
         ":type_utils",
-        "@com_github_google_glog//:glog",
+        "@glog//:glog",
     ],
 )
 
@@ -99,7 +99,7 @@ cc_test(
     srcs = ["circular_buffer_test.cc"],
     deps = [
         ":circular_buffer",
-        "@com_github_google_glog//:glog",
+        "@glog//:glog",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -22,6 +22,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <array>
 
 #include "envpool/sokoban/utils.h"
 
@@ -203,8 +204,8 @@ TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   }
   // Load new files until the current level index is within the loaded levels
   // this is required when new files have lesser levels than the number of envs
-  while (cur_level_ >= levels_.size()) {
-    cur_level_ -= levels_.size();
+  while (cur_level_ >= std::ssize(levels_)) {
+    cur_level_ -= std::ssize(levels_);
     LoadFile(gen);
   }
   // no need for bound checks since it is checked in the while loop above
