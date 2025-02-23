@@ -103,18 +103,12 @@ clang-tidy: clang-tidy-install bazel-pip-requirement-dev
 
 bazel-debug: bazel-install bazel-pip-requirement-dev
 	bazel build $(BAZELOPT) //:wheel --config=debug
-	mkdir -p dist
-	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
 
 bazel-build: bazel-install bazel-pip-requirement-dev
 	bazel build $(BAZELOPT) //:wheel --config=test
-	mkdir -p dist
-	cp bazel-bin/*.whl ./dist
 
 bazel-release: bazel-install bazel-pip-requirement-release
-	bazel build $(BAZELOPT) //:wheel
-	mkdir -p dist
-	cp bazel-bin/*.whl ./dist
+	bazel build $(BAZELOPT) //:wheel_dist
 
 bazel-test: bazel-install bazel-pip-requirement-dev
 	bazel test --test_output=all $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=test --spawn_strategy=local --color=yes

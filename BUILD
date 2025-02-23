@@ -1,5 +1,5 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
-load("@rules_python//python:packaging.bzl", "py_wheel")
+load("@rules_python//python:packaging.bzl", "py_wheel", "py_wheel_dist")
 
 
 filegroup(
@@ -25,14 +25,16 @@ py_binary(
     ],
 )
 
+
 py_wheel(
     name = "wheel",
-    testonly = True,
     distribution = "envpool",
-    python_tag = "cp312-cp312-linux_x86_64",
+    python_tag = "cp312",
+    platform="linux_x86_64",
     twine = None,
     version = "0.9.0",
     deps = [
         "//envpool:envpool",
     ],
 )
+py_wheel_dist(name="wheel_dist", out="dist", wheel="wheel")
