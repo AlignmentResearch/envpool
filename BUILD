@@ -1,4 +1,6 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
+load("@rules_python//python:packaging.bzl", "py_wheel")
+
 
 filegroup(
     name = "clang_tidy_config",
@@ -20,5 +22,17 @@ py_binary(
     deps = [
         requirement("setuptools"),
         requirement("wheel"),
+    ],
+)
+
+py_wheel(
+    name = "wheel",
+    testonly = True,
+    distribution = "envpool",
+    python_tag = "py3",
+    twine = None,
+    version = "0.9.0",
+    deps = [
+        "//envpool:envpool",
     ],
 )

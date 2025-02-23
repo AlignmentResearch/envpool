@@ -16,10 +16,6 @@ load("@pip_requirements//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "workspace0.bzl",
-    "workspace1.bzl",
-])
 
 py_library(
     name = "registration",
