@@ -9,7 +9,7 @@ parameters:
   docker_img_version:
     # Docker image version for running tests.
     type: string
-    default: "8d8cf1a-envpool-ci"
+    default: "79cee56-envpool"
 
 workflows:
   test-jobs:
