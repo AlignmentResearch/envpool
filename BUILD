@@ -1,7 +1,6 @@
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@rules_python//python:packaging.bzl", "py_package", "py_wheel", "py_wheel_dist")
 
-
 filegroup(
     name = "clang_tidy_config",
     data = [".clang-tidy"],
@@ -29,19 +28,24 @@ py_binary(
 py_package(
     name = "pkg",
     packages = [],
-    deps = ["//envpool:envpool"],
+    deps = ["//envpool"],
 )
 
 py_wheel(
     name = "wheel",
-    distribution = "envpool",
-    python_tag = "cp312",
     abi = "cp312",
-    platform="linux_x86_64",
+    distribution = "envpool",
+    platform = "linux_x86_64",
+    python_tag = "cp312",
     twine = None,
     version = "0.9.0",
     deps = [
         ":pkg",
     ],
 )
-py_wheel_dist(name="wheel_dist", out="dist", wheel="wheel")
+
+py_wheel_dist(
+    name = "wheel_dist",
+    out = "dist",
+    wheel = "wheel",
+)

@@ -16,7 +16,6 @@ load("@pip_requirements//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
-
 py_library(
     name = "registration",
     srcs = ["registration.py"],
