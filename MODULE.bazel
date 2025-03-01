@@ -39,7 +39,6 @@ pip.parse(
     },
 )
 
-
 # Actually create the repos for these pip dependencies
 use_repo(pip, "pip_requirements")
 
@@ -47,6 +46,13 @@ use_repo(pip, "pip_requirements")
 bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "pybind11_bazel", version = "2.13.6")
 
+# Add bazel_skylib dependency
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+
+# rules_foreign_cc dependency with toolchain registration
+bazel_dep(name = "rules_foreign_cc", version = "0.14.0")
+# Register all the toolchains for rules_foreign_cc
+register_toolchains("@rules_foreign_cc//toolchains:all")
 
 bazel_dep(name = "glog")
 archive_override(
@@ -56,26 +62,12 @@ archive_override(
     integrity = "sha256-9hkaq2gE/U4mGZinLTBbLpi1wXgkThpSwBzEBCSF/Hw=",
 )
 
-
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 
 ##############################################
 # 2) Declare each http_archive exactly once.
 #    The "name" attribute is your final repo name.
 ##############################################
-
-# rules_foreign_cc
-http_archive(
-    name = "rules_foreign_cc",
-    sha256 = "476303bd0f1b04cc311fc258f1708a5f6ef82d3091e53fd1977fa20383425a6a",
-    strip_prefix = "rules_foreign_cc-0.10.1",
-    urls = [
-        "https://github.com/bazelbuild/rules_foreign_cc/archive/0.10.1.tar.gz",
-        "https://ml.cs.tsinghua.edu.cn/~jiayi/envpool/bazelbuild/rules_foreign_cc/0.10.1.tar.gz",
-    ],
-)
-
 
 # com_google_absl
 http_archive(
