@@ -59,3 +59,34 @@ template_rule = rule(
     output_to_genfiles = True,
     implementation = template_rule_impl,
 )
+
+def _copy_directory_impl(ctx):
+    output_dir = ctx.actions.declare_directory(ctx.attr.out)
+
+    # Create a command that copies all input files to the output directory
+    commands = ["mkdir -p %s" % output_dir.path]
+    for src in ctx.files.src:
+        commands.append("cp -r %s %s/" % (src.path, output_dir.path))
+
+    ctx.actions.run_shell(
+        inputs = ctx.files.src,
+        outputs = [output_dir],
+        command = " && ".join(commands),
+    )
+
+    return [DefaultInfo(files = depset([output_dir]))]
+
+copy_directory = rule(
+    implementation = _copy_directory_impl,
+    attrs = {
+        "src": attr.label(
+            mandatory = True,
+            allow_files = True,
+            doc = "Source directory or files to copy",
+        ),
+        "out": attr.string(
+            mandatory = True,
+            doc = "Output directory name",
+        ),
+    },
+)

@@ -50,6 +50,9 @@ cc_library(
         "src/games",
         "src/games/supported",
     ],
+    copts = [
+        "-include stdint.h",
+    ],
     linkopts = [
         "-ldl",
     ],

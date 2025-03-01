@@ -18,13 +18,6 @@ load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 package(default_visibility = ["//visibility:public"])
 
 genrule(
-    name = "gen_atari_roms",
-    srcs = ["@atari_roms//:roms"],
-    outs = ["roms"],
-    cmd = "mkdir -p $(OUTS) && cp $(SRCS) $(OUTS)",
-)
-
-genrule(
     name = "gen_pretrain_weight",
     srcs = [
         "@pretrain_weight//:pth",
@@ -47,7 +40,7 @@ cc_library(
     name = "atari_env",
     hdrs = ["atari_env.h"],
     data = [
-        ":gen_atari_roms",
+        "@atari_roms//:roms",
     ],
     deps = [
         "//envpool/core:async_envpool",

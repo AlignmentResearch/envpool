@@ -14,21 +14,20 @@
 
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+load("@envpool//third_party:common.bzl", "copy_directory")
 
 package(default_visibility = ["//visibility:public"])
 
-genrule(
+copy_directory(
     name = "gen_mujoco_gym_xml",
-    srcs = ["@mujoco_gym_xml"],
-    outs = ["assets_gym"],
-    cmd = "mkdir -p $(OUTS) && cp -r $(SRCS) $(OUTS)",
+    src = "@mujoco_gym_xml",
+    out = "assets_gym",
 )
 
-genrule(
+copy_directory(
     name = "gen_mujoco_dmc_xml",
-    srcs = ["@mujoco_dmc_xml"],
-    outs = ["assets_dmc"],
-    cmd = "mkdir -p $(OUTS) && cp -r $(SRCS) $(OUTS)",
+    src = "@mujoco_dmc_xml",
+    out = "assets_dmc",
 )
 
 genrule(

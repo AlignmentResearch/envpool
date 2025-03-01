@@ -1,5 +1,15 @@
-filegroup(
+load("@envpool//third_party:common.bzl", "copy_directory")
+
+copy_directory(
     name = "roms",
+    src = "roms_sources",
+    out = "",
+    visibility = ["//visibility:public"],
+)
+
+
+filegroup(
+    name = "roms_sources",
     srcs = glob(
         ["ROM/*/*.bin"],
         exclude = [
@@ -8,6 +18,5 @@ filegroup(
             "ROM/maze_craze/maze_craze.bin",
             "ROM/warlords/warlords.bin",
         ],
-    ),
-    visibility = ["//visibility:public"],
+    )
 )

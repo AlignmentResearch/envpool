@@ -14,6 +14,7 @@
 
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+load("@envpool//third_party:common.bzl", "copy_directory")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -29,14 +30,18 @@ genrule(
     cmd = "cp $(SRCS) $(@D)",
 )
 
-genrule(
-    name = "gen_vizdoom_maps",
+filegroup(
+    name = "vizdoom_maps_sources",
     srcs = [
         "@vizdoom_lib//:vizdoom_maps",
         "@vizdoom_extra_maps//:vizdoom_maps",
     ],
-    outs = ["maps"],
-    cmd = "mkdir -p $(OUTS) && cp $(SRCS) $(OUTS)",
+)
+
+copy_directory(
+    name = "gen_vizdoom_maps",
+    src = ":vizdoom_maps_sources",
+    out = "maps",
 )
 
 cc_library(
