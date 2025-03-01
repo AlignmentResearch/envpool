@@ -62,7 +62,54 @@ archive_override(
     integrity = "sha256-9hkaq2gE/U4mGZinLTBbLpi1wXgkThpSwBzEBCSF/Hw=",
 )
 
+bazel_dep(name = "rules_boost", repo_name = "com_github_nelhage_rules_boost")
+archive_override(
+    module_name = "rules_boost",
+    urls = ["https://github.com/nelhage/rules_boost/archive/refs/heads/master.tar.gz"],
+    strip_prefix = "rules_boost-master",
+    integrity = "sha256-MKo5D1Ifiiwk2OUaZCwOfZQTmgUfASeve9ug5CeUC8g=",
+)
+
+non_module_boost_repositories = use_extension("@com_github_nelhage_rules_boost//:boost/repositories.bzl", "non_module_dependencies")
+use_repo(
+    non_module_boost_repositories,
+    "boost",
+)
+
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# NOTE: The best way to configure Qt with Bazel MODULE.bazel would be:
+# 1. Use qt_configure to create a local_config_qt repository
+# 2. Use local_qt_path to get the path to the Qt installation
+# 3. Create a new_local_repository called "qt" with the build file from com_justbuchanan_rules_qt
+# 4. Register the Qt toolchains
+#
+# However, this approach has issues with the current Bazel module system.
+# For a WORKSPACE-based project, the configuration would look like:
+#
+# load("@com_justbuchanan_rules_qt//:qt_configure.bzl", "qt_configure")
+# qt_configure()
+# load("@local_config_qt//:local_qt.bzl", "local_qt_path")
+# new_local_repository(
+#     name = "qt",
+#     build_file = "@com_justbuchanan_rules_qt//:qt.BUILD",
+#     path = local_qt_path(),
+# )
+# load("@com_justbuchanan_rules_qt//tools:qt_toolchain.bzl", "register_qt_toolchains")
+# register_qt_toolchains()
+
+# Commenting out Qt configuration to move on without it
+# qt_configure = use_repo_rule("@com_justbuchanan_rules_qt//:qt_configure.bzl", "qt_configure")
+# qt_configure(name = "local_config_qt")
+#
+# local_qt_path = use_repo_rule("@local_config_qt//:local_qt.bzl", "local_qt_path")
+# new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:new_local_repository.bzl", "new_local_repository")
+# new_local_repository(
+#     name = "qt",
+#     build_file = "@com_justbuchanan_rules_qt//:qt.BUILD",
+#     path = local_qt_path(),
+# )
+
 
 ##############################################
 # 2) Declare each http_archive exactly once.
@@ -254,30 +301,6 @@ http_archive(
         "https://ml.cs.tsinghua.edu.cn/~jiayi/envpool/libsdl/SDL2-2.28.4.tar.gz",
     ],
     build_file = "//third_party/sdl2:sdl2.BUILD",
-)
-
-# com_github_nelhage_rules_boost
-http_archive(
-    name = "com_github_nelhage_rules_boost",
-    # NOTE: the sha256 was commented out in your original snippet.
-    strip_prefix = "rules_boost-e60cf50996da9fe769b6e7a31b88c54966ecb191",
-    urls = [
-        "https://github.com/nelhage/rules_boost/archive/e60cf50996da9fe769b6e7a31b88c54966ecb191.tar.gz",
-        "https://ml.cs.tsinghua.edu.cn/~jiayi/envpool/nelhage/rules_boost/e60cf50996da9fe769b6e7a31b88c54966ecb191.tar.gz",
-    ],
-)
-
-# boost
-http_archive(
-    name = "boost",
-    build_file = "@com_github_nelhage_rules_boost//:boost.BUILD",
-    patch_cmds = ["rm -f doc/pdf/BUILD"],
-    sha256 = "6478edfe2f3305127cffe8caf73ea0176c53769f4bf1585be237eb30798c3b8e",
-    strip_prefix = "boost_1_83_0",
-    urls = [
-        "https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.bz2",
-        "https://ml.cs.tsinghua.edu.cn/~jiayi/envpool/boost/boost_1_83_0.tar.bz2",
-    ],
 )
 
 # freedoom

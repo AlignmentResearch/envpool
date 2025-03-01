@@ -7,7 +7,7 @@ cc_library(
     hdrs = glob([
         "src/**/*.def",
         "src/**/*.ins",
-    ]),
+    ], allow_empty = True),
 )
 
 template_rule(
@@ -37,6 +37,7 @@ cc_library(
         exclude = [
             "src/python/*",
         ],
+        allow_empty = True,
     ) + [
         ":ale_version",
     ],

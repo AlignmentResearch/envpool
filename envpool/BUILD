@@ -48,7 +48,7 @@ py_library(
         "//envpool/classic_control",
         "//envpool/mujoco:mujoco_dmc",
         "//envpool/mujoco:mujoco_gym",
-        "//envpool/procgen",
+        # "//envpool/procgen",  # Disabled, missing qt5 in dockerfile
         "//envpool/python",
         "//envpool/toy_text",
         "//envpool/vizdoom",
