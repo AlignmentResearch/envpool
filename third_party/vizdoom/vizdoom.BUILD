@@ -752,6 +752,9 @@ cc_binary(
         "-mmmx",
         "-include $(execpath @glibc_version_header//:glibc_2_17)",
     ],
+    cxxopts = [
+        "-std=c++11",  # vizdoom uses register in class variables, which is forbidden in C++17
+    ],
     data = [
         ":vizdoom_pk3",
     ],
