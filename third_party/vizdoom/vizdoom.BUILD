@@ -336,8 +336,6 @@ cc_library(
     copts = [
         "-Dstricmp=strcasecmp",
         "-Dstrnicmp=strncasecmp",
-        "-fno-tree-dominator-opts",
-        "-fno-tree-fre",
         "-include $(execpath @glibc_version_header//:glibc_2_17)",
     ],
     includes = [
