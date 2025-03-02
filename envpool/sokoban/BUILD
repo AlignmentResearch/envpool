@@ -122,6 +122,7 @@ py_library(
 
 pybind_extension(
     name = "sokoban_envpool",
+    srcs = ["sokoban_envpool.cc"],
     linkopts = [
         "-ldl",
     ],

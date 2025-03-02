@@ -410,5 +410,5 @@ def test_noop_action():
 
 
 if __name__ == "__main__":
-  retcode = pytest.main(["-v", __file__])
+  retcode = pytest.main(["-v", *sys.argv[1:]])
   sys.exit(retcode)
