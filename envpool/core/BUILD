@@ -194,6 +194,7 @@ cc_library(
     ],
     deps = [
         "@cuda//:cudart_static",
+        "//third_party/xla:ffi_headers",
     ],
 )
 

@@ -31,6 +31,7 @@
 
 #include "envpool/core/envpool.h"
 #include "envpool/core/xla.h"
+#include "envpool/core/xla_template.h"
 
 namespace py = pybind11;
 

@@ -27,8 +27,8 @@
 #include <tuple>
 #include <vector>
 
-#include "xla/ffi/api.h"
-#include "xla/ffi/ffi.h"
+#include "xla/ffi/api/c_api.h"
+#include "xla/ffi/api/ffi.h"
 
 namespace py = pybind11;
 namespace ffi = xla::ffi;
