@@ -17,27 +17,16 @@ load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 package(default_visibility = ["//visibility:public"])
 
-py_library(
-    name = "sokoban",
-    srcs = ["__init__.py"],
-    data = [":sokoban_envpool.so"],
-    deps = ["//envpool/python:api"],
-)
-
-py_library(
-    name = "registration",
-    srcs = ["registration.py"],
-    deps = [
-        "//envpool:registration",
-    ],
-)
-
+# Core C++ libraries
 cc_library(
-    name = "sokoban_envpool_h",
+    name = "sokoban_envpool_lib",
     hdrs = [
         "level_loader.h",
         "sokoban_envpool.h",
         "utils.h",
+    ],
+    srcs = [
+        "sokoban_envpool.cc",
     ],
     deps = [
         "//envpool/core:async_envpool",
@@ -56,30 +45,47 @@ cc_library(
     deps = ["//third_party/astar_stl:astar_stl_h"],
 )
 
-cc_binary(
-    name = "astar_log",
-    srcs = [
-        "astar_log.cc",
-        "level_loader.cc",
-        "sokoban_node.cc",
-    ],
+cc_library(
+    name = "level_loader_lib",
+    hdrs = ["level_loader.h"],
+    srcs = ["level_loader.cc"],
+)
+
+cc_library(
+    name = "sokoban_node_lib",
+    srcs = ["sokoban_node.cc"],
     deps = [
         ":sokoban_node_h",
+    ],
+)
+
+cc_library(
+    name = "astar_log_lib",
+    srcs = ["astar_log.cc"],
+    deps = [
+        ":level_loader_lib",
+        ":sokoban_node_lib",
+    ],
+)
+
+# Binaries
+cc_binary(
+    name = "astar_log",
+    deps = [
+        ":astar_log_lib",
     ],
 )
 
 cc_binary(
     name = "astar_log_level",
-    srcs = [
-        "astar_log_level.cc",
-        "level_loader.cc",
-        "sokoban_node.cc",
-    ],
+    srcs = ["astar_log_level.cc"],
     deps = [
-        ":sokoban_node_h",
+        ":level_loader_lib",
+        ":sokoban_node_lib",
     ],
 )
 
+# Tests
 py_test(
     name = "test",
     srcs = ["sokoban_py_envpool_test.py"],
@@ -93,17 +99,40 @@ py_test(
     ],
 )
 
+cc_test(
+    name = "astar_log_test",
+    srcs = ["astar_log_test.cc"],
+    deps = [
+        ":astar_log_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Python code
+py_library(
+    name = "sokoban",
+    srcs = ["__init__.py"],
+    data = [":sokoban_envpool.so"],
+    deps = ["//envpool/python:api"],
+)
+
+py_library(
+    name = "registration",
+    srcs = ["registration.py"],
+    deps = [
+        "//envpool:registration",
+    ],
+)
+
+
+# Python extension
 pybind_extension(
     name = "sokoban_envpool",
-    srcs = [
-        "level_loader.cc",
-        "sokoban_envpool.cc",
-    ],
     linkopts = [
         "-ldl",
     ],
     deps = [
-        ":sokoban_envpool_h",
+        ":sokoban_envpool_lib",
         "//envpool/core:py_envpool",
     ],
 )
