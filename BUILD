@@ -42,6 +42,7 @@ py_wheel(
     deps = [
         ":pkg",
     ],
+    requires_file="//third_party/pip_requirements:requirements-release.txt",
 )
 
 py_wheel_dist(

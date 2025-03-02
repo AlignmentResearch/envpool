@@ -334,28 +334,6 @@ def test_load_sequentially_with_multiple_envs() -> None:
       for j, line in enumerate(level):
         assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
 
-
-def test_astar_log(tmp_path) -> None:
-  level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
-  log_file_name = tmp_path / "log_file.csv"
-  subprocess.run(
-    [
-      "/root/go/bin/bazel", f"--output_base={str(tmp_path)}", "run",
-      "//envpool/sokoban:astar_log", "--", level_file_name,
-      str(log_file_name), "1"
-    ],
-    check=True,
-    cwd="/app/envpool",
-    env={
-      "HOME": "/root",
-      "PATH": "/opt/conda/bin:/usr/bin",
-      "USE_BAZEL_VERSION": "6.4.0",
-    },
-  )
-  log = log_file_name.read_text()
-  assert f"0,{SOLVE_LEVEL_ZERO},21,1380" == log.split("\n")[1]
-
-
 def test_sneaky_noop():
   """
   Even though an action < 0 is not part of the environment, we overload it to

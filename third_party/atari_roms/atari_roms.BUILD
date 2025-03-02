@@ -3,7 +3,7 @@ load("@envpool//third_party:common.bzl", "copy_directory")
 copy_directory(
     name = "roms",
     src = "roms_sources",
-    out = "",
+    out = "roms",
     visibility = ["//visibility:public"],
 )
 

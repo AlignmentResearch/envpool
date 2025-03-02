@@ -61,12 +61,15 @@ template_rule = rule(
 )
 
 def _copy_directory_impl(ctx):
-    output_dir = ctx.actions.declare_directory(ctx.attr.out)
+    # Use the label as the output directory name, so that the output directory is unique (within a BUILD file)
+    output_dir = ctx.actions.declare_directory(ctx.label.name)
 
-    # Create a command that copies all input files to the output directory
-    commands = ["mkdir -p %s" % output_dir.path]
+    # Create commands that copy all input files to the output directory
+    commands = []
+    dest_dir = output_dir.path + "/" + ctx.attr.out
+    commands.append("mkdir -p %s" % dest_dir)
     for src in ctx.files.src:
-        commands.append("cp -r %s %s/" % (src.path, output_dir.path))
+        commands.append("cp -r %s %s/" % (src.path, dest_dir))
 
     ctx.actions.run_shell(
         inputs = ctx.files.src,
@@ -85,8 +88,8 @@ copy_directory = rule(
             doc = "Source directory or files to copy",
         ),
         "out": attr.string(
-            mandatory = True,
-            doc = "Output directory name",
+            default = "",
+            doc = "Optional subdirectory path within the output directory to copy files to",
         ),
     },
 )

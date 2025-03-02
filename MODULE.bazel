@@ -35,7 +35,7 @@ pip.parse(
     python_version = "3.12",
     # We list dependencies for "linux_x86_64" by referencing our file
     requirements_by_platform = {
-        "//third_party/pip_requirements:requirements-sokoban.txt": "linux_x86_64",
+        "//third_party/pip_requirements:requirements-dev-locked.txt": "linux_x86_64",
     },
 )
 
