@@ -173,8 +173,17 @@ def test_xla() -> None:
     dim_room=10,
     levels_dir="/app/envpool/sokoban/sample_levels",
   )
-  handle, recv, send, step = env.xla()
+  handle, recv, send, _ = env.xla()
 
+  # Test that the environment can be reset
+  env.async_reset()
+  obs, _ = recv(handle)
+  assert obs.shape == (num_envs, 3, 10, 10)
+  j
+  # Test that the environment can take a step
+  action = np.random.randint(0, 5, size=(num_envs,))
+  send(handle, action)
+  obs, reward, terminated, truncated, info = recv(handle)
 
 SOLVE_LEVEL_ZERO: str = "222200001112330322210"
 TINY_COLORS: list[tuple[tuple[int, int, int], str]] = [
