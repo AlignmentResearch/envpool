@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "envpool/core/array.h"
-#include "envpool/core/xla_template.h"
 
 template <typename D>
 constexpr bool is_container_v = false;  // NOLINT
