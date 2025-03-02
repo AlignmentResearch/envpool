@@ -27,92 +27,70 @@
 #include <tuple>
 #include <vector>
 
+#include "xla/ffi/api.h"
+#include "xla/ffi/ffi.h"
+
 namespace py = pybind11;
+namespace ffi = xla::ffi;
 
 template <typename Spec>
 static auto SpecToTuple(const Spec& spec) {
   return std::make_tuple(py::dtype::of<typename Spec::dtype>(), spec.shape);
 }
 
-template <std::size_t N>
-void ToArray(const void** raw, std::array<void*, N>* array) {
-  int i = 0;
-  std::apply([&](auto&&... a) { ((a = const_cast<void*>(raw[i++])), ...); },
-             *array);
+// Helper function to create a PyCapsule from an FFI handler
+template <typename T>
+py::capsule EncapsulateFfiHandler(T* handler) {
+  return py::capsule(reinterpret_cast<void*>(handler), "xla.ffi.api.handler");
 }
 
-template <std::size_t N>
-void ToArray(void** raw, std::array<void*, N>* array) {
-  int i = 0;
-  std::apply([&](auto&&... a) { ((a = raw[i++]), ...); }, *array);
-}
+// Helper class to register FFI handlers for a class
+template <typename Class>
+struct FfiHandlers {
+  static py::tuple GetSendHandler(Class* obj) {
+    return py::make_tuple(
+        py::str("Send"),
+        EncapsulateFfiHandler(Send<Class>),
+        py::make_tuple(SpecToTuple(Spec<uint8_t>({sizeof(Class*)})))
+    );
+  }
 
-template <typename Class, typename CC>
-struct CustomCall {
-  using InSpecs =
-      typename std::invoke_result<decltype(CC::InSpecs), Class*>::type;
-  using OutSpecs =
-      typename std::invoke_result<decltype(CC::OutSpecs), Class*>::type;
-  using In = std::array<void*, std::tuple_size_v<InSpecs>>;
-  using Out = std::array<void*, std::tuple_size_v<OutSpecs>>;
+  static py::tuple GetSendGpuHandler(Class* obj) {
+    return py::make_tuple(
+        py::str("SendGpu"),
+        EncapsulateFfiHandler(SendGpu<Class>),
+        py::make_tuple(SpecToTuple(Spec<uint8_t>({sizeof(Class*)})))
+    );
+  }
 
-  static py::bytes Handle(Class* obj) {
-    return py::bytes(
+  static py::tuple GetRecvHandler(Class* obj) {
+    return py::make_tuple(
+        py::str("Recv"),
+        EncapsulateFfiHandler(Recv<Class>),
+        py::make_tuple(SpecToTuple(Spec<uint8_t>({sizeof(Class*)})))
+    );
+  }
+
+  static py::tuple GetRecvGpuHandler(Class* obj) {
+    return py::make_tuple(
+        py::str("RecvGpu"),
+        EncapsulateFfiHandler(RecvGpu<Class>),
+        py::make_tuple(SpecToTuple(Spec<uint8_t>({sizeof(Class*)})))
+    );
+  }
+
+  static py::tuple GetHandlers(Class* obj) {
+    py::list handlers;
+    handlers.append(GetSendHandler(obj));
+    handlers.append(GetSendGpuHandler(obj));
+    handlers.append(GetRecvHandler(obj));
+    handlers.append(GetRecvGpuHandler(obj));
+
+    // Create a handle for the object
+    py::bytes handle = py::bytes(
         std::string(reinterpret_cast<const char*>(&obj), sizeof(Class*)));
-  }
 
-  static void Cpu(void* out, const void** in) {
-    Class* obj = *reinterpret_cast<Class**>(const_cast<void*>(in[0]));
-    in += 1;
-    In in_arr;
-    Out out_arr;
-    ToArray(in, &in_arr);
-    if (std::tuple_size<Out>::value == 0) {
-      std::memcpy(out, &obj, sizeof(Class*));
-    } else {
-      void** outs = reinterpret_cast<void**>(out);
-      std::memcpy(outs[0], &obj, sizeof(Class*));
-      ToArray(outs + 1, &out_arr);
-    }
-    CC::Cpu(obj, in_arr, out_arr);
-  }
-
-  static void Gpu(cudaStream_t stream, void** buffers, const char* opaque,
-                  std::size_t opaque_len) {
-    Class* obj = *reinterpret_cast<Class**>(const_cast<char*>(opaque));
-    buffers += 1;
-    In in_arr;
-    Out out_arr;
-    ToArray(buffers, &in_arr);
-    buffers += std::tuple_size<In>::value;
-    buffers += 1;
-    ToArray(buffers, &out_arr);
-    CC::Gpu(obj, stream, in_arr, out_arr);
-  }
-
-  static auto Specs(Class* obj) {
-    auto handle_spec =
-        std::make_tuple(SpecToTuple(Spec<uint8_t>({sizeof(Class*)})));
-    auto in_specs = CC::InSpecs(obj);
-    auto in = std::apply(
-        [&](auto&&... a) { return std::make_tuple(SpecToTuple(a)...); },
-        in_specs);
-    auto out_specs = CC::OutSpecs(obj);
-    auto out = std::apply(
-        [&](auto&&... a) { return std::make_tuple(SpecToTuple(a)...); },
-        out_specs);
-    return std::make_tuple(std::tuple_cat(handle_spec, in),
-                           std::tuple_cat(handle_spec, out));
-  }
-
-  static auto Capsules() {
-    return std::make_tuple(
-        py::capsule(reinterpret_cast<void*>(Cpu), "xla._CUSTOM_CALL_TARGET"),
-        py::capsule(reinterpret_cast<void*>(Gpu), "xla._CUSTOM_CALL_TARGET"));
-  }
-
-  static auto Xla(Class* obj) {
-    return std::make_tuple(Handle(obj), Specs(obj), Capsules());
+    return py::make_tuple(handle, handlers);
   }
 };
 
