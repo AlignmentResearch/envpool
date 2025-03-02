@@ -15,10 +15,10 @@
 #ifndef ENVPOOL_SOKOBAN_SOKOBAN_NODE_H_
 #define ENVPOOL_SOKOBAN_SOKOBAN_NODE_H_
 
+#include <array>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <array>
 
 #include "envpool/sokoban/level_loader.h"
 #include "third_party/astar_stl/astar.h"

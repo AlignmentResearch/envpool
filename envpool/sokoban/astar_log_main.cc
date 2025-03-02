@@ -1,13 +1,13 @@
-#include "envpool/sokoban/sokoban_node.h"
 #include <iostream>
 #include <string>
 
+#include "envpool/sokoban/sokoban_node.h"
+
 namespace sokoban {
-  // forward-declare RunAStar
-  void RunAStar(const std::string& level_file_name,
-                const std::string& log_file_name,
-                int total_levels_to_run = 1000,
-                int fsa_limit = 1000000);
+// forward-declare RunAStar
+void RunAStar(const std::string& level_file_name,
+              const std::string& log_file_name, int total_levels_to_run = 1000,
+              int fsa_limit = 1000000);
 }  // namespace sokoban
 
 int main(int argc, char** argv) {

@@ -7,7 +7,6 @@ copy_directory(
     visibility = ["//visibility:public"],
 )
 
-
 filegroup(
     name = "roms_sources",
     srcs = glob(
@@ -18,5 +17,5 @@ filegroup(
             "ROM/maze_craze/maze_craze.bin",
             "ROM/warlords/warlords.bin",
         ],
-    )
+    ),
 )

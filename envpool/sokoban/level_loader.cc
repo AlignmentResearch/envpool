@@ -15,6 +15,7 @@
 #include "level_loader.h"
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -22,7 +23,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <array>
 
 #include "envpool/sokoban/utils.h"
 

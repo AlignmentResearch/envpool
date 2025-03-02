@@ -20,10 +20,10 @@
 #include <mjxmacro.h>
 #include <mujoco.h>
 
+#include <array>
 #include <memory>
 #include <random>
 #include <string>
-#include <array>
 
 #include "envpool/mujoco/dmc/utils.h"
 

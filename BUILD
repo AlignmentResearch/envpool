@@ -37,12 +37,12 @@ py_wheel(
     distribution = "envpool",
     platform = "linux_x86_64",
     python_tag = "cp312",
+    requires_file = "//third_party/pip_requirements:requirements-release.txt",
     twine = None,
     version = "0.9.0",
     deps = [
         ":pkg",
     ],
-    requires_file="//third_party/pip_requirements:requirements-release.txt",
 )
 
 py_wheel_dist(

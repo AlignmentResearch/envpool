@@ -1,52 +1,45 @@
-load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+load("@pip_requirements//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
 # 1. Level Loader
 cc_library(
     name = "level_loader_lib",
-    hdrs = ["level_loader.h", "utils.h"],
     srcs = ["level_loader.cc"],
-    # if needed, add any includes or linkopts here
+    hdrs = [
+        "level_loader.h",
+        "utils.h",
+    ],
 )
 
 # 2. Sokoban Node
 cc_library(
     name = "sokoban_node_lib",
-    hdrs = ["sokoban_node.h"],        # "level_loader.h" is #included from .h if needed
     srcs = ["sokoban_node.cc"],
+    hdrs = ["sokoban_node.h"],
     deps = [
+        ":level_loader_lib",
         "//third_party/astar_stl:astar_stl_h",
-        ":level_loader_lib",         # only if SokobanNode uses LevelLoader calls
-        # If "utils.h" is used in sokoban_node.cc, you can add a tiny library for it
-        # or just treat it as header-only. If header-only, you may not need an extra dep.
     ],
 )
-
-# 3. (Optional) If utils.h is purely header-only, you can omit a library. Otherwise:
-# cc_library(
-#     name = "sokoban_utils_lib",
-#     hdrs = ["utils.h"],
-#     # no srcs if purely templates header-only, or "utils.cc" if it exists
-# )
 
 # 4. Sokoban Env
 cc_library(
     name = "sokoban_envpool_lib",
-    hdrs = [
-        "sokoban_envpool.h",
-    ],
     srcs = [
         "sokoban_envpool.cc",
     ],
+    hdrs = [
+        "sokoban_envpool.h",
+        "utils.h",
+    ],
     deps = [
-        # these come from your existing config
+        ":level_loader_lib",
         "//envpool/core:async_envpool",
         "//envpool/core:env",
         "//envpool/core:env_spec",
-        ":level_loader_lib",  # needed because we actually instantiate LevelLoader in .cc
-        # If "utils.h" needed a separate library, you'd add it here too
+        "//envpool/core:py_envpool",
     ],
 )
 
@@ -54,13 +47,12 @@ cc_library(
 cc_library(
     name = "astar_log_lib",
     srcs = [
-        "astar_log.cc",  # no main here
+        "astar_log.cc",
     ],
     deps = [
-        ":sokoban_node_lib",
         ":level_loader_lib",
+        ":sokoban_node_lib",
         "//third_party/astar_stl:astar_stl_h",
-        # anything else as needed
     ],
 )
 
@@ -68,7 +60,7 @@ cc_library(
 cc_binary(
     name = "astar_log",
     srcs = [
-        "astar_log_main.cc",  # <--- main() is here now
+        "astar_log_main.cc",
     ],
     deps = [
         ":astar_log_lib",
@@ -91,7 +83,7 @@ py_test(
     main = "sokoban_py_envpool_test.py",
     deps = [
         ":registration",
-        ":sokoban",   # lbry below
+        ":sokoban",
         "//envpool",
         requirement("numpy"),
         requirement("pytest"),
@@ -135,6 +127,6 @@ pybind_extension(
     ],
     deps = [
         ":sokoban_envpool_lib",
-        "//envpool/core:py_envpool",  # presumably needed for the PyEnvSpec/PyEnvPool macros
+        "//envpool/core:py_envpool",
     ],
 )

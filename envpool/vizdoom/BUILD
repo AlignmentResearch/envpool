@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@envpool//third_party:common.bzl", "copy_directory")
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
-load("@envpool//third_party:common.bzl", "copy_directory")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -33,8 +33,8 @@ genrule(
 filegroup(
     name = "vizdoom_maps_sources",
     srcs = [
-        "@vizdoom_lib//:vizdoom_maps",
         "@vizdoom_extra_maps//:vizdoom_maps",
+        "@vizdoom_lib//:vizdoom_maps",
     ],
 )
 
