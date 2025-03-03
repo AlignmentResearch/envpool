@@ -166,8 +166,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
             << "x" << dim_room << '\n';
         throw std::runtime_error(msg.str());
       }
-      levels_.emplace_back(
-          std::make_pair(cur_level_idx++, std::move(cur_level)));
+      levels_.emplace_back(cur_level_idx++, std::move(cur_level));
     }
   }
   if (!load_sequentially_) {
@@ -204,8 +203,8 @@ TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   }
   // Load new files until the current level index is within the loaded levels
   // this is required when new files have lesser levels than the number of envs
-  while (cur_level_ >= std::ssize(levels_)) {
-    cur_level_ -= std::ssize(levels_);
+  while (cur_level_ >= std::size(levels_)) {
+    cur_level_ -= std::size(levels_);
     LoadFile(gen);
   }
   // no need for bound checks since it is checked in the while loop above

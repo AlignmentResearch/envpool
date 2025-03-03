@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
   if (argc > 4) {
     fsa_limit = std::stoi(argv[4]);
   }
-  sokoban::RunAStar(level_file_name, log_file_name, total_levels_to_run, fsa_limit);
+  sokoban::RunAStar(level_file_name, log_file_name, total_levels_to_run,
+                    fsa_limit);
   return 0;
 }

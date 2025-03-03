@@ -18,6 +18,7 @@
 #include <array>
 #include <csignal>
 #include <memory>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -73,12 +74,14 @@ class SokobanNode {
             player_x = x;
             player_y = y;
             break;
+          case kWall:
+            walls->at(x + y * dim_room) = true;
+          case kEmpty:
+            break;
           default:
-            throw std::runtime_error("Invalid character in Sokoban level");
-        }
-
-        if (world.at(x + y * dim_room) == kWall) {
-          walls->at(x + y * dim_room) = true;
+            std::stringstream msg;
+            msg << "Invalid character in Sokoban level: " << static_cast<int>(world.at(x + y * dim_room)) << '\n';
+            throw std::runtime_error(msg.str());
         }
       }
     }

@@ -92,8 +92,7 @@ void RunAStar(const std::string& level_file_name,
         prev_y = curr_y;
       }
       if (!correct_solution) {
-        loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps
-                      << '\n';
+        loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps << '\n';
       } else {
         loglinestream << "," << steps << "," << search_steps << '\n';
       }
@@ -116,8 +115,7 @@ void RunAStar(const std::string& level_file_name,
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
       log_file_out << level_idx << ","
-                   << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps
-                   << '\n';
+                   << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps << '\n';
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
       log_file_out << level_idx << ","

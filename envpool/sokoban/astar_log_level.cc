@@ -83,8 +83,7 @@ void RunAStar(const std::string& level_file_name,
       prev_y = curr_y;
     }
     if (!correct_solution) {
-      loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps
-                    << '\n';
+      loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps << '\n';
     } else {
       loglinestream << "," << steps << "," << search_steps << '\n';
     }
@@ -98,8 +97,7 @@ void RunAStar(const std::string& level_file_name,
   } else if (search_state ==
              std::AStarSearch<SokobanNode>::SEARCH_STATE_NOT_INITIALISED) {
     log_file_out << level_idx << ","
-                 << "SEARCH_STATE_NOT_INITIALISED,-1," << search_steps
-                 << '\n';
+                 << "SEARCH_STATE_NOT_INITIALISED,-1," << search_steps << '\n';
   } else if (search_state ==
              std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING) {
     log_file_out << level_idx << ","
@@ -107,8 +105,7 @@ void RunAStar(const std::string& level_file_name,
   } else if (search_state ==
              std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
     log_file_out << level_idx << ","
-                 << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps
-                 << '\n';
+                 << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps << '\n';
   } else if (search_state ==
              std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
     log_file_out << level_idx << ","
@@ -122,20 +119,28 @@ void RunAStar(const std::string& level_file_name,
 }  // namespace sokoban
 
 int main(int argc, char** argv) {
-  int fsa_limit = 1000000;
-  if (argc < 4) {
-    std::cout << "Usage: " << argv[0]
-              << " level_file_name log_file_name level_to_run [fsa_limit]"
-              << '\n';
+  try {
+    int fsa_limit = 1000000;
+    if (argc < 4) {
+      std::cout << "Usage: " << argv[0]
+                << " level_file_name log_file_name level_to_run [fsa_limit]"
+                << '\n';
+      return 1;
+    }
+    std::string level_file_name = argv[1];
+    std::string log_file_name = argv[2];
+    int level_to_run = std::stoi(argv[3]);
+    if (argc > 4) {
+      fsa_limit = std::stoi(argv[4]);
+    }
+
+    sokoban::RunAStar(level_file_name, log_file_name, level_to_run, fsa_limit);
+    return 0;
+  } catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << '\n';
+    return 1;
+  } catch (...) {
+    std::cerr << "Unknown error occurred\n";
     return 1;
   }
-  std::string level_file_name = argv[1];
-  std::string log_file_name = argv[2];
-  int level_to_run = std::stoi(argv[3]);
-  if (argc > 4) {
-    fsa_limit = std::stoi(argv[4]);
-  }
-
-  sokoban::RunAStar(level_file_name, log_file_name, level_to_run, fsa_limit);
-  return 0;
 }

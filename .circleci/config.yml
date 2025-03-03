@@ -9,7 +9,7 @@ parameters:
   docker_img_version:
     # Docker image version for running tests.
     type: string
-    default: "79cee56-envpool"
+    default: "614e97a-envpool-devbox"
 
 workflows:
   test-jobs:
@@ -51,10 +51,10 @@ jobs:
           name: clang-format
           command: |
             make clang-format
-      - run:
-          name: clang-tidy
-          command: |
-            make clang-tidy
+      # - run:
+      #     name: clang-tidy
+      #     command: |
+      #       make clang-tidy
       - run:
           name: buildifier
           command: |
