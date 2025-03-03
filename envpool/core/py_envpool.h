@@ -30,7 +30,6 @@
 #include <vector>
 
 #include "envpool/core/envpool.h"
-#include "envpool/core/xla.h"
 
 namespace py = pybind11;
 
@@ -215,29 +214,6 @@ class PyEnvPool : public EnvPool {
       : EnvPool(py_spec), py_spec(py_spec) {}
 
   /**
-   * get xla functions
-   */
-  auto Xla() {
-    if (HasContainerType(EnvPool::spec.state_spec)) {
-      throw std::runtime_error(
-          "State of this env has dynamic shaped container, xla is disabled");
-    }
-    if (HasDynamicDim(EnvPool::spec.state_spec)) {
-      throw std::runtime_error(
-          "State of this env has dynamic (-1) shape, xla is disabled");
-    }
-    if (EnvPool::spec.config["max_num_players"_] != 1) {
-      throw std::runtime_error(
-          "Xla is not available for multiplayer environment.");
-    }
-    return std::make_tuple(
-        std::make_tuple("recv",
-                        CustomCall<EnvPool, XlaRecv<EnvPool>>::Xla(this)),
-        std::make_tuple("send",
-                        CustomCall<EnvPool, XlaSend<EnvPool>>::Xla(this)));
-  }
-
-  /**
    * py api
    */
   void PySend(const std::vector<py::array>& action) {
@@ -307,7 +283,6 @@ py::object abc_meta = py::module::import("abc").attr("ABCMeta");
       .def("_send", &ENVPOOL::PySend)                                \
       .def("_reset", &ENVPOOL::PyReset)                              \
       .def_readonly_static("_state_keys", &ENVPOOL::py_state_keys)   \
-      .def_readonly_static("_action_keys", &ENVPOOL::py_action_keys) \
-      .def("_xla", &ENVPOOL::Xla);
+      .def_readonly_static("_action_keys", &ENVPOOL::py_action_keys);
 
 #endif  // ENVPOOL_CORE_PY_ENVPOOL_H_

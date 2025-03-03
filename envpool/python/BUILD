@@ -72,26 +72,6 @@ py_library(
     ],
 )
 
-py_library(
-    name = "xla_template",
-    srcs = ["xla_template.py"],
-    deps = [
-        requirement("jax"),
-    ],
-)
-
-py_library(
-    name = "lax",
-    srcs = ["lax.py"],
-    deps = [
-        requirement("jax"),
-        requirement("dm-env"),
-        requirement("numpy"),
-        requirement("absl-py"),
-        ":protocol",
-        ":xla_template",
-    ],
-)
 
 py_library(
     name = "dm_envpool",
@@ -102,7 +82,6 @@ py_library(
         requirement("numpy"),
         ":data",
         ":envpool",
-        ":lax",
         ":utils",
     ],
 )
@@ -117,7 +96,6 @@ py_library(
         requirement("numpy"),
         ":data",
         ":envpool",
-        ":lax",
         ":utils",
     ],
 )
@@ -132,7 +110,6 @@ py_library(
         requirement("numpy"),
         ":data",
         ":envpool",
-        ":lax",
         ":utils",
     ],
 )
