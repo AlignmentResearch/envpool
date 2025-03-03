@@ -26,7 +26,7 @@ workflows:
 jobs:
   lint:
     docker:
-      - image: ghcr.io/alignmentresearch/learned-planners:<< pipeline.parameters.docker_img_version >>
+      - image: ghcr.io/alignmentresearch/train-learned-planners:<< pipeline.parameters.docker_img_version >>
         auth:
           username: "$GHCR_DOCKER_USER"
           password: "$GHCR_DOCKER_TOKEN"
@@ -67,7 +67,7 @@ jobs:
 
   tests:
     docker:
-      - image: ghcr.io/alignmentresearch/learned-planners:<< pipeline.parameters.docker_img_version >>
+      - image: ghcr.io/alignmentresearch/train-learned-planners:<< pipeline.parameters.docker_img_version >>
         auth:
           username: "$GHCR_DOCKER_USER"
           password: "$GHCR_DOCKER_TOKEN"
