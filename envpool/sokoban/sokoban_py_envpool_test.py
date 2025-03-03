@@ -15,7 +15,6 @@
 
 import glob
 import re
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -317,6 +316,7 @@ def test_load_sequentially_with_multiple_envs() -> None:
     for i, level in enumerate(levels_by_files):
       for j, line in enumerate(level):
         assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
+
 
 def test_sneaky_noop():
   """

@@ -23,7 +23,7 @@ void RunAStar(const std::string& level_file_name,
               const std::string& log_file_name, int total_levels_to_run,
               int fsa_limit) {
   std::cout << "Running A* on file " << level_file_name << " and logging to "
-            << log_file_name << " with fsa_limit " << fsa_limit << std::endl;
+            << log_file_name << " with fsa_limit " << fsa_limit << '\n';
   const int dim_room = 10;
   int level_idx = 0;
   LevelLoader level_loader(level_file_name, true, -1);
@@ -33,7 +33,7 @@ void RunAStar(const std::string& level_file_name,
   std::ifstream log_file_in(log_file_name);
   // check if the file is empty
   if (log_file_in.peek() == std::ifstream::traits_type::eof()) {
-    log_file_out << "Level,Actions,Steps,SearchSteps" << std::endl;
+    log_file_out << "Level,Actions,Steps,SearchSteps" << '\n';
   } else {  // skip levels that have already been run
     std::string line;
     std::getline(log_file_in, line);  // skip header
@@ -49,7 +49,7 @@ void RunAStar(const std::string& level_file_name,
 
   while (level_idx < total_levels_to_run) {
     std::AStarSearch<SokobanNode> astarsearch(fsa_limit);
-    std::cout << "Running level " << level_idx << std::endl;
+    std::cout << "Running level " << level_idx << '\n';
     SokobanLevel level = level_loader.GetLevel(gen).data;
 
     SokobanNode node_start(dim_room, level, false);
@@ -57,7 +57,7 @@ void RunAStar(const std::string& level_file_name,
     astarsearch.SetStartAndGoalStates(node_start, node_end);
     unsigned int search_state;
     unsigned int search_steps = 0;
-    std::cout << "Starting search" << std::endl;
+    std::cout << "Starting search" << '\n';
     do {
       search_state = astarsearch.SearchStep();
       search_steps++;
@@ -93,9 +93,9 @@ void RunAStar(const std::string& level_file_name,
       }
       if (!correct_solution) {
         loglinestream << ",INCORRECT_SOLUTION_FOUND," << search_steps
-                      << std::endl;
+                      << '\n';
       } else {
-        loglinestream << "," << steps << "," << search_steps << std::endl;
+        loglinestream << "," << steps << "," << search_steps << '\n';
       }
       log_file_out << loglinestream.str();
       astarsearch.FreeSolutionNodes();
@@ -103,28 +103,28 @@ void RunAStar(const std::string& level_file_name,
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_FAILED) {
       log_file_out << level_idx << ","
-                   << "SEARCH_STATE_FAILED,-1," << search_steps << std::endl;
+                   << "SEARCH_STATE_FAILED,-1," << search_steps << '\n';
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_NOT_INITIALISED) {
       log_file_out << level_idx << ","
                    << "SEARCH_STATE_NOT_INITIALISED,-1," << search_steps
-                   << std::endl;
+                   << '\n';
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_SEARCHING) {
       log_file_out << level_idx << ","
-                   << "SEARCH_STATE_SEARCHING,-1," << search_steps << std::endl;
+                   << "SEARCH_STATE_SEARCHING,-1," << search_steps << '\n';
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_OUT_OF_MEMORY) {
       log_file_out << level_idx << ","
                    << "SEARCH_STATE_OUT_OF_MEMORY,-1," << search_steps
-                   << std::endl;
+                   << '\n';
     } else if (search_state ==
                std::AStarSearch<SokobanNode>::SEARCH_STATE_INVALID) {
       log_file_out << level_idx << ","
-                   << "SEARCH_STATE_INVALID,-1," << search_steps << std::endl;
+                   << "SEARCH_STATE_INVALID,-1," << search_steps << '\n';
     } else {
       log_file_out << level_idx << ","
-                   << "UNKNOWN,-1," << search_steps << std::endl;
+                   << "UNKNOWN,-1," << search_steps << '\n';
     }
     log_file_out.flush();
     level_idx++;

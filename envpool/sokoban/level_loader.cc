@@ -68,7 +68,7 @@ void AddLine(SokobanLevel& level, const std::string& line) {
   if ((start != '#') || (end != '#')) {
     std::stringstream msg;
     msg << "Line '" << line << "' does not start (" << start << ") and end ("
-        << end << ") with '#', as it should." << std::endl;
+        << end << ") with '#', as it should." << '\n';
     throw std::runtime_error(msg.str());
   }
   for (const char& r : line) {
@@ -91,7 +91,7 @@ void AddLine(SokobanLevel& level, const std::string& line) {
       default:
         std::stringstream msg;
         msg << "Line '" << line << "'has character '" << r
-            << "' which is not in the valid set '#@$. '." << std::endl;
+            << "' which is not in the valid set '#@$. '." << '\n';
         throw std::runtime_error(msg.str());
         break;
     }
@@ -108,7 +108,7 @@ void PrintLevel(std::ostream& os, const SokobanLevel& vec) {
   for (size_t i = 0; i < vec.size(); i++) {
     os << kPrintLevelKey.at(vec.at(i));
     if ((i + 1) % dim_room == 0) {
-      os << std::endl;
+      os << '\n';
     }
   }
 }
@@ -154,7 +154,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
         if (line.length() != dim_room) {
           std::stringstream msg;
           msg << "Irregular line '" << line
-              << "' does not match dim_room=" << dim_room << std::endl;
+              << "' does not match dim_room=" << dim_room << '\n';
           throw std::runtime_error(msg.str());
         }
         AddLine(cur_level, line);
@@ -163,7 +163,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
       if (cur_level.size() != dim_room * dim_room) {
         std::stringstream msg;
         msg << "Room is not square: " << cur_level.size() << " != " << dim_room
-            << "x" << dim_room << std::endl;
+            << "x" << dim_room << '\n';
         throw std::runtime_error(msg.str());
       }
       levels_.emplace_back(
@@ -175,18 +175,18 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
   }
   if (levels_.empty()) {
     std::stringstream msg;
-    msg << "No levels loaded from file '" << file_path << std::endl;
+    msg << "No levels loaded from file '" << file_path << '\n';
     throw std::runtime_error(msg.str());
   }
 
   if (verbose >= 1) {
     std::cout << "***Loaded " << levels_.size() << " levels from " << file_path
-              << std::endl;
+              << '\n';
     if (verbose >= 2) {
       PrintLevel(std::cout, levels_.at(0).second);
-      std::cout << std::endl;
+      std::cout << '\n';
       PrintLevel(std::cout, levels_.at(1).second);
-      std::cout << std::endl;
+      std::cout << '\n';
     }
   }
 }
@@ -194,7 +194,7 @@ void LevelLoader::LoadFile(std::mt19937& gen) {
 TaggedSokobanLevel LevelLoader::GetLevel(std::mt19937& gen) {
   if (n_levels_to_load_ > 0 && levels_loaded_ >= n_levels_to_load_) {
     // std::cerr << "Warning: All levels loaded. Looping around now." <<
-    // std::endl;
+    // '\n';
     levels_loaded_ = 0;
     cur_file_ = level_file_paths_.begin();
     cur_level_file_ = -1;

@@ -41,7 +41,7 @@ void SokobanEnv::ResetWithoutWrite() {
   if (world_.size() != dim_room_ * dim_room_) {
     std::stringstream msg;
     msg << "Loaded level is not dim_room x dim_room. world_.size()="
-        << world_.size() << ", dim_room_=" << dim_room_ << std::endl;
+        << world_.size() << ", dim_room_=" << dim_room_ << '\n';
     throw std::runtime_error(msg.str());
   }
   unmatched_boxes_ = 0;
@@ -193,7 +193,7 @@ void SokobanEnv::WriteState(float reward) {
     std::stringstream msg;
     msg << "Obs size and level size are different: obs_size=" << obs.size
         << "/3, level_size=" << world_.size() << ", dim_room=" << dim_room_
-        << std::endl;
+        << '\n';
     throw std::runtime_error(msg.str());
   }
 

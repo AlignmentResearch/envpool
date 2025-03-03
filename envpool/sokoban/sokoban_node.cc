@@ -27,7 +27,7 @@ bool SokobanNode::IsSameState(SokobanNode& rhs) const {
 }
 
 void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
-  std::cout << "Action: " << action_from_parent << std::endl;
+  std::cout << "Action: " << action_from_parent << '\n';
   for (int y = 0; y < dim_room; y++) {
     for (int x = 0; x < dim_room; x++) {
       bool is_wall = walls->at(x + y * dim_room);
@@ -68,7 +68,7 @@ void SokobanNode::PrintNodeInfo(std::vector<std::pair<int, int>>* goals) {
         std::cout << " ";
       }
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 

@@ -16,6 +16,7 @@
 #define ENVPOOL_SOKOBAN_SOKOBAN_NODE_H_
 
 #include <array>
+#include <csignal>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -55,23 +56,25 @@ class SokobanNode {
           case kBox:
             if (!is_goal_node) {
               total_boxes++;
-              boxes.emplace_back(std::make_pair(x, y));
+              boxes.emplace_back(x, y);
             }
             break;
           case kTarget:
             if (is_goal_node) {
               total_boxes++;
-              boxes.emplace_back(std::make_pair(x, y));
+              boxes.emplace_back(x, y);
             }
             break;
           case kBoxOnTarget:
             total_boxes++;
-            boxes.emplace_back(std::make_pair(x, y));
+            boxes.emplace_back(x, y);
             break;
           case kPlayerOnTarget:
             player_x = x;
             player_y = y;
             break;
+          default:
+            throw std::runtime_error("Invalid character in Sokoban level");
         }
 
         if (world.at(x + y * dim_room) == kWall) {
