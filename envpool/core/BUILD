@@ -186,25 +186,12 @@ cc_library(
 )
 
 cc_library(
-    name = "xla_template",
-    hdrs = ["xla_template.h"],
-    linkopts = [
-        "-ldl",
-        "-lrt",
-    ],
-    deps = [
-        "@cuda//:cudart_static",
-        "//third_party/xla:ffi_headers",
-    ],
-)
-
-cc_library(
     name = "xla",
     hdrs = ["xla.h"],
     deps = [
         ":array",
-        ":xla_template",
         "@cuda//:cudart_static",
+        "//third_party/xla:ffi_headers",
     ],
 )
 

@@ -27,6 +27,40 @@
 #include <vector>
 
 #include "envpool/core/array.h"
+#include "xla/ffi/api/ffi.h"
+#include "xla/ffi/api/c_api.h"
+
+namespace ffi = ffi;
+
+
+namespace envpool {
+
+/**
+ * A wrapper so XLA recognizes EnvPool* as a custom host-only type.
+ *
+ * We must make sure to call RegisterTypeId once in the library initialization code.
+ */
+template <typename EnvPool>
+struct EnvPoolPtr {
+  EnvPool* ptr;
+  // We'll register this type ID somewhere in your library init code.
+  static ffi::TypeId id;
+
+  static void RegisterTypeId() {
+    const XLA_FFI_Api* api = ffi::GetXlaFfiApi();
+
+    std::string name = "EnvPoolPtr." + std::string(typeid(EnvPool).name());
+    auto error = ffi::Ffi::RegisterTypeId(api, name, &EnvPoolPtr<EnvPool>::id);
+    try {
+      if (error != ffi::ErrorCode::kOk) {
+        throw std::runtime_error(std::string("Failed to register EnvPoolPtr type id: ") +
+                                ffi::internal::GetErrorMessage(api, error));
+      }
+    } finally {
+      ffi::internal::DestroyError(api, error);
+    }
+  }
+};
 
 template <typename D>
 constexpr bool is_container_v = false;  // NOLINT
@@ -109,103 +143,159 @@ template <typename D>
   return ::Spec<D>(shape);
 }
 
+
+/**
+ * XlaSend: sends "action" arrays from the user to EnvPool::Send(...).
+ *
+ * Now the first argument is a typed user-data pointer for EnvPool,
+ * instead of a raw pointer in a buffer.
+ */
 template <typename EnvPool>
-struct XlaSend {
-  using In =
-      std::array<void*, std::tuple_size_v<typename EnvPool::Action::Keys>>;
-  using Out = std::array<void*, 0>;
+struct XlaStep {
 
-  static decltype(auto) InSpecs(EnvPool* envpool) {
-    int batch_size = envpool->spec.config["batch_size"_];
-    int max_num_players = envpool->spec.config["max_num_players"_];
-    return std::apply(
-        [&](auto&&... s) {
-          return std::make_tuple(
-              NormalizeSpec(s, batch_size, max_num_players)...);
-        },
-        envpool->spec.action_spec.AllValues());
+  using FirstActionType = std::tuple_element<0, EnvPool::Action::Values>::dtype;
+  auto FirstActionFFIDtype = xla::ffi::internal::NativeTypeToCApiDataType<FirstActionType>;
+
+  std::tuple<int, int, ffi::Error> CheckDtypesAndGetBsNp(EnvPoolPtr<EnvPool> env_ud, ffi::Buffer<FirstActionFFIDtype> in_actions) {
+    EnvPool* envpool = env_ud->ptr;
+    const auto action_spec = envpool->spec.action_spec.AllValues();
+    const auto action_dtype = xla::ffi::internal::NativeTypeToCApiDataType<std::tuple_element<0, decltype(action_spec)>>;
+    const int batch_size = envpool->spec.config["batch_size"_];
+    const int max_num_players = envpool->spec.config["max_num_players"_];
+
+    // This is a dynamic assertion because XLA will be checking the buffer time at runtime, so the compiler does not
+    // know it.
+    if(action_dtype != in_actions.element_type()) {
+      return {batch_size, max_num_players, ffi::Error::InvalidArgument("XlaSend CPU: action dtype mismatch")};
+    }
+
+    // We could use a static assert here, but we haven't implemented multiple input argument handling
+    // more than one action input. But we haven't implemented handling for those.
+    if (std::tuple_size_v<decltype(action_spec)> != 1) {
+      return {batch_size, max_num_players, ffi::Error::InvalidArgument("action_spec must contain exactly one entry.")};
+    }
+
+    // Same for output arguments
+    const auto obs_spec = envpool->spec["obs"_]
+
+
+
+
+    return {batch_size, max_num_players, ffi::Error::Success()};
   }
 
-  static decltype(auto) OutSpecs(EnvPool* envpool) { return std::tuple<>(); }
-
-  static void Cpu(EnvPool* envpool, const In& in, const Out& out) {
-    std::vector<Array> action;
-    action.reserve(std::tuple_size_v<typename EnvPool::Action::Keys>);
-    int batch_size = envpool->spec.config["batch_size"_];
-    int max_num_players = envpool->spec.config["max_num_players"_];
-    auto action_spec = envpool->spec.action_spec.AllValues();
-    std::size_t index = 0;
-    std::apply(
-        [&](auto&&... spec) {
-          ((action.emplace_back(CpuBufferToArray(in[index++], spec, batch_size,
-                                                 max_num_players))),
-           ...);
-        },
-        action_spec);
-    envpool->Send(action);
+  static ffi::Error Cpu(EnvPoolPtr<EnvPool> env_ud, ffi::Buffer<FirstActionFFIDtype> in_actions) {
+    // Instantiate vector with 1 element directly, we know at compile time it will be 1 element.
+    std::vector<Array> out_actions{{
+        CpuBufferToArray(in_actions, std::tuple_element_v<0, action_spec>, batch_size, max_num_players)
+    }};
+    envpool->Send(out_actions);
+    return ffi::Error::Success();
   }
 
-  static void Gpu(EnvPool* envpool, cudaStream_t stream, const In& in,
-                  const Out& out) {
-    std::vector<Array> action;
-    action.reserve(std::tuple_size_v<typename EnvPool::Action::Keys>);
-    int batch_size = envpool->spec.config["batch_size"_];
-    int max_num_players = envpool->spec.config["max_num_players"_];
-    auto action_spec = envpool->spec.action_spec.AllValues();
-    std::size_t index = 0;
-    std::apply(
-        [&](auto&&... spec) {
-          ((action.emplace_back(GpuBufferToArray(stream, in[index++], spec,
-                                                 batch_size, max_num_players))),
-           ...);
-        },
-        action_spec);
-    cudaStreamSynchronize(stream);
-    envpool->Send(action);
+  static decltype(auto) CpuBinding = ffi::Ffi::Bind()
+        .Arg<ffi::UserData<EnvPoolPtr<EnvPool>>>()
+        .Arg<ffi::Buffer<FirstActionFFIDtype>>();
+
+
+  static ffi::Error Gpu(cudaStream_t stream, EnvPoolPtr<EnvPool> env_ud, ffi::Buffer<FirstActionFFIDtype> in_actions) {
+    // Same as CPU, but with GpuBuffer and synchronizing
+    EnvPool* envpool = env_ud->ptr;
+    const auto action_spec = envpool->spec.action_spec.AllValues();
+    const auto action_dtype = xla::ffi::internal::NativeTypeToCApiDataType<std::tuple_element<0, decltype(action_spec)>>;
+
+    // This is a dynamic assertion because XLA will be checking the buffer time at runtime, so the compiler does not
+    // know it.
+    if(action_dtype != in_actions.element_type()) {
+      return ffi::Error::InvalidArgument("XlaSend CPU: action dtype mismatch");
+    }
+
+    // We use a dynamic assert here, because we're going to compile this function for all EnvPools, even those that have
+    // more than one action input. But we haven't implemented handling for those.
+    if (std::tuple_size_v<decltype(action_spec)> != 1) {
+        return ffi::Error::InvalidArgument("action_spec must contain exactly one entry.");
+    }
+
+    const int batch_size = envpool->spec.config["batch_size"_];
+    const int max_num_players = envpool->spec.config["max_num_players"_];
+    // Instantiate vector with 1 element directly, we know at compile time it will be 1 element.
+    std::vector<Array> out_actions{{
+        GpuBufferToArray(in_actions, std::tuple_element_v<0, action_spec>, batch_size, max_num_players)
+    }};
+    cudaStreamSynchronize(stream);  // Ensure the Cuda arrays for every environment have been copied to host
+    envpool->Send(out_actions);
+    return ffi::Error::Success();
   }
+
+  static decltype(auto) CpuBinding = ffi::Ffi::Bind()
+        .Ctx<cudaStream_t>()
+        .Arg<ffi::UserData<EnvPoolPtr<EnvPool>>>()
+        .Arg<ffi::Buffer<FirstActionFFIDtype>>();
 };
 
+/**
+ * XlaRecv: receives "state" arrays from EnvPool::Recv(...).
+ *
+ * We again pass ffi::UserData for the EnvPool pointer.
+ */
 template <typename EnvPool>
 struct XlaRecv {
   using In = std::array<void*, 0>;
   using Out =
       std::array<void*, std::tuple_size_v<typename EnvPool::State::Keys>>;
 
-  static decltype(auto) InSpecs(EnvPool* envpool) { return std::tuple<>(); }
+  static decltype(auto) InSpecs(EnvPool* /*envpool*/) {
+    return std::tuple<>();
+  }
 
   static decltype(auto) OutSpecs(EnvPool* envpool) {
     int batch_size = envpool->spec.config["batch_size"_];
     int max_num_players = envpool->spec.config["max_num_players"_];
     return std::apply(
         [&](auto&&... s) {
-          return std::make_tuple(
-              NormalizeSpec(s, batch_size, max_num_players)...);
+          return std::make_tuple(NormalizeSpec(s, batch_size, max_num_players)...);
         },
         envpool->spec.state_spec.AllValues());
   }
 
-  static void Cpu(EnvPool* envpool, const In& in, const Out& out) {
+  // CPU: EnvPool::Recv => copy to host buffers
+  static ffi::Error Cpu(ffi::UserData<EnvPoolPtr<EnvPool>> env_ud,
+                             const In& /*unused*/, const Out& out) {
+    EnvPool* envpool = env_ud->ptr;
     int batch_size = envpool->spec.config["batch_size"_];
     int max_num_players = envpool->spec.config["max_num_players"_];
     std::vector<Array> recv = envpool->Recv();
+
     for (std::size_t i = 0; i < recv.size(); ++i) {
-      CHECK_LE(recv[i].Shape(0), (std::size_t)batch_size * max_num_players);
+      // Check shape
+      if (recv[i].Shape(0) > (std::size_t)batch_size * max_num_players) {
+        return ffi::Error::InternalError("Shape mismatch in XlaRecv CPU");
+      }
       std::memcpy(out[i], recv[i].Data(), recv[i].size * recv[i].element_size);
     }
+    return ffi::Error::Success();
   }
 
-  static void Gpu(EnvPool* envpool, cudaStream_t stream, const In& in,
-                  const Out& out) {
+  // GPU: EnvPool::Recv => copy from host => device buffers
+  static ffi::Error Gpu(ffi::UserData<EnvPoolPtr<EnvPool>> env_ud,
+                             cudaStream_t stream, const In& /*unused*/,
+                             const Out& out) {
+    EnvPool* envpool = env_ud->ptr;
     int batch_size = envpool->spec.config["batch_size"_];
     int max_num_players = envpool->spec.config["max_num_players"_];
     std::vector<Array> recv = envpool->Recv();
+
     for (std::size_t i = 0; i < recv.size(); ++i) {
-      CHECK_LE(recv[i].Shape(0), (std::size_t)batch_size * max_num_players);
+      if (recv[i].Shape(0) > (std::size_t)batch_size * max_num_players) {
+        return ffi::Error::InternalError("Shape mismatch in XlaRecv GPU");
+      }
       cudaMemcpyAsync(out[i], recv[i].Data(),
                       recv[i].size * recv[i].element_size,
                       cudaMemcpyHostToDevice, stream);
     }
+    return ffi::Error::Success();
   }
 };
+}  // namespace envpool
 
 #endif  // ENVPOOL_CORE_XLA_H_

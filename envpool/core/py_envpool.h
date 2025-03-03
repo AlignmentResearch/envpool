@@ -31,7 +31,6 @@
 
 #include "envpool/core/envpool.h"
 #include "envpool/core/xla.h"
-#include "envpool/core/xla_template.h"
 
 namespace py = pybind11;
 
@@ -200,6 +199,17 @@ void ToArray(const std::vector<py::array>& py_arrs,
 }
 
 /**
+ * Function that puts an XLA function into a py::capsule
+ */
+template <typename T>
+py::capsule EncapsulateFfiCall(T *fn) {
+  // This check is optional, but it can be helpful for avoiding invalid handlers.
+  static_assert(std::is_invocable_r_v<XLA_FFI_Error *, T, XLA_FFI_CallFrame *>,
+                "Encapsulated function must be an XLA FFI handler");
+  return py::capsule(reinterpret_cast<void *>(fn));
+}
+
+/**
  * Templated subclass of EnvPool,
  * to be overrided by the real EnvPool.
  */
@@ -215,10 +225,14 @@ class PyEnvPool : public EnvPool {
   explicit PyEnvPool(const PySpec& py_spec)
       : EnvPool(py_spec), py_spec(py_spec) {}
 
-  /**
-   * get xla functions
+  /** XLA handlers
    */
-  auto Xla() {
+  XLA_FFI_DEFINE_HANDLER_EXPLICIT(send_cpu, XlaSend<EnvPool>::Cpu, XlaSend<EnvPool>::CpuBinding);
+  XLA_FFI_DEFINE_HANDLER_EXPLICIT(send_gpu, XlaSend<EnvPool>::Gpu, XlaSend<EnvPool>::GpuBinding);
+  XLA_FFI_DEFINE_HANDLER_EXPLICIT(recv_cpu, XlaRecv<EnvPool>::Cpu, XlaRecv<EnvPool>::CpuBinding);
+  XLA_FFI_DEFINE_HANDLER_EXPLICIT(recv_gpu, XlaRecv<EnvPool>::Gpu, XlaRecv<EnvPool>::GpuBinding);
+
+  static auto Xla() {
     if (HasContainerType(EnvPool::spec.state_spec)) {
       throw std::runtime_error(
           "State of this env has dynamic shaped container, xla is disabled");
@@ -232,10 +246,8 @@ class PyEnvPool : public EnvPool {
           "Xla is not available for multiplayer environment.");
     }
     return std::make_tuple(
-        std::make_tuple("recv",
-                        CustomCall<EnvPool, XlaRecv<EnvPool>>::Xla(this)),
-        std::make_tuple("send",
-                        CustomCall<EnvPool, XlaSend<EnvPool>>::Xla(this)));
+      std::make_tuple("send", std::make_tuple(send_cpu, send_gpu)),
+      std::make_tuple("recv", std::make_tuple(recv_cpu, recv_gpu)));
   }
 
   /**
@@ -291,6 +303,7 @@ py::object abc_meta = py::module::import("abc").attr("ABCMeta");
  * The static bool status is local to the translation unit.
  */
 #define REGISTER(MODULE, SPEC, ENVPOOL)                              \
+  envpool::EnvPoolPtr<ENVPOOL>::RegisterTypeId();                    \
   py::class_<SPEC>(MODULE, "_" #SPEC, py::metaclass(abc_meta))       \
       .def(py::init<const typename SPEC::ConfigValues&>())           \
       .def_readonly("_config_values", &SPEC::py_config_values)       \
@@ -309,6 +322,6 @@ py::object abc_meta = py::module::import("abc").attr("ABCMeta");
       .def("_reset", &ENVPOOL::PyReset)                              \
       .def_readonly_static("_state_keys", &ENVPOOL::py_state_keys)   \
       .def_readonly_static("_action_keys", &ENVPOOL::py_action_keys) \
-      .def("_xla", &ENVPOOL::Xla);
+      .def_static("_xla", &ENVPOOL::Xla);
 
 #endif  // ENVPOOL_CORE_PY_ENVPOOL_H_
