@@ -1,12 +1,5 @@
 load("@envpool//third_party:common.bzl", "copy_directory")
 
-copy_directory(
-    name = "roms",
-    src = "roms_sources",
-    out = "roms",
-    visibility = ["//visibility:public"],
-)
-
 filegroup(
     name = "roms_sources",
     srcs = glob(
@@ -18,4 +11,5 @@ filegroup(
             "ROM/warlords/warlords.bin",
         ],
     ),
+    visibility=["//visibility:public"],
 )

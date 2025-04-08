@@ -39,9 +39,9 @@ filegroup(
 )
 
 copy_directory(
-    name = "gen_vizdoom_maps",
+    name = "maps",
     src = ":vizdoom_maps_sources",
-    out = "maps",
+    out = "",
 )
 
 cc_library(
@@ -76,7 +76,7 @@ py_library(
     name = "vizdoom",
     srcs = ["__init__.py"],
     data = [
-        ":gen_vizdoom_maps",
+        ":maps",
         ":vizdoom_envpool.so",
         "//envpool/vizdoom/bin:freedoom",
         "//envpool/vizdoom/bin:vizdoom_bin",

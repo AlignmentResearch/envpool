@@ -34,10 +34,19 @@ py_package(
 py_wheel(
     name = "wheel",
     abi = "cp312",
-    distribution = "envpool",
-    platform = "linux_x86_64",
+    distribution = "far_envpool",
+    platform = "manylinux2014_x86_64",
     python_tag = "cp312",
-    requires_file = "//third_party/pip_requirements:requirements-release.txt",
+    requires=[
+        "numpy>=2.2.0",
+        "dm-env>=1.6",
+        "gym>=0.26",
+        "gymnasium>=0.26,!=0.27.0",
+        "optree>=0.6.0",
+        "jax>=0.5.0",
+        "pytest",
+    ],
+    python_requires = ">=3.10,<3.13",
     twine = None,
     version = "0.9.0",
     deps = [

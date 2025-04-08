@@ -14,6 +14,7 @@
 
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+load("@envpool//third_party:common.bzl", "copy_directory")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -36,11 +37,19 @@ py_library(
     deps = ["//envpool/python:api"],
 )
 
+
+copy_directory(
+    name = "roms",
+    src = "@atari_roms//:roms_sources",
+    out = "",
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "atari_env",
     hdrs = ["atari_env.h"],
     data = [
-        "@atari_roms//:roms",
+        ":roms",
     ],
     deps = [
         "//envpool/core:async_envpool",

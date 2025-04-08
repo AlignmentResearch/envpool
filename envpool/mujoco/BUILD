@@ -19,15 +19,15 @@ load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 package(default_visibility = ["//visibility:public"])
 
 copy_directory(
-    name = "gen_mujoco_gym_xml",
+    name = "assets_gym",
     src = "@mujoco_gym_xml",
-    out = "assets_gym",
+    out = "",
 )
 
 copy_directory(
-    name = "gen_mujoco_dmc_xml",
+    name = "assets_dmc",
     src = "@mujoco_dmc_xml",
-    out = "assets_dmc",
+    out = "",
 )
 
 genrule(
@@ -54,7 +54,7 @@ cc_library(
         "gym/walker2d.h",
     ],
     data = [
-        ":gen_mujoco_gym_xml",
+        ":assets_gym",
     ],
     deps = [
         "//envpool/core:async_envpool",
@@ -98,7 +98,7 @@ cc_library(
         "dmc/utils.h",
         "dmc/walker.h",
     ],
-    data = [":gen_mujoco_dmc_xml"],
+    data = [":assets_dmc"],
     deps = [
         "//envpool/core:async_envpool",
         "@mujoco//:mujoco_lib",
@@ -121,7 +121,7 @@ py_library(
     name = "mujoco_dmc",
     srcs = ["dmc/__init__.py"],
     data = [
-        ":gen_mujoco_dmc_xml",
+        ":assets_dmc",
         ":gen_mujoco_so",
         ":mujoco_dmc_envpool.so",
     ],
@@ -132,7 +132,7 @@ py_library(
     name = "mujoco_gym",
     srcs = ["gym/__init__.py"],
     data = [
-        ":gen_mujoco_gym_xml",
+        ":assets_gym",
         ":gen_mujoco_so",
         ":mujoco_gym_envpool.so",
     ],
