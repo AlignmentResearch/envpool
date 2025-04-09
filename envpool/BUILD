@@ -16,11 +16,6 @@ load("@pip_requirements//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "workspace0.bzl",
-    "workspace1.bzl",
-])
-
 py_library(
     name = "registration",
     srcs = ["registration.py"],
@@ -30,6 +25,14 @@ py_library(
     name = "entry",
     srcs = ["entry.py"],
     deps = [
+        "//envpool/atari:atari_registration",
+        "//envpool/box2d:box2d_registration",
+        "//envpool/classic_control:classic_control_registration",
+        "//envpool/mujoco:mujoco_dmc_registration",
+        "//envpool/mujoco:mujoco_gym_registration",
+        # "//envpool/procgen:procgen_registration",  # Disabled, we have not installed qt5 in envpool dockerfile
+        "//envpool/toy_text:toy_text_registration",
+        "//envpool/vizdoom:vizdoom_registration",
         "//envpool/sokoban:registration",
     ],
 )
@@ -40,6 +43,15 @@ py_library(
     deps = [
         ":entry",
         ":registration",
+        "//envpool/python",
+        "//envpool/atari",
+        "//envpool/box2d",
+        "//envpool/classic_control",
+        "//envpool/mujoco:mujoco_dmc",
+        "//envpool/mujoco:mujoco_gym",
+        # "//envpool/procgen",  # Disabled, we have not installed qt5 in envpool dockerfile
+        "//envpool/toy_text",
+        "//envpool/vizdoom",
         "//envpool/sokoban",
     ],
 )

@@ -49,7 +49,7 @@ TEST(ActionBufferQueueTest, Concurrent) {
 
   std::thread send([&] {
     for (std::size_t m = 0; m < mul; ++m) {
-      while (flag[m] == 1) {
+      while (flag[m] == 1) {  // NOLINT[bugprone-infinite-loop]
       }
       actions.clear();
       for (std::size_t i = 0; i < env_num[m]; ++i) {

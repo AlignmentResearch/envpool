@@ -4,10 +4,13 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "irregular_files",
-    hdrs = glob([
-        "src/**/*.def",
-        "src/**/*.ins",
-    ]),
+    hdrs = glob(
+        [
+            "src/**/*.def",
+            "src/**/*.ins",
+        ],
+        allow_empty = True,
+    ),
 )
 
 template_rule(
@@ -34,6 +37,7 @@ cc_library(
             "src/**/*.cpp",
             "src/**/*.cxx",
         ],
+        allow_empty = True,
         exclude = [
             "src/python/*",
         ],
@@ -41,6 +45,9 @@ cc_library(
         ":ale_version",
     ],
     hdrs = ["src/ale_interface.hpp"],
+    copts = [
+        "-include stdint.h",
+    ],
     includes = [
         "src",
         "src/common",

@@ -17,8 +17,17 @@ filegroup(
 
 cc_library(
     name = "procgen",
-    srcs = glob(["src/**/*.cpp"]) + glob(["src/*.h"]),
-    hdrs = glob(["src/*.h"]),
+    srcs = glob(
+        ["src/**/*.cpp"],
+        allow_empty = True,
+    ) + glob(
+        ["src/*.h"],
+        allow_empty = True,
+    ),
+    hdrs = glob(
+        ["src/*.h"],
+        allow_empty = True,
+    ),
     copts = [
         "-fpic",
     ],

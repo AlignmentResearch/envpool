@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@envpool//third_party:common.bzl", "copy_directory")
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
@@ -29,14 +30,18 @@ genrule(
     cmd = "cp $(SRCS) $(@D)",
 )
 
-genrule(
-    name = "gen_vizdoom_maps",
+filegroup(
+    name = "vizdoom_maps_sources",
     srcs = [
-        "@vizdoom_lib//:vizdoom_maps",
         "@vizdoom_extra_maps//:vizdoom_maps",
+        "@vizdoom_lib//:vizdoom_maps",
     ],
-    outs = ["maps"],
-    cmd = "mkdir -p $(OUTS) && cp $(SRCS) $(OUTS)",
+)
+
+copy_directory(
+    name = "maps",
+    src = ":vizdoom_maps_sources",
+    out = "",
 )
 
 cc_library(
@@ -71,7 +76,7 @@ py_library(
     name = "vizdoom",
     srcs = ["__init__.py"],
     data = [
-        ":gen_vizdoom_maps",
+        ":maps",
         ":vizdoom_envpool.so",
         "//envpool/vizdoom/bin:freedoom",
         "//envpool/vizdoom/bin:vizdoom_bin",

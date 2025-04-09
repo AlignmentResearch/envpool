@@ -15,7 +15,6 @@
 
 import glob
 import re
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -158,22 +157,6 @@ def test_envpool_load_sequentially(capfd) -> None:
       assert n_levels == len(levels_by_files[i][1])
       assert lev1 == levels_by_files[i][1][0]
       assert lev2 == levels_by_files[i][1][1]
-
-
-def test_xla() -> None:
-  num_envs = 10
-  env = envpool.make(
-    "Sokoban-v0",
-    env_type="dm",
-    num_envs=num_envs,
-    batch_size=num_envs,
-    seed=2346890,
-    max_episode_steps=60,
-    reward_step=-0.1,
-    dim_room=10,
-    levels_dir="/app/envpool/sokoban/sample_levels",
-  )
-  handle, recv, send, step = env.xla()
 
 
 SOLVE_LEVEL_ZERO: str = "222200001112330322210"
@@ -335,27 +318,6 @@ def test_load_sequentially_with_multiple_envs() -> None:
         assert printed_obs[i][j] == line, f"Level {i} is not loaded correctly."
 
 
-def test_astar_log(tmp_path) -> None:
-  level_file_name = "/app/envpool/sokoban/sample_levels/small.txt"
-  log_file_name = tmp_path / "log_file.csv"
-  subprocess.run(
-    [
-      "/root/go/bin/bazel", f"--output_base={str(tmp_path)}", "run",
-      "//envpool/sokoban:astar_log", "--", level_file_name,
-      str(log_file_name), "1"
-    ],
-    check=True,
-    cwd="/app/envpool",
-    env={
-      "HOME": "/root",
-      "PATH": "/opt/conda/bin:/usr/bin",
-      "USE_BAZEL_VERSION": "6.4.0",
-    },
-  )
-  log = log_file_name.read_text()
-  assert f"0,{SOLVE_LEVEL_ZERO},21,1380" == log.split("\n")[1]
-
-
 def test_sneaky_noop():
   """
   Even though an action < 0 is not part of the environment, we overload it to
@@ -432,5 +394,5 @@ def test_noop_action():
 
 
 if __name__ == "__main__":
-  retcode = pytest.main(["-v", __file__])
+  retcode = pytest.main(["-v", *sys.argv[1:]])
   sys.exit(retcode)

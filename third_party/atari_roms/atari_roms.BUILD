@@ -1,5 +1,7 @@
+load("@envpool//third_party:common.bzl", "copy_directory")
+
 filegroup(
-    name = "roms",
+    name = "roms_sources",
     srcs = glob(
         ["ROM/*/*.bin"],
         exclude = [
@@ -9,5 +11,5 @@ filegroup(
             "ROM/warlords/warlords.bin",
         ],
     ),
-    visibility = ["//visibility:public"],
+    visibility=["//visibility:public"],
 )

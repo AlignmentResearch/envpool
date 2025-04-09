@@ -17,69 +17,80 @@ load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 package(default_visibility = ["//visibility:public"])
 
-py_library(
-    name = "sokoban",
-    srcs = ["__init__.py"],
-    data = [":sokoban_envpool.so"],
-    deps = ["//envpool/python:api"],
-)
-
-py_library(
-    name = "registration",
-    srcs = ["registration.py"],
-    deps = [
-        "//envpool:registration",
+# 1. Level Loader
+cc_library(
+    name = "level_loader_lib",
+    srcs = ["level_loader.cc"],
+    hdrs = [
+        "level_loader.h",
+        "utils.h",
     ],
 )
 
+# 2. Sokoban Node
 cc_library(
-    name = "sokoban_envpool_h",
+    name = "sokoban_node_lib",
+    srcs = ["sokoban_node.cc"],
+    hdrs = ["sokoban_node.h"],
+    deps = [
+        ":level_loader_lib",
+        "//third_party/astar_stl:astar_stl_h",
+    ],
+)
+
+# 4. Sokoban Env
+cc_library(
+    name = "sokoban_envpool_lib",
+    srcs = [
+        "sokoban_envpool.cc",
+    ],
     hdrs = [
-        "level_loader.h",
         "sokoban_envpool.h",
         "utils.h",
     ],
     deps = [
+        ":level_loader_lib",
         "//envpool/core:async_envpool",
         "//envpool/core:env",
         "//envpool/core:env_spec",
+        "//envpool/core:py_envpool",
     ],
 )
 
+# 5. astar_log
 cc_library(
-    name = "sokoban_node_h",
-    hdrs = [
-        "level_loader.h",
-        "sokoban_node.h",
-        "utils.h",
+    name = "astar_log_lib",
+    srcs = [
+        "astar_log.cc",
     ],
-    deps = ["//third_party/astar_stl:astar_stl_h"],
+    deps = [
+        ":level_loader_lib",
+        ":sokoban_node_lib",
+        "//third_party/astar_stl:astar_stl_h",
+    ],
 )
 
+# The actual CLI tool with the main:
 cc_binary(
     name = "astar_log",
     srcs = [
-        "astar_log.cc",
-        "level_loader.cc",
-        "sokoban_node.cc",
+        "astar_log_main.cc",
     ],
     deps = [
-        ":sokoban_node_h",
+        ":astar_log_lib",
     ],
 )
 
 cc_binary(
     name = "astar_log_level",
-    srcs = [
-        "astar_log_level.cc",
-        "level_loader.cc",
-        "sokoban_node.cc",
-    ],
+    srcs = ["astar_log_level.cc"],
     deps = [
-        ":sokoban_node_h",
+        ":level_loader_lib",
+        ":sokoban_node_lib",
     ],
 )
 
+# 6. Python tests
 py_test(
     name = "test",
     srcs = ["sokoban_py_envpool_test.py"],
@@ -93,17 +104,44 @@ py_test(
     ],
 )
 
+# Now your test doesn't accidentally invoke that main.
+cc_test(
+    name = "astar_log_test",
+    srcs = [
+        "astar_log_test.cc",
+    ],
+    deps = [
+        ":astar_log_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# 7. Python code and extension
+py_library(
+    name = "sokoban",
+    srcs = ["__init__.py"],
+    data = [":sokoban_envpool.so"],
+    deps = [
+        "//envpool/python:api",
+    ],
+)
+
+py_library(
+    name = "registration",
+    srcs = ["registration.py"],
+    deps = [
+        "//envpool:registration",
+    ],
+)
+
 pybind_extension(
     name = "sokoban_envpool",
-    srcs = [
-        "level_loader.cc",
-        "sokoban_envpool.cc",
-    ],
+    srcs = ["sokoban_envpool.cc"],
     linkopts = [
         "-ldl",
     ],
     deps = [
-        ":sokoban_envpool_h",
+        ":sokoban_envpool_lib",
         "//envpool/core:py_envpool",
     ],
 )

@@ -12,23 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@envpool//third_party:common.bzl", "copy_directory")
 load("@pip_requirements//:requirements.bzl", "requirement")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 package(default_visibility = ["//visibility:public"])
 
-genrule(
-    name = "gen_mujoco_gym_xml",
-    srcs = ["@mujoco_gym_xml"],
-    outs = ["assets_gym"],
-    cmd = "mkdir -p $(OUTS) && cp -r $(SRCS) $(OUTS)",
+copy_directory(
+    name = "assets_gym",
+    src = "@mujoco_gym_xml",
+    out = "",
 )
 
-genrule(
-    name = "gen_mujoco_dmc_xml",
-    srcs = ["@mujoco_dmc_xml"],
-    outs = ["assets_dmc"],
-    cmd = "mkdir -p $(OUTS) && cp -r $(SRCS) $(OUTS)",
+copy_directory(
+    name = "assets_dmc",
+    src = "@mujoco_dmc_xml",
+    out = "",
 )
 
 genrule(
@@ -55,7 +54,7 @@ cc_library(
         "gym/walker2d.h",
     ],
     data = [
-        ":gen_mujoco_gym_xml",
+        ":assets_gym",
     ],
     deps = [
         "//envpool/core:async_envpool",
@@ -99,7 +98,7 @@ cc_library(
         "dmc/utils.h",
         "dmc/walker.h",
     ],
-    data = [":gen_mujoco_dmc_xml"],
+    data = [":assets_dmc"],
     deps = [
         "//envpool/core:async_envpool",
         "@mujoco//:mujoco_lib",
@@ -122,7 +121,7 @@ py_library(
     name = "mujoco_dmc",
     srcs = ["dmc/__init__.py"],
     data = [
-        ":gen_mujoco_dmc_xml",
+        ":assets_dmc",
         ":gen_mujoco_so",
         ":mujoco_dmc_envpool.so",
     ],
@@ -133,7 +132,7 @@ py_library(
     name = "mujoco_gym",
     srcs = ["gym/__init__.py"],
     data = [
-        ":gen_mujoco_gym_xml",
+        ":assets_gym",
         ":gen_mujoco_so",
         ":mujoco_gym_envpool.so",
     ],

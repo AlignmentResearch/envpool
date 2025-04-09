@@ -148,3 +148,6 @@ log
 _vizdoom*
 MUJOCO_LOG.TXT
 .vscode/
+
+
+MODULE.bazel.lock

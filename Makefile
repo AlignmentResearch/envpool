@@ -40,7 +40,7 @@ clang-tidy-install:
 
 go-install:
 	# requires go >= 1.16
-	command -v go || (sudo apt-get install -y golang-1.18 && sudo ln -sf /usr/lib/go-1.18/bin/go /usr/bin/go)
+	command -v go || (sudo apt-get install -y golang-1.21 && sudo ln -sf /usr/lib/go-1.18/bin/go /usr/bin/go)
 
 bazel-install: go-install
 	command -v bazel || (go install github.com/bazelbuild/bazelisk@latest && ln -sf $(HOME)/go/bin/bazelisk $(HOME)/go/bin/bazel)
@@ -102,19 +102,13 @@ clang-tidy: clang-tidy-install bazel-pip-requirement-dev
 	bazel build $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=clang-tidy --config=test
 
 bazel-debug: bazel-install bazel-pip-requirement-dev
-	bazel run $(BAZELOPT) //:setup --config=debug -- bdist_wheel
-	mkdir -p dist
-	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
+	bazel build $(BAZELOPT) //:wheel --config=debug
 
 bazel-build: bazel-install bazel-pip-requirement-dev
-	bazel run $(BAZELOPT) //:setup --config=test -- bdist_wheel
-	mkdir -p dist
-	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
+	bazel build $(BAZELOPT) //:wheel --config=test
 
 bazel-release: bazel-install bazel-pip-requirement-release
-	bazel run $(BAZELOPT) //:setup --config=release -- bdist_wheel
-	mkdir -p dist
-	cp bazel-bin/setup.runfiles/$(PROJECT_NAME)/dist/*.whl ./dist
+	bazel build $(BAZELOPT) //:wheel_dist
 
 bazel-test: bazel-install bazel-pip-requirement-dev
 	bazel test --test_output=all $(BAZELOPT) //envpool/core/... //envpool/sokoban/... --config=test --spawn_strategy=local --color=yes

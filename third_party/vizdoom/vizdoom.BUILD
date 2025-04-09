@@ -336,8 +336,6 @@ cc_library(
     copts = [
         "-Dstricmp=strcasecmp",
         "-Dstrnicmp=strncasecmp",
-        "-fno-tree-dominator-opts",
-        "-fno-tree-fre",
         "-include $(execpath @glibc_version_header//:glibc_2_17)",
     ],
     includes = [
@@ -753,6 +751,9 @@ cc_binary(
         "-msse2",
         "-mmmx",
         "-include $(execpath @glibc_version_header//:glibc_2_17)",
+    ],
+    cxxopts = [
+        "-std=c++11",  # vizdoom uses register in class variables, which is forbidden in C++17
     ],
     data = [
         ":vizdoom_pk3",

@@ -83,14 +83,14 @@ class SokobanEnv : public Env<SokobanEnvSpec> {
     if (max_num_players_ != spec_.config["max_num_players"_]) {
       std::stringstream msg;
       msg << "max_num_players_ != spec_['max_num_players'] " << max_num_players_
-          << " != " << spec_.config["max_num_players"_] << std::endl;
+          << " != " << spec_.config["max_num_players"_] << '\n';
       throw std::runtime_error(msg.str());
     }
 
     if (max_num_players_ != spec.config["max_num_players"_]) {
       std::stringstream msg;
       msg << "max_num_players_ != spec['max_num_players'] " << max_num_players_
-          << " != " << spec.config["max_num_players"_] << std::endl;
+          << " != " << spec.config["max_num_players"_] << '\n';
       throw std::runtime_error(msg.str());
     }
   }

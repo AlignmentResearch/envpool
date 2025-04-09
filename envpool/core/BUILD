@@ -30,7 +30,7 @@ cc_library(
     name = "spec",
     hdrs = ["spec.h"],
     deps = [
-        "@com_github_google_glog//:glog",
+        "@glog",
     ],
 )
 
@@ -39,7 +39,7 @@ cc_library(
     hdrs = ["array.h"],
     deps = [
         ":spec",
-        "@com_github_google_glog//:glog",
+        "@glog",
     ],
 )
 
@@ -51,7 +51,7 @@ cc_library(
         ":spec",
         ":tuple_utils",
         ":type_utils",
-        "@com_github_google_glog//:glog",
+        "@glog",
     ],
 )
 
@@ -99,8 +99,8 @@ cc_test(
     srcs = ["circular_buffer_test.cc"],
     deps = [
         ":circular_buffer",
-        "@com_github_google_glog//:glog",
         "@com_google_googletest//:gtest_main",
+        "@glog",
     ],
 )
 
@@ -185,33 +185,10 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "xla_template",
-    hdrs = ["xla_template.h"],
-    linkopts = [
-        "-ldl",
-        "-lrt",
-    ],
-    deps = [
-        "@cuda//:cudart_static",
-    ],
-)
-
-cc_library(
-    name = "xla",
-    hdrs = ["xla.h"],
-    deps = [
-        ":array",
-        ":xla_template",
-        "@cuda//:cudart_static",
-    ],
-)
-
 pybind_library(
     name = "py_envpool",
     hdrs = ["py_envpool.h"],
     deps = [
         ":envpool",
-        ":xla",
     ],
 )
